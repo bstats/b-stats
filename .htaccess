@@ -1,0 +1,51 @@
+Order deny,allow
+#Deny from all
+
+
+ErrorDocument 404 /404.php
+ErrorDocument 403 /404.php
+
+RewriteEngine on
+
+##
+# 4chan URL compatibility
+##
+RewriteRule ^(b|f|hm)$ /$1/ [R]
+RewriteRule ^(b|f|hm)/$ /board.php?b=$1
+RewriteRule ^(b|f|hm)/([0-9]+)/$ /$1/$2 [R]
+RewriteRule ^(b|f|hm)/([0-9]+)$ /board.php?b=$1&page=$2
+RewriteRule ^(b|f|hm)/res/([0-9]+) /thread.php?b=$1&t=$2
+RewriteRule ^(b|f|hm)/res/ /$1/ [R]
+RewriteRule ^(b|f|hm)/res /$1/ [R]
+RewriteRule ^(b|f|hm)/post/([0-9]+) /postRedirect.php?b=$1&no=$2
+RewriteRule ^(b|f|hm)/catalog /catalog.php?b=$1
+
+##
+# b-stats custom URLs
+##
+RewriteRule ^(b|f|hm)/res/images/([0-9]+) /threadImg.php?b=$1&t=$2&images=true
+RewriteRule ^(b|f|hm)/deleted/ /deleted.php?b=$1
+RewriteRule ^(b|f|hm)/filedeleted/ /deleted.php?b=$1&file=true
+
+RewriteRule ^(b|f|hm)/search/md5/(.*)$  /search_redir.php?md5=$2&b=$1 [B]
+
+##
+# FoolFuuka URL scheme compatibility
+##
+RewriteRule ^(b|f|hm)/thread/([0-9]+)/ /$1/res/$2 [R]
+RewriteRule ^(b|f|hm)/full_image/([0-9]{13})(\.png|\.jpg|\.gif)?/? /notimplemented.html
+
+RewriteRule ^(b|f|hm)/search/filename/(.*) /search_redir.php?filename=$2&b=$1
+RewriteRule ^(b|f|hm)/search/image/(.*)  /search_redir.php?md5=$2&b=$1 [B]
+RewriteRule ^(b|f|hm)/search/name/(.*) /notimplemented.html
+
+RewriteRule ^api/(b|f|hm)/post/([0-9]+)(\.json)? /jsonApi.php?a=getPost&board=$1&num=$2
+RewriteRule ^api/(b|f|hm)/res/([0-9]+)(\.json)? /jsonApi.php?a=getThread&board=$1&num=$2
+RewriteRule ^_/api/chan/post/ /jsonApi.php?a=getPost&foolfuuka=true [QSA]
+RewriteRule ^_/api/chan/thread/ /jsonApi.php?a=getThread&foolfuuka=true [QSA]
+
+##
+# Cleaner URLs
+##
+RewriteRule ^news news.php
+RewriteRule ^faq faq.php
