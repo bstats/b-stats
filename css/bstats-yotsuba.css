@@ -1,0 +1,26 @@
+.navbar {
+	background-color:#f0e0d6;
+	box-shadow: 0 0 3px 3px rgba(0,0,0,0.2);
+}
+.navelement:hover{
+	background-color:rgb(200, 150, 118);
+	color:#c00;
+}
+.threadbox a img{
+	box-shadow: 0 0 2px 2px #CCB;
+}
+.threadbox a img:hover{
+	box-shadow: 0 0 3px 3px #AA9;
+}
+.dashTable th, .reportTable th {
+    background-color: #EA8;
+}
+
+.newsArticleHead{
+    background-color: #fca;
+}
+
+.newsArticleBody {
+    background-color: #fff;
+    color: black;
+}

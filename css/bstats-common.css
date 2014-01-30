@@ -1,0 +1,236 @@
+h1,h2,h3,h4,h5,h6{
+	text-align:center;
+}
+
+.navbar{
+	height:22px;
+	position:fixed;
+	z-index:100;
+	top:0px;
+        left:0px;
+        right:0px;
+	overflow:hidden;
+	vertical-align:middle;
+	cursor:default;
+	display:inline-block;
+}
+
+.threadbox{
+	height:75px;
+	/*width:200px;*/
+	vertical-align:middle;
+	margin:20px 15px;
+        margin-bottom: 50px;
+	/*float:left;*/
+	display:inline-block;
+        font-size: 0.75em;
+}
+
+.navelement{
+	height:20px;
+	display:inline-block;
+	width:auto;
+	margin: 0px 3px;
+	padding: 2px 0px;
+	vertical-align:middle;
+	/*cursor:pointer;*/
+	text-decoration:none;
+}
+.navelement * {
+    cursor:pointer;
+    text-decoration:none;
+}
+.copyright,.push{
+	height:35px;
+        font-size: .8em;
+        text-align:center;
+}
+.copyright {
+    margin: 0 auto;
+    display: block;
+}
+.wrapper {
+	min-height: 100%;
+	height: auto !important;
+	height: 100%;
+	/*margin: -20px auto -15px; /* the bottom margin is the negative value of the footer's height */
+	/*padding: 20px 0 0 0;*/
+	margin:0 auto -35px;
+	padding:0;
+        padding-top: 5px;
+}
+
+.shadow {
+    text-shadow:2px 2px 5px rgba(0,0,0,0.5);
+}
+
+a.button, input.button {
+    display:inline-block;
+    border: 1px solid rgba(0,0,0,0.5);
+    text-decoration: none;
+    padding: 2px;
+    background-color: rgba(128,128,128,0.5);
+    color: black;
+    border-radius: 4px;
+    min-width:1em;
+}
+
+a.button:hover, input.button:hover{
+    background-color: rgba(0,0,0,0.5);
+    border: 1px solid rgba(0,0,0,1);
+    color: rgba(255,255,255,1) !important;
+}
+
+.faqItem {
+    width: 40em;
+    margin: 0 auto;
+    padding: 2em;
+    border-style: solid;
+    border-width: 2px;
+    border-color: black;
+    border-radius: 8px;
+    margin-bottom: 1.5em;
+    box-shadow: 0px 0px 15px rgba(0,0,0,0.5);
+}
+
+.faqQuestion, .faqAnswer {
+    padding-left: 25px ;
+    text-indent: -25px ;
+    margin-bottom: 8px;
+    margin-left: 8px
+}
+
+.faqQuestion {
+    font-size: 20px;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.15);
+}
+
+.faqQuestion:first-letter, .faqAnswer:first-letter {
+    font-size: 18px;
+    font-weight: bold;
+    width: 2em;
+    font-family: monospace;
+    text-shadow: none;
+}
+
+
+#hover {
+    border: 1px solid rgba(128, 128, 128, 0.25);
+    padding: 1px;
+    position: fixed;
+    box-shadow: rgba(0, 0, 0, 0.15) 0px 1px 2px;
+    margin-right: 5px;
+}
+
+.inline {
+    border: 1px solid rgba(128, 128, 128, 0.25);
+    display: table;
+    background-color: rgba(255, 255, 255, .14);
+    margin: 2px 0;
+}
+
+.inline * {
+    background-color: rgba(0,0,0,0) !important;
+}
+
+.inlined {
+    opacity: .5;
+}
+
+.expand-loading {
+    opacity: 0.5;
+}
+
+.expand-loaded {
+    display:none !important;
+}
+
+.expanded {
+    max-width: 100vw;
+    max-height: 95vh;
+}
+
+.flashListing {
+    border-collapse: separate;
+}
+a.miniButton{
+    font-size:0.7em;
+    display:inline-block;
+    border: 1px solid rgba(128,128,128,0.3);
+    position: relative;
+    padding: 0 1px;
+    top: -2px;
+}
+a.miniButton:hover{
+    border: 1px solid rgba(0,0,0,0.3);
+}
+a.clicked, a.clicked:hover {
+    border: 1px solid rgba(128,128,128,0.3);
+}
+.dashTable {
+    border: none;
+    width: 25em;
+    
+}
+.dashTable th {
+    background-color: rgba(0,0,0,0.5);
+}
+.dashTable tr, .dashTable td {
+    
+}
+.dashTable td{
+    width:50%;
+}
+.dashTable tr td:first-of-type {
+    font-weight: bold;
+}
+.dashTable tr td:nth-of-type(2) {
+    
+}
+
+.reportTable {
+    border: none;
+    width: 35em;
+    text-align:center;
+}
+.reportTable th {
+    background-color: rgba(0,0,0,0.5);
+}
+.right{
+    text-align:right;
+}
+.errorMsg{
+    margin-top: 1em;
+    font-size: 2em;
+    text-align:center;
+}
+
+.newsBox {
+    width: 40em;
+    border: 1px solid;
+    margin: 0 auto 2em auto;
+}
+
+.newsArticleHead {
+    border-bottom: 1px solid;
+    padding-left: 5px;
+    padding-top: 3px;
+    line-height: 1.5em;
+}
+
+.newsArticleTitle {
+    font-weight: bold;
+    font-size: 1.5em;
+}
+
+.newsArticleInfo {
+    font-size: 0.8em;
+}
+
+.newsArticleBody {
+    padding: 1em 0.5em 0.5em 0.5em;
+}
+
+.borderless, .borderless *{
+    border: none;
+}

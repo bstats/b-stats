@@ -1,0 +1,5 @@
+ExpiresActive On
+Header unset ETag
+ExpiresDefault "access plus 1 day"
+Header append Cache-Control "max-age=86400"
+Header append Cache-Control "public"

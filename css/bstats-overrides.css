@@ -1,0 +1,17 @@
+body {
+    padding-top: 22px;
+    margin: 0;
+}
+
+div.pagelist {
+    display: inline-block;
+    float: none;
+}
+/*a.anchor{
+    padding-top:25px;
+    margin-top:-25px; 
+    -webkit-background-clip:content-box;
+    background-clip:content-box;
+    display: block;
+    position: static;
+}*/

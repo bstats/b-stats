@@ -1,0 +1,21 @@
+.navbar {
+	background-color:#282a2e;
+	box-shadow: 0 0 4px 4px #111;
+}
+.navelement:hover{
+	background-color:#222;
+	color:#c00;
+}
+.threadbox a{
+	box-shadow: 0 0 2px 2px #1a1a1a;
+}
+.threadbox a:hover{
+	box-shadow: 0 0 3px 3px #111;
+}
+table {
+    border-collapse: collapse;
+}
+td, tr {
+    border: 1px solid black;
+    
+}
