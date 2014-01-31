@@ -49,7 +49,7 @@ class Model {
         $threadQ = $dbl->query("SELECT * FROM `{$board}thread` WHERE `threadid`='$no'");
         $postQ = $dbl->query("SELECT * FROM `{$board}post` WHERE `threadid`='$no' ORDER BY `no` ASC");
         if(!$threadQ->num_rows)
-            throw new Exception ("Thread does not exist.");
+            throw new Exception ("Thread does not exist in the archive.");
         return array($threadQ,$postQ);
     }
     
@@ -66,6 +66,9 @@ class Model {
         $board = $board."_";
         $no = $dbl->real_escape_string($no);
         $postQ = $dbl->query("SELECT * FROM `{$board}post` WHERE `no`='$no'");
+        if($postQ->num_rows === 0){
+            throw new Exception("No such post $no exists in this archive");
+        }
         return $postQ;
     }
     

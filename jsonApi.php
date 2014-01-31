@@ -4,12 +4,19 @@ header("Access-Control-Allow-Headers: x-requested-with, if-modified-since");
 header("Access-Control-Allow-Credentials: true");
 header("Content-Type: application/json");
 include('inc/config.php');
-
+if(!isset($_GET['board']))
+    die("no board specified");
 switch($_GET['a']){
     case "getPost":
         $no = $_GET['num'];
         $board = $_GET['board'];
-        $data = fourChanFormat(Model::getPost($board, $no)->fetch_assoc());
+        try{
+            $data = fourChanFormat(Model::getPost($board, $no)->fetch_assoc());
+        }
+        catch(Exception $e){
+            header("HTTP/1.1 404 Not Found");
+            die(json_encode(["error"=>$e->getMessage()]));
+        }
         if(isset($_GET['foolfuuka']) && $_GET['foolfuuka'] == true){
             $data['fourchan_date'] = $data['now'];
             $data['timestamp'] = $data['time'];
