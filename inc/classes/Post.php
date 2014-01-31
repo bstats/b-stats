@@ -38,7 +38,7 @@ class Post {
             $this->threadid = $arr['threadid'];
             $this->time = $arr['time'];
             $this->tim = $arr['tim'];
-            $this->id = isset($arr['id']) ? $arr['id'] : '';
+            $this->id = isset($arr['id']) && $arr['id'] != '' ? $arr['id'] : isset($arr['ns_id']) && $arr['ns_id'] != '' ? $arr['ns_id'] : "";
             $this->name = $arr['name'];
             $this->email = $arr['email'];
             $this->sub = $arr['subject'];
