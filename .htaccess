@@ -27,7 +27,7 @@ RewriteRule ^(b|f|hm)/res/images/([0-9]+) /threadImg.php?b=$1&t=$2&images=true
 RewriteRule ^(b|f|hm)/deleted/ /deleted.php?b=$1
 RewriteRule ^(b|f|hm)/filedeleted/ /deleted.php?b=$1&file=true
 
-RewriteRule ^(b|f|hm)/search/md5/(.*)$  /search_redir.php?md5=$2&b=$1 [B]
+
 
 ##
 # FoolFuuka URL scheme compatibility
@@ -37,6 +37,8 @@ RewriteRule ^(b|f|hm)/full_image/([0-9]{13})(\.png|\.jpg|\.gif)?/? /notimplement
 
 RewriteRule ^(b|f|hm)/search/filename/(.*) /search_redir.php?filename=$2&b=$1
 RewriteRule ^(b|f|hm)/search/image/(.*)  /search_redir.php?md5=$2&b=$1 [B]
+RewriteRule ^(b|f|hm)/search/md5/(.*)$  /search_redir.php?md5=$2&b=$1 [B]
+RewriteRule ^(b|f|hm)/search/id/(.*)$  /search_redir.php?id=$2&b=$1 [B]
 RewriteRule ^(b|f|hm)/search/name/(.*) /notimplemented.html
 
 RewriteRule ^api/(b|f|hm)/post/([0-9]+)(\.json)? /jsonApi.php?a=getPost&board=$1&num=$2

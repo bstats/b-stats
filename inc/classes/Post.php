@@ -145,7 +145,7 @@ class Post {
         $nameblock .= $cap;
         
         if($this->id != "")
-            $nameblock .= ' <span class="posteruid postNum id_'.$this->id.'">(ID: <a class="hand posteruid postNum" href="/id/'.$this->id.'" title="View posts by this ID">'.$this->id.'</a>)</span>';
+            $nameblock .= ' <span class="posteruid postNum id_'.$this->id.'">(ID: <a class="hand posteruid postNum" href="/'.$this->board.'/search/id/'.$this->id.'" title="View posts by this ID">'.$this->id.'</a>)</span>';
         
         $nameblock .= '</span>'; //closing nameBlock
         if($t === 'op')

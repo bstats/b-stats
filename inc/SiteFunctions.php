@@ -40,7 +40,7 @@ function fourChanFormat($data){
     if($data['trip'] !="") $returnArr['trip'] = $data['trip'];
     if($data['email'] !="") $returnArr['email'] = $data['email'];
     $returnArr['resto'] = $data['threadid'];
-    $returnArr['id'] = $data['id'];
+    $returnArr['id'] = $data['id'] != '' ? $data['id'] : $data['ns_id'] != '' ? $data['ns_id'] : '';
 
     if($data['no'] == $data['threadid']){
         $returnArr['bumplimit'] = 0;
