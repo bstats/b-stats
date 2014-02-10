@@ -165,9 +165,9 @@ class Model {
         $dbl = Config::getConnection();
         
         $username = $dbl->real_escape_string($username);
-        $password = $dbl->real_escape_string($password);
+        $password = md5($password);
         
-        $query = $dbl->query("SELECT * FROM `users` WHERE `username`='$username' AND `password`='$password'");
+        $query = $dbl->query("SELECT * FROM `users` WHERE `username`='$username' AND `password_hash`=UNHEX('$password')");
         if($query->num_rows){
             $result = $query->fetch_assoc();
             $user = new User($result['uid'],$result['username'],$result['privilege'],$result['theme']);
@@ -268,9 +268,9 @@ class Model {
         $dbl = Config::getConnectionRW();
         $uid = (int)$uid;
         $user = $dbl->query("SELECT * FROM `users` WHERE `uid`=$uid")->fetch_assoc();
-        if($user['password']==$old){
-            $new = $dbl->real_escape_string($new);
-            $dbl->query("UPDATE `users` SET `password`='$new' WHERE `uid`=$uid");
+        if($user['password_hash']==md5($old,true)){
+            $new = md5($new);
+            $dbl->query("UPDATE `users` SET `password_hash`=UNHEX('$new') WHERE `uid`=$uid");
             if(!$dbl->errno)
                 return true;
         }
@@ -292,9 +292,9 @@ class Model {
         $themes = array("yotsuba"=>"yotsuba","tomorrow"=>"tomorrow");
         $theme = $themes[$theme];
         $username = $db->real_escape_string($username);
-        $password = $db->real_escape_string($password);
+        $password = md5($password);
         $privilege = (int)$privilege;
-        $db->query("INSERT INTO `users` (`username`,`password`,`privilege`,`theme`) VALUES ('$username','$password','$privilege','$theme')");
+        $db->query("INSERT INTO `users` (`username`,`password_hash`,`privilege`,`theme`) VALUES ('$username',UNHEX('$password'),'$privilege','$theme')");
         if(!$db->errno){
             return true;
         }
