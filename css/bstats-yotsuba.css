@@ -24,3 +24,8 @@
     background-color: #fff;
     color: black;
 }
+
+table.flashListing {
+    border-collapse: separate;
+    border-spacing: 1px;
+}

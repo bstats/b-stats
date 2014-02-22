@@ -19,3 +19,10 @@ td, tr {
     border: 1px solid black;
     
 }
+table.flashListing {
+    border-collapse: separate;
+    border-spacing:1px;
+}
+table.flashListing * {
+    border-color: rgba(0,0,0,0);
+}

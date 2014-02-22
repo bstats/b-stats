@@ -58,12 +58,12 @@ if($board->isSwfBoard()){
     while($row = $pageResult->fetch_assoc()){
         $tr = "<tr>".
             "<td>{$row['no']}</td>".
-            "<td class='name-col'><span class='name'>{$row['name']}</span></td>".
+            "<td class='name-col'><span class='name'>{$row['name']}</span>".($row['trip'] != '' ? " <span class='postertrip'>{$row['trip']}</span>" : "")."</td>".
             "<td>[<a href='//images.b-stats.org/f/src/".str_replace("/","-",$row['md5']).".swf' title='".str_replace("'","&#39;",$row['filename'])."' data-width='{$row['w']}' data-height='{$row['h']}' target='_blank'>".(strlen($row['filename']) > 33 ? substr($row['filename'], 0,30)."(...)" : $row['filename'])."</a>]</td>".
             "<td>[".str_replace("O","?",substr($row['tag'],0,1))."]</td>".
             "<td class='subject'><span title='".str_replace("'","&#39;",$row['subject'])."'>".(strlen($row['subject']) > 33 ? substr($row['subject'], 0,30)."(...)" : $row['subject'])."</span></td>".
             "<td>".human_filesize($row['fsize'],2)."</td>".
-            "<td>".date("Y-m-d(D)H:i:s",$row['time'])."</td>".
+            "<td>".date("Y-m-d(D)H:i",$row['time'])."</td>".
             "<td>{$row['replies']}</td>".
             "<td>[<a href='res/{$row['no']}'>View</a>]</td>".
             "</tr>";

@@ -1,16 +1,16 @@
 <?php
-include("inc/config.php");
-$page = new Page("b-stats dashboard","",1);
+include('inc/config.php');
+$page = new Page('b-stats dashboard',"",1);
 
 $you = Site::getUser();
 
-$error = "";
-if($_POST['action'] == 'change'){
+$error = '';
+if(isset($_POST['action']) && $_POST['action'] == 'change'){
     if(Model::changePassword($you->getUID(), $_POST['old'], $_POST['new'])){
-        $error = "Password changed.";
+        $error = 'Password changed.';
     }
     else
-        $error = "Could not change password.";
+        $error = 'Could not change password.';
             
 }
 

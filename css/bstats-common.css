@@ -150,9 +150,10 @@ a.button:hover, input.button:hover{
     max-height: 95vh;
 }
 
-.flashListing {
-    border-collapse: separate;
+table.flashListing tr:not(:first-of-type) * {
+    border-color: rgba(0,0,0,0);
 }
+
 a.miniButton{
     font-size:0.7em;
     display:inline-block;
@@ -233,4 +234,21 @@ a.clicked, a.clicked:hover {
 
 .borderless, .borderless *{
     border: none;
+}
+
+.boardlist_big {
+    width: 40em;
+    margin: 0 auto;
+    text-align:center;
+    padding: 2em;
+}
+.boardlist_big a {
+    font-weight: bold;
+    line-height: 2em;
+    font-size: 1.5em;
+    color: inherit !important;
+    text-decoration: none;
+}
+.boardlist_big a:hover {
+    text-decoration: underline;
 }

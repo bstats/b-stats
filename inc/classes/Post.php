@@ -38,7 +38,7 @@ class Post {
             $this->threadid = $arr['threadid'];
             $this->time = $arr['time'];
             $this->tim = $arr['tim'];
-            $this->id = ($arr['id'] != '') ? $arr['id'] :
+            $this->id = (isset($arr['id']) && $arr['id'] != '') ? $arr['id'] :
                         (isset($arr['ns_id']) && $arr['ns_id'] != '' ? $arr['ns_id'] : "");
             $this->name = $arr['name'];
             $this->email = $arr['email'];
@@ -207,6 +207,7 @@ END;
                          "</a>";
             }
             $chanMedia = $this->board == 'f' ? '//i.4cdn.org/f/src/'.$this->filename.$this->ext : '//i.4cdn.org/'.$this->board.'/src/'.$this->tim.$this->ext;
+            $fullImgLink = $this->board == 'f' ? "//images.b-stats.org/f/src/{$this->md5}.swf" : "//images.b-stats.org/{$this->md5}{$this->ext}";
             $ret .= <<<END
 <div id="f{$this->no}" class="file">
 <div class="fileInfo">
@@ -216,7 +217,7 @@ END;
 END;
             $ret .= $this->board == 'f' ? $this->tag.")" : "<span title='{$this->filename}{$this->ext}'>{$this->tim}{$this->ext}</span>)";
             $ret .= <<<END
-            <a target='_blank' title='iqdb image search' href='http://iqdb.org/?url=http://thumbs.b-stats.org/{$md5code}.jpg'>iqdb</a>&nbsp;<a target='_blank' title='Reverse Google Image Search' href='http://www.google.com/searchbyimage?image_url=http://thumbs.b-stats.org/{$doublecode}.jpg'>google</a>&nbsp;<a target='_blank' title='Other posts with this image' href='/{$this->board}/search/md5/{$this->md5}'>others</a>&nbsp;<a target='_blank' title='Full image (archive)' href='http://images.b-stats.org/{$this->md5}{$this->ext}'>full</a>
+            <a target='_blank' title='iqdb image search' href='http://iqdb.org/?url=http://thumbs.b-stats.org/{$md5code}.jpg'>iqdb</a>&nbsp;<a target='_blank' title='Reverse Google Image Search' href='http://www.google.com/searchbyimage?image_url=http://thumbs.b-stats.org/{$doublecode}.jpg'>google</a>&nbsp;<a target='_blank' title='Other posts with this image' href='/{$this->board}/search/md5/{$this->md5}'>others</a>&nbsp;<a target='_blank' title='Full image (archive)' href='$fullImgLink'>full</a>
     </span>&nbsp;
 </div>
 $thumb
