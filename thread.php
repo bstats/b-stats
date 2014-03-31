@@ -48,7 +48,7 @@ $firstTime = 0;
 $deleted = 0;
 while($row = $postQ->fetch_assoc()){
     if($i++ == 0){
-        $thread = new Thread($row['threadid'],$row['no'],$board,$threadDetails['sticky'],$threadDetails['closed']);
+        $thread = new Thread($row['threadid'],$board,$threadDetails['sticky'],$threadDetails['closed']);
         $firstTime = $row['time'];
     }
     $thread->addPost(new Post($row,$board));

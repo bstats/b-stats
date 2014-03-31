@@ -67,6 +67,21 @@ class Post {
         $this->board = (string)$board;
     }
 
+    function hasImage(){
+        return ($this->filename != "" && $this->filename != null);
+    }
+    function getFilename(){
+        return $this->filename;
+    }
+    function getExtension(){
+        return $this->ext;
+    }
+    function getFullFilename(){
+        return $this->filename.$this->ext;
+    }
+    function getMD5Filename(){
+        return str_replace("/","-",$this->md5);
+    }
     /**
      * Function for rendering the post.
      * 

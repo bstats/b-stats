@@ -10,7 +10,7 @@ switch($_POST['a']){
             echo str_replace('data-original','src',$post->display());
         }
         catch(Exception $e){
-            echo 'Error: '.$e;
+            echo 'Error: '.$e->getMessage();
         }
         break;
 }

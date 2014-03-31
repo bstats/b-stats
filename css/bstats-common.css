@@ -208,12 +208,12 @@ a.clicked, a.clicked:hover {
 
 .newsBox {
     width: 40em;
-    border: 1px solid;
     margin: 0 auto 2em auto;
 }
 
 .newsArticleHead {
-    border-bottom: 1px solid;
+    border-radius: 8px 8px 0 0;
+    border: 1px solid;
     padding-left: 5px;
     padding-top: 3px;
     line-height: 1.5em;
@@ -230,6 +230,9 @@ a.clicked, a.clicked:hover {
 
 .newsArticleBody {
     padding: 1em 0.5em 0.5em 0.5em;
+    border-bottom: 1px solid;
+    border-left:1px solid;
+    border-right:1px solid;
 }
 
 .borderless, .borderless *{
@@ -251,4 +254,13 @@ a.clicked, a.clicked:hover {
 }
 .boardlist_big a:hover {
     text-decoration: underline;
+}
+
+.name-col
+{
+    max-width: 250px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    word-wrap: break-word;
 }

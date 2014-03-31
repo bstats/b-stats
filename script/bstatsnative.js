@@ -328,6 +328,17 @@ var StyleSwitcher = {
                 data: "style=yotsuba"
             });
         }
+        else if(style==="blue"){
+            document.getElementById('chanCSS').href = "/css/yotsuba-blue.css";
+            document.getElementById('statsCSS').href = "/css/bstats-yotsuba-blue.css";
+            $.ajax({
+                dataType: "html",
+                headers: {"X-Requested-With":"Ajax"},
+                url: protocol+'//'+host+'/style.php',
+                type: "GET",
+                data: "style=yotsuba-blue"
+            });
+        }
         else if(style === "dark"){
             document.getElementById('chanCSS').href = "/css/tomorrow.css";
             document.getElementById('statsCSS').href = "/css/bstats-tomorrow.css";
@@ -339,7 +350,7 @@ var StyleSwitcher = {
                 data: "style=tomorrow"
             });
         }
-        else {
+        else if (style === "pink"){
             document.getElementById('chanCSS').href = "/css/yotsuba-pink.css";
             document.getElementById('statsCSS').href = "/css/bstats-yotsuba-pink.css";
             $.ajax({

@@ -18,6 +18,10 @@ switch($_GET['style']){
         Site::getUser()->setTheme("yotsuba-pink");
         echo "true";
     break;
+case "yotsuba-blue":
+        Site::getUser()->setTheme("yotsuba-blue");
+        echo "true";
+    break;
 }
 /*if(isset($_SERVER['HTTP_REFERER']))
     header("Location: {$_SERVER['HTTP_REFERER']}");

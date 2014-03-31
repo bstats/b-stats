@@ -11,7 +11,7 @@ class Model {
      * @return array 
      */
     static function getBoards(){
-        $q = Config::getConnection()->query("SELECT * FROM `boards` ORDER BY `board_shortname` ASC");
+        $q = Config::getConnection()->query("SELECT * FROM `boards` ORDER BY `shortname` ASC");
         $return = array();
         while($r = $q->fetch_assoc())
             $return[] = $r;
@@ -22,11 +22,11 @@ class Model {
      * Fetches board name and related info.
      * 
      * @param string $board The board shortname.
-     * @return mixed array [board_shortname,board_longname,board_worksafe,board_pages,board_perpage], or FALSE on failure.
+     * @return mixed array [shortname,longname,worksafe,pages,perpage], or FALSE on failure.
      */
     static function getBoardInfo($board){
         $board = Config::getConnection()->real_escape_string($board);
-        $q = Config::getConnection()->query("SELECT * FROM `boards` WHERE `board_shortname`='$board'");
+        $q = Config::getConnection()->query("SELECT * FROM `boards` WHERE `shortname`='$board'");
         if($q->num_rows > 0)
             $r = $q->fetch_assoc();
         else
@@ -35,11 +35,11 @@ class Model {
     }
     
     /**
-     * Fetches a single post.
+     * Fetches a complete thread.
      * 
      * @param string $board The board shortname.
      * @param int $no The post id#.
-     * @return mysqli_result Mysqli result set.
+     * @return array Mysqli result sets for thread, then post.
      */
     static function getThread($board,$no){
         $dbl = Config::getConnection();
@@ -48,7 +48,7 @@ class Model {
         $no = $dbl->real_escape_string($no);
         $threadQ = $dbl->query("SELECT * FROM `{$board}thread` WHERE `threadid`='$no'");
         $postQ = $dbl->query("SELECT * FROM `{$board}post` WHERE `threadid`='$no' ORDER BY `no` ASC");
-        if(!$threadQ->num_rows)
+        if(!($threadQ->num_rows > 0))
             throw new Exception ("Thread does not exist in the archive.");
         return array($threadQ,$postQ);
     }
@@ -75,12 +75,12 @@ class Model {
     static function getPage($board,$page){
         $dbl = Config::getConnection();
         $prefix = $board->getName()."_";
-        $board_perpage = $board->getThreadsPerPage();
+        $perpage = $board->getThreadsPerPage();
         $pTable = $prefix."post";
         $tTable = $prefix."thread";
         $page = $dbl->real_escape_string($page);
-        $number = $page*$board_perpage;
-        $pageQuery = "SELECT {$tTable}.*, {$pTable}.*  FROM {$tTable} LEFT JOIN {$pTable} ON {$pTable}.no = {$tTable}.threadid WHERE {$tTable}.active = 1 ORDER BY ({$tTable}.sticky + {$tTable}.active) DESC, {$tTable}.lastreply DESC LIMIT $number,$board_perpage";
+        $number = $page*$perpage;
+        $pageQuery = "SELECT {$tTable}.*, {$pTable}.*  FROM {$tTable} LEFT JOIN {$pTable} ON {$pTable}.no = {$tTable}.threadid WHERE {$tTable}.active = 1 ORDER BY ({$tTable}.sticky + {$tTable}.active) DESC, {$tTable}.lastreply DESC LIMIT $number,$perpage";
         $q = $dbl->query($pageQuery);
         return $q;
     }
@@ -305,10 +305,19 @@ class Model {
         $db = Config::getConnection();
         $query = "SELECT `users`.`username`,`users`.`uid`,`news`.`article_id`,`news`.`title`,`news`.`content`,`news`.`time`,`news`.`update` FROM `news` JOIN `users` ON `news`.`author_id`=`users`.`uid` WHERE `news`.`time` < UNIX_TIMESTAMP() ORDER BY `news`.`article_id` DESC";
         $q = $db->query($query);
-        $articles = [];
-        while($article = $q->fetch_assoc()){
-            $articles[] = $article;
-        }
-        return $articles;
+        return $q->fetch_all(MYSQLI_ASSOC);
+    }
+    
+    public static function getRequests($acceptedOnly = true){
+        $db = Config::getConnection();
+        $query = "SELECT * FROM `request`".$acceptedOnly?" WHERE `accepted`=0":"";
+        $q = $db->query($query);
+        return $q->fetch_all(MYSQLI_ASSOC);
+    }
+    public static function confirmRequest($ip){
+        
+    }
+    public static function denyRequest($ip){
+        
     }
 }

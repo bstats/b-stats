@@ -1,53 +1,86 @@
 <?php
-class Thread {
+class Thread implements Iterator {
     
+    /**
+     * @var int
+     */
     private $threadId;
-    private $opId;
+    /**
+     * @var array posts 
+     */
     private $posts;
+    /**
+     * @var Board
+     */
     private $board;
+    /**
+     * @var bool
+     */
     private $sticky;
+    /**
+     * @var bool
+     */
     private $closed;
+    
+    /** @var int Current iterator index*/
+    private $index;
     
     /**
      * Thread constructor. (obvious, change this)
      * 
      * @param string|int $thrdId the thread ID/res number
      * @param string|int $op the thread ID/res number
-     * @param string $board the thread's board
+     * @param Board $board the thread's board
+     * @param bool $sticky
+     * @param bool $closed
      */
-    function __construct($thrdId, $op, $board, $sticky=false, $closed=false){
+    function __construct($thrdId, $board, $sticky=false, $closed=false){
+        if(!$board instanceof Board)
+            throw new Exception("Board must be a Board object.");
+        if(!is_numeric($thrdId))
+            throw new Exception("Thread ID is invalid.");
         $this->threadId = $thrdId;
-        $this->opId = $op;
         $this->posts = array();
         $this->board = $board;
         $this->sticky = $sticky;
         $this->closed = $closed;
+        
     }
     
     /**
-     * Loads the entire thread from the DB
-     * @todo implement this function
+     * Loads the entire thread from the DB.
+     * Only works if no posts have been loaded yet.
      * @return \Thread reference to self
      */
     function loadAll(){
-        
+        if(count($this->posts) == 0){
+            $tmp = Model::getThread($this->board, $this->threadId);
+            while($row = $tmp[1]->fetch_assoc()){
+                $this->addPost(new Post($row));
+            }
+        }
+        else
+        {
+            throw new Exception("posts not 0");
+        }
         return $this;
     }
     
     /**
-     * Loads only the OP. 
-     * NB: Adds this on to the post stack, so only call this once!
-     * @todo implement this function
+     * Loads only the OP. If OP is already loaded, does nothing.
      * @return \Thread reference to self
      */
     function loadOP(){
-        
+        if(count($this->posts) == 0){
+            
+        }
         return $this;
     }
     
     /**
      * Loads the last (n) posts from the DB
      * @param type $n
+     * @return \Thread reference to self
      */
     function loadLastN($n){
         $posts = Model::getLastNPosts($this->board->getName(), $this->threadId, $n);
@@ -111,5 +144,26 @@ class Thread {
         }
         $ret .= "</div>";
         return $ret;
+    }
+    /*
+     * Iterator functions
+     */
+    function rewind(){
+        $this->index = 0;
+    }
+    function valid(){
+        return ($this->index < count($this->posts));
+    }
+    function key(){
+        return $this->index;
+    }
+    /**
+     * @return Post
+     */
+    function current(){
+        return $this->posts[$this->index];
+    }
+    function next(){
+        $this->index++;
     }
 }

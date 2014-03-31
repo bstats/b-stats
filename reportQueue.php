@@ -19,12 +19,12 @@ $html .= "</table>";
 if($page->checkPrivilege() >= SITE::LEVEL_TERRANCE){
     $html .= "<br><table class='reportTable'><tr><th colspan='3'>Last Few Deleted Posts</th></tr><tr><th style='width:3em;'>Board</th><th>Post</th><th style='width:7em;'>Options</th></tr>";
     foreach(Model::getBoards() as $board){
-        $lastFew = Model::getLastNDeletedPosts($board['board_shortname'], 5);
+        $lastFew = Model::getLastNDeletedPosts($board['shortname'], 5);
         foreach($lastFew as $report){
             $html .= "<tr id='report{$report['no']}'>";
-            $html .= "<td>".$board['board_shortname']."</td>";
+            $html .= "<td>".$board['shortname']."</td>";
             $html .= "<td>&gt;&gt;{$report['no']} ({$report['name']}{$report['trip']})</td>";
-            $html .= "<td><a class='button' href='javascript:restorePost({$report['no']},\"{$board['board_shortname']}\");' >Restore&nbsp;Post</a></td>";
+            $html .= "<td><a class='button' href='javascript:restorePost({$report['no']},\"{$board['shortname']}\");' >Restore&nbsp;Post</a></td>";
             $html .= "</tr>";
         }
     }

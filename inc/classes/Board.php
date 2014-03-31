@@ -39,26 +39,26 @@ class Board {
     }
     
     public function getBoardInfo(){
-        return ["board_shortname"=>$this->name,
-                "board_longname"=>$this->name_long,
-                "board_worksafe"=>$this->worksafe,
-                "board_pages"=>$this->pages,
-                "board_perpage"=>$this->perpage,
-                "board_swf_board"=>$this->swf_board,
-                "board_privilege"=>$this->privilege];
+        return ["shortname"=>$this->name,
+                "longname"=>$this->name_long,
+                "worksafe"=>$this->worksafe,
+                "pages"=>$this->pages,
+                "perpage"=>$this->perpage,
+                "swf_board"=>$this->swf_board,
+                "privilege"=>$this->privilege];
     }
     
     public function __construct($shortname) {
         $boardInfo = Model::getBoardInfo($shortname);
-        if($boardInfo['board_shortname'] !== $shortname)
+        if($boardInfo == false || $boardInfo['shortname'] !== $shortname)
             throw new Exception("Board does not exist");
         $this->name = $shortname;
-        $this->name_long = $boardInfo['board_longname'];
-        $this->worksafe = $boardInfo['board_worksafe'];
-        $this->pages = $boardInfo['board_pages'];
-        $this->perpage = $boardInfo['board_perpage'];
+        $this->name_long = $boardInfo['longname'];
+        $this->worksafe = $boardInfo['worksafe'];
+        $this->pages = $boardInfo['pages'];
+        $this->perpage = $boardInfo['perpage'];
         $this->swf_board = $shortname === 'f' ? true : false;
-        $this->privilege = $boardInfo['board_privilege'];
+        $this->privilege = $boardInfo['privilege'];
         $this->archive = true; //no `real` boards here. maybe in the future
     }
     
