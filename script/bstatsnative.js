@@ -197,13 +197,24 @@ var ExpandImage = {
         var ext = $(thumb).attr("data-ext");
         var width = $(thumb).attr("data-width");
         var height = $(thumb).attr("data-height");
-        var newImg = $("<img class='expanded' style='display:none' alt='image'/>");
-        newImg.attr("data-width",width).attr("data-height",height);
-        newImg.load(function(){ExpandImage.loaded(this);});
-        $(thumb).after(newImg);             
-        newImg.attr("src","https://images.b-stats.org/"+md5+ext);
+        if(ext != ".webm"){
+            var newImg = $("<img class='expanded' style='display:none' alt='image'/>");
+            newImg.attr("data-width",width).attr("data-height",height);
+            newImg.load(function(){ExpandImage.loaded(this);});
+            $(thumb).after(newImg);             
+            newImg.attr("src","https://images.b-stats.org/"+md5+ext);
+        }
+        else {
+            var newImg = $("<video id='"+md5+"' class='expanded' style='display:block' alt='video' loop autoplay controls />");
+            newImg.attr("data-width",width).attr("data-height",height);
+            newImg.attr("src","https://images.b-stats.org/"+md5+ext+"#t="+document.getElementById("hoverImg").currentTime);
+            $(thumb).removeClass("expand-loading").addClass("expand-loaded").after(newImg)
+            $("#hoverImg").remove();
+            ImageHover.checkScale(newImg);
+        }
     },
     loaded: function(img){
+        
         $(img).prev().removeClass("expand-loading").addClass("expand-loaded");
         $(img).css("display","block");
         $("#hoverImg").remove();
@@ -238,17 +249,27 @@ var ImageHover = {
         var ext = thumb.attr("data-ext");
         var width = thumb.attr("data-width");
         var height = thumb.attr("data-height");
-        $("body").append("<img id='hoverImg' style='visibility:hidden;' alt=''/>");
-        $("#hoverImg").attr("data-width",width);
-        $("#hoverImg").attr("data-height",height);
-        $("#hoverImg").css("position","absolute").css("top","0px").css("left","0px").css("position","fixed").fadeIn("slow");
-        ImageHover.checkScale(document.getElementById("hoverImg"));
-        $("#hoverImg").on("load",function(){
-            thumb.attr("src","//images.b-stats.org/"+md5+ext);
-            $("#hoverImg").mousemove();
-            $("#hoverImg").css("visibility","visible");
-        });
-        $("#hoverImg").attr("src","//images.b-stats.org/"+md5+ext);
+        if(ext !== ".webm"){
+            $("body").append("<img id='hoverImg' style='visibility:hidden;' alt=''/>");
+            $("#hoverImg").attr("data-width",width);
+            $("#hoverImg").attr("data-height",height);
+            $("#hoverImg").css("position","absolute").css("top","0px").css("left","0px").css("position","fixed").fadeIn("slow");
+            ImageHover.checkScale(document.getElementById("hoverImg"));
+            $("#hoverImg").on("load",function(){
+                thumb.attr("src","//images.b-stats.org/"+md5+ext);
+                thumb.mousemove();
+                $("#hoverImg").css("visibility","visible");
+            });
+            $("#hoverImg").attr("src","//images.b-stats.org/"+md5+ext);
+        }
+        else{
+            $("body").append("<video id='hoverImg' autoplay loop alt=''/>");
+            $("#hoverImg").attr("data-width",width).attr("data-height",height)
+                .css("top","0px").css("left","0px").css("position","fixed")
+                .attr("src","//images.b-stats.org/"+md5+ext);
+            ImageHover.checkScale(document.getElementById("hoverImg"));
+            thumb.mousemove();
+        }
     },
     mouseMove : function(e){
         var Y = e.clientY - offsetY;

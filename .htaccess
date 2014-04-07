@@ -39,7 +39,8 @@ RewriteRule ^(b|f|hm|lgbt)/search/filename/(.*) /search_redir.php?filename=$2&b=
 RewriteRule ^(b|f|hm|lgbt)/search/image/(.*)  /search_redir.php?md5=$2&b=$1 [B]
 RewriteRule ^(b|f|hm|lgbt)/search/md5/(.*)$  /search_redir.php?md5=$2&b=$1 [B]
 RewriteRule ^(b|f|hm|lgbt)/search/id/(.*)$  /search_redir.php?id=$2&b=$1 [B]
-RewriteRule ^(b|f|hm|lgbt)/search/name/(.*) /notimplemented.html
+RewriteRule ^(b|f|hm|lgbt)/search/name/(.*) /notimplemented.html [B]
+RewriteRule ^(b|f|hm|lgbt)/search/tripcode/(.*) /notimplemented.html [B]
 
 RewriteRule ^api/(b|f|hm|lgbt)/post/([0-9]+)(\.json)? /jsonApi.php?a=getPost&board=$1&num=$2
 RewriteRule ^api/(b|f|hm|lgbt)/res/([0-9]+)(\.json)? /jsonApi.php?a=getThread&board=$1&num=$2
