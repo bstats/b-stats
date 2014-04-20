@@ -225,7 +225,7 @@ class Model {
                 throw new Exception("Query failed: ".$dbl->error);
         }
         else
-            throw new Exception("Query failed.");
+            throw new Exception("Query failed: ".$dbl->error);
     }
     public static function deleteReport($no,$board){
         $dbl = Config::getConnectionRW();

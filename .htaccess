@@ -14,7 +14,7 @@ RewriteRule ^(b|f|hm|lgbt)$ /$1/ [R]
 RewriteRule ^(b|f|hm|lgbt)/$ /board.php?b=$1
 RewriteRule ^(b|f|hm|lgbt)/([0-9]+)/$ /$1/$2 [R]
 RewriteRule ^(b|f|hm|lgbt)/([0-9]+)$ /board.php?b=$1&page=$2
-RewriteRule ^(b|f|hm|lgbt)/res/([0-9]+) /thread.php?b=$1&t=$2
+RewriteRule ^(b|f|hm|lgbt)/(res|thread)/([0-9]+) /thread.php?b=$1&t=$3
 RewriteRule ^(b|f|hm|lgbt)/res/$ /$1/ [R]
 RewriteRule ^(b|f|hm|lgbt)/res$ /$1/ [R]
 RewriteRule ^(b|f|hm|lgbt)/post/([0-9]+) /postRedirect.php?b=$1&no=$2

@@ -1,14 +1,27 @@
-var protocol = window.location.protocol;
-var path = location.pathname.split("/res/");
+var protocol,path,pathtype,thread,apiPosts,host,hoverLoaded,offsetX,offsetY;
+
+protocol = window.location.protocol;
+pathtype = 'thread';
+thread = '';
 location.hash = location.hash.replace(/#([0-9]{1,9})/,'#p$1');
-if(/\/res\//.test(location.pathname) )
+if(/\/res\//.test(location.pathname)){
+    path = location.pathname.split("/res/");
+    thread = path[1];
+    pathtype = 'res';
     if(location.pathname.substr(location.pathname.length - 1) === "/")
         window.location.href = window.location.protocol + "//" + location.host + location.pathname.substr(0,location.pathname.length - 1) + location.hash;
+}
+else if(/\/thread\//.test(location.pathname)){
+    path = location.pathname.split("/thread/");
+    thread = path[1];
+    pathtype = 'thread';
+    if(location.pathname.substr(location.pathname.length - 1) === "/")
+        window.location.href = window.location.protocol + "//" + location.host + location.pathname.substr(0,location.pathname.length - 1) + location.hash;
+}
 
-var thread = path[1];
-var apiPosts = new Array();
-var host = location.host;
-var hoverLoaded = false;
+apiPosts = new Array();
+host = location.host;
+hoverLoaded = false;
 
 offsetX = 50;
 offsetY = 150;
@@ -126,14 +139,14 @@ function fixAllCrossLinks(container){
         var link_thread = $(this).attr("data-thread");
         var post = $(this).attr("data-post");
         if(link_thread != thread && link_thread != 0 
-                && /\/res\//.test(document.location.href) 
+                && /\/(res|thread)\//.test(document.location.href) 
                 && !/\/post\//.test(this.href)
                 && !/Cross-thread/.test(this.innerText)
         ){
             $(this).html($(this).html() + " (Cross-thread)");
         }
         if($(this).attr("data-thread")){
-            $(this).attr("href","/"+board+"/res/"+link_thread+"#p"+post);
+            $(this).attr("href","/"+board+"/"+pathtype+"/"+link_thread+"#p"+post);
         }
     });
     $(container + " .deadlink").each(function(index){

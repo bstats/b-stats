@@ -104,7 +104,7 @@ function getThreads(){
            $desired_width = floor($row['w'] * ($desired_height / $row['h']));
        else
            $desired_width=75;
-       $ret .= "<div class='threadbox' style='width:{$desired_width}px'>$typeStr<br><a rel='noreferrer' href='http://boards.4chan.org/b/res/{$row['threadid']}'><img title='$hover' alt='OP' align='middle' src='http://".Site::getThumbHostname()."/{$row['md5']}.jpg' style='width:{$desired_width}px; height:{$desired_height}px;'></a><span>R: {$row['replies']} I:{$row['images']} <a href='/itt/{$row['threadid']}'>N:{$row['nsnames']}</a></span></div>";
+       $ret .= "<div class='threadbox' style='width:{$desired_width}px'>$typeStr<br><a rel='noreferrer' href='http://boards.4chan.org/b/thread/{$row['threadid']}'><img title='$hover' alt='OP' align='middle' src='http://".Site::getThumbHostname()."/{$row['md5']}.jpg' style='width:{$desired_width}px; height:{$desired_height}px;'></a><span>R: {$row['replies']} I:{$row['images']} <a href='/itt/{$row['threadid']}'>N:{$row['nsnames']}</a></span></div>";
    }
    return $ret;
 }

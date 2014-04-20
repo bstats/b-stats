@@ -56,7 +56,7 @@ try{
                 "<td>".human_filesize($row['fsize'],2)."</td>".
                 "<td>".date("Y-m-d(D)H:i",$row['time'])."</td>".
                 "<td>{$row['replies']}</td>".
-                "<td>[<a href='res/{$row['no']}'>View</a>]</td>".
+                "<td>[<a href='thread/{$row['no']}'>View</a>]</td>".
                 "</tr>";
             $page->appendToBody($tr);
         }

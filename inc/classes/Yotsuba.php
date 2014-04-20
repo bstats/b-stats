@@ -11,19 +11,34 @@ class Yotsuba {
     * @param string $com the post comment (full HTML)
     * @return string the fixed HTML
     */
-    public static function fixHTML($com,$board = 'b'){
+    public static function fixHTML($com,$board = 'b',$thread = ''){
         $search = array();
         $replace = array();
         //For links to /b/ threads
         $search[0] = '/<a href="(\d+)#p(\d+)" class="quotelink">/';
         $replace[0] = '<a href="$1#p$2" data-board="'.$board.'" data-thread="$1" data-post="$2" class="quotelink">';
         
-        //For links to other boards' threads
-        $search[1] = '~<a href="/(\w+)/res/(\d+)#p(\d+)" class="quotelink">~';
-        $replace[1] = '<a href="//boards.4chan.org/$1/res/$2#p$3" class="quotelink">';
+         
+        //new for OP quotes, thanks moot you asshole
+        $search[1] = '~<a href="/'.$board.'/thread/'.$thread.'#p(\d+)" class="quotelink">~';
+        $replace[1] = '<a href="'.$thread.'#p$1" data-board="'.$board.'" data-thread="'.$thread.'" data-post="$1" class="quotelink">';
         
+        //hopefully dead links haven't changed
         $search[2] = '/<span class="deadlink">/';
         $replace[2] = '<span class="deadlink" data-board="'.$board.'">';
+        
+        //STOP CHANGING THINGS MOOT HOLY SHIT
+        $search[3] = '/<a href="#p(\d+)" class="quotelink">/';
+        $replace[3] = '<a href="#p$1" data-board="'.$board.'" data-thread="'.$thread.'" data-post="$1" class="quotelink">';
+        
+        //For links to other boards' threads
+        $search[4] = '~<a href="/'.$board.'/(res|thread)/(\d+)#p(\d+)" class="quotelink">~';
+        $replace[4] = '<a href="/'.$board.'/$1/$2#p$3" data-board="'.$board.'" data-thread="$2" data-post="$3" class="quotelink">';
+        
+        //For links to other boards' threads
+        $search[5] = '~<a href="/(\w+)/(res|thread)/(\d+)#p(\d+)" class="quotelink">~';
+        $replace[5] = '<a href="//boards.4chan.org/$1/$2/$3#p$4" class="quotelink">';
+        
         $ret = preg_replace($search,$replace,$com);
         
         return $ret;

@@ -96,7 +96,7 @@ class Post {
             list($tnW,$tnH) = tn_Size($this->w, $this->h);
             $md5Filename = str_replace("/","-",$this->md5);
             return "<div id='thread-{$this->no}' class='thread'>".
-            "<a href='/{$this->board}/res/{$this->no}'>".
+            "<a href='/{$this->board}/thread/{$this->no}'>".
             "<img alt='' id='thumb-{$this->no}' class='thumb lazyload' width='$tnW' height='$tnH' data-original='//thumbs.b-stats.org/$md5Filename.jpg' data-id='{$this->no}'>".
             "</a>".
             ($this->replies>1? "<div title='(R)eplies / (I)mages' id='meta-{$this->no}' class='meta'>".
@@ -109,14 +109,14 @@ class Post {
             
         }
         $timefmt = date("Y-m-d (D) H:i:s",$this->time);
-        $comment = Yotsuba::fixHTML($this->com,$this->board);
+        $comment = Yotsuba::fixHTML($this->com,$this->board,$this->threadid);
         
         /**
          * Add backlinks, a la 4chanX
          */
         $backlinkblck = "";
         foreach($this->backlinks as $bl){
-            $backlinkblck .= "<a href='/{$this->board}/res/{$this->threadid}#p$bl' data-board='$this->board' data-thread='{$this->threadid}' data-post='$bl' class='backlink'>&gt;&gt;$bl</a> ";
+            $backlinkblck .= "<a href='/{$this->board}/thread/{$this->threadid}#p$bl' data-board='$this->board' data-thread='{$this->threadid}' data-post='$bl' class='backlink'>&gt;&gt;$bl</a> ";
         }
         if($backlinkblck != ""){
             $backlinkblck = '<span class="container" id="blc'.$this->no.'">'.$backlinkblck.'</span>';
@@ -187,7 +187,7 @@ $nameblock
 <span class="dateTime" data-utc="{$this->time}">$timefmt</span>
 <span class="postNum desktop">
 <a href="#p{$this->no}" title="Highlight this post">No.</a>
-<a href="/{$this->board}/res/{$this->threadid}#p{$this->no}" title="Link to this post">{$this->no}</a>$icons
+<a href="/{$this->board}/thread/$this->threadid}#p{$this->no}" title="Link to this post">{$this->no}</a>$icons
 <a class='miniButton' href='javascript:' onclick='reportPost(this,"$this->board","$this->no","$this->threadid");'>Report</a>
 </span>&nbsp;$backlinkblck
 </div>
