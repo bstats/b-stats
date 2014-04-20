@@ -73,6 +73,7 @@ class Model {
     }
     
     static function getPage($board,$page){
+        $page--;
         $dbl = Config::getConnection();
         $prefix = $board->getName()."_";
         $perpage = $board->getThreadsPerPage();

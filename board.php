@@ -25,9 +25,9 @@ try{
     /*
      * Get the correct index page.
      */
-    $pageNo = isset($_GET['page']) ? $_GET['page'] : 0;
+    $pageNo = isset($_GET['page']) ? $_GET['page'] : 1;
     if($board->isSwfBoard()){
-        $pageNo = 0;
+        $pageNo = 1;
     }
     $pageResult = $board->getPage($pageNo);
 
@@ -73,17 +73,17 @@ try{
             $page->appendToBody($thread->displayThread());
             $page->appendToBody("\n<hr>\n");
         }
-        if($pageNo == 0){
+        if($pageNo == 1){
             $linkList = file_get_contents(Site::dir."/htmls/pagelist/pagelist_first.html");
         }
-        elseif(0 < $pageNo && $pageNo < $board->getPages() - 1){
+        elseif(1 < $pageNo && $pageNo < $board->getPages() - 1){
             $linkList = file_get_contents(Site::dir."/htmls/pagelist/pagelist_middle.html");
         }
         else{
             $linkList = file_get_contents(Site::dir."/htmls/pagelist/pagelist_last.html");
         }
         $pages = "";
-        for($p = 1; $p < $board->getPages(); $p++){
+        for($p = 2; $p < $board->getPages(); $p++){
             if($p == $pageNo)
                 $pages .= "[<strong><a href='$p'>$p</a></strong>] ";
             else
