@@ -187,7 +187,7 @@ $nameblock
 <span class="dateTime" data-utc="{$this->time}">$timefmt</span>
 <span class="postNum desktop">
 <a href="#p{$this->no}" title="Highlight this post">No.</a>
-<a href="/{$this->board}/thread/$this->threadid}#p{$this->no}" title="Link to this post">{$this->no}</a>$icons
+<a href="/{$this->board}/thread/{$this->threadid}#p{$this->no}" title="Link to this post">{$this->no}</a>$icons
 <a class='miniButton' href='javascript:' onclick='reportPost(this,"$this->board","$this->no","$this->threadid");'>Report</a>
 </span>&nbsp;$backlinkblck
 </div>
