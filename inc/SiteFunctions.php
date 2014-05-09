@@ -1,11 +1,5 @@
 <?php
-	 
-function writelog(){
-    $file = 'log.txt';
-    // The new person to add to the file
-    $line = time()."\t".$_SERVER['REMOTE_ADDR']."\t".basename($_SERVER['PHP_SELF'])."\t".$_SERVER['REQUEST_URI']."\n";
-    file_put_contents($file, $line, FILE_APPEND);
-}
+
  function dlUrl($url){
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $url);
