@@ -181,10 +181,10 @@ class Page {
         $this->header = Site::parseHtmlFragment('pagehead.html',[
                 '_stylename_','<!-- pageTitle -->',
                 '<!-- additionalHeaders -->','<!-- navbar -->',
-                '<!-- boardTitle -->'],
+                '<!-- boardTitle -->','<!-- boardlist -->'],
                [$this->user->getTheme(),$this->title,
                 $this->addToHead,$navBar,
-                $boardTitle]);
+                $boardTitle,Board::getBoardList()]);
         
         if($_SERVER['SCRIPT_NAME'] != "/index.php"){
             if($this->board == null)

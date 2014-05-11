@@ -11,7 +11,7 @@ class Model {
      * @return array 
      */
     static function getBoards(){
-        $q = Config::getConnection()->query("SELECT * FROM `boards` ORDER BY `shortname` ASC");
+        $q = Config::getConnection()->query("SELECT * FROM `boards` ORDER BY `group` ASC, `shortname` ASC");
         $return = array();
         while($r = $q->fetch_assoc())
             $return[] = $r;

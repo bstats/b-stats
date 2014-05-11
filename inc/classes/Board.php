@@ -45,7 +45,8 @@ class Board {
                 "pages"=>$this->pages,
                 "perpage"=>$this->perpage,
                 "swf_board"=>$this->swf_board,
-                "privilege"=>$this->privilege];
+                "privilege"=>$this->privilege,
+                "group"=>$this->group];
     }
     
     public function __construct($shortname) {
@@ -59,6 +60,7 @@ class Board {
         $this->perpage = $boardInfo['perpage'];
         $this->swf_board = $shortname === 'f' ? true : false;
         $this->privilege = $boardInfo['privilege'];
+        $this->group = $boardInfo['group'];
         $this->archive = true; //no `real` boards here. maybe in the future
     }
     
@@ -74,5 +76,24 @@ class Board {
     
     public function getPage($no){
         return Model::getPage($this,$no);
+    }
+    
+    public static function getBoardList(){
+        $ret = "";
+        $boards = Model::getBoards();
+        $groups = array();
+        foreach($boards as $board){
+            $groups[$board['group']][] = $board;
+        }
+        foreach($groups as $group){
+            $ret .= "[";
+            $i = 0;
+            foreach($group as $board){
+                if($i++ > 0) $ret .= " / ";
+                $ret .= '<a href="/'.$board['shortname'].'/" title="'.$board['longname'].'">'.$board['shortname'].'</a>';
+            }
+            $ret .= "] ";
+        }
+        return $ret;
     }
 }
