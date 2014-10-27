@@ -1,9 +1,11 @@
 <?php
 
- function dlUrl($url){
+ function dlUrl($url,$fakeUA = false){
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1); 
+    if($fakeUA)
+        curl_setopt($ch, CURLOPT_USERAGENT, "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/36.0.1985.125 Safari/537.36");
     $data = curl_exec($ch);
     curl_close($ch);
     return $data;
@@ -163,4 +165,31 @@ function secsToDHMS($seconds){
     $minutes = ($seconds > 60) ? (int)($seconds/60) : 0;
     $seconds -= $minutes*60;
     return [$days,$hours,$minutes,$seconds];
+}
+
+function durationToText($duration){
+    $dhms = secsToDHMS($duration);
+    $ret=array();
+    if($dhms[0] != 0){ //days
+        $ret[] = $dhms[0]." days";
+    }
+    if($dhms[1] != 0){ //hours
+        $ret[] = $dhms[1]." hours";
+    }
+    if($dhms[2] != 0){ //minutes
+        $ret[] = $dhms[2]." minutes";
+    }
+    if($dhms[3] != 0){
+        $ret[] = $dhms[3]." seconds";
+    }
+    return implode(", ",$ret);
+}
+
+function ago($duration){
+    if($duration < 5){
+        return "just now";
+    }
+    else{
+        return durationToText($duration)." ago";
+    }
 }

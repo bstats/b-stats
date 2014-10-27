@@ -1,4 +1,5 @@
 <?php
+define("CONFIG_INC_TIME",microtime(true));
 include "SiteFunctions.php";
 include "SiteClasses.php";
 include "ChanClasses.php";
