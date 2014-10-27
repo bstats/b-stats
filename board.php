@@ -74,16 +74,16 @@ try{
             $page->appendToBody("\n<hr>\n");
         }
         if($pageNo == 1){
-            $linkList = file_get_contents(Site::dir."/htmls/pagelist/pagelist_first.html");
+            $linkList = file_get_contents(Site::getPath()."/htmls/pagelist/pagelist_first.html");
         }
         elseif(1 < $pageNo && $pageNo < $board->getPages() - 1){
-            $linkList = file_get_contents(Site::dir."/htmls/pagelist/pagelist_middle.html");
+            $linkList = file_get_contents(Site::getPath()."/htmls/pagelist/pagelist_middle.html");
         }
         else{
-            $linkList = file_get_contents(Site::dir."/htmls/pagelist/pagelist_last.html");
+            $linkList = file_get_contents(Site::getPath()."/htmls/pagelist/pagelist_last.html");
         }
         $pages = "";
-        for($p = 2; $p < $board->getPages(); $p++){
+        for($p = 2; $p <= $board->getPages(); $p++){
             if($p == $pageNo)
                 $pages .= "[<strong><a href='$p'>$p</a></strong>] ";
             else
