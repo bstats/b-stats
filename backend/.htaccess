@@ -1,0 +1,7 @@
+Options -Indexes
+ErrorDocument 403 /404.html
+Order Deny,Allow
+Deny from all
+<Files ~ "_media\.json$">
+    Allow from all
+</Files>
