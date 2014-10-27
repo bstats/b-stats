@@ -1,3 +1,4 @@
+<div class='navbar'>
 <a href='/'><span class='navelement'>
         &nbsp;Home&nbsp;
 </span></a><a href='/faq'><span class='navelement'>
@@ -5,13 +6,14 @@
 </span></a><a href='/news'><span class='navelement'>
         &nbsp;News&nbsp;
 </span></a>
-<span style="float:right; margin-left: 8px;">
-    Page style:&nbsp;
-    <a href='javascript:' onclick='StyleSwitcher.switchTo("light")' class='navelement' title='yotsuba'>&nbsp;y&nbsp;</a>
-    /
-    <a href='javascript:' onclick='StyleSwitcher.switchTo("blue")' class='navelement' title='yotsuba-blue'>&nbsp;yb&nbsp;</a>
-    /
-    <a href='javascript:' onclick='StyleSwitcher.switchTo("dark")' class='navelement' title='tomorrow'>&nbsp;t&nbsp;</a>
-    /
-    <a href='javascript:' onclick='StyleSwitcher.switchTo("pink")' class='navelement' title='yotsuba-pink'>&nbsp;yp&nbsp;</a>
-</span>
+<ul class="stylemenu" style="margin-left: 8px; display:inline">
+    <li class="navelement">[Page Style]
+        <ul>
+        <li><a href='javascript:' onclick='StyleSwitcher.switchTo("light")' class='navelement' title='yotsuba'>&nbsp;yotsuba&nbsp;</a></li>
+        <li><a href='javascript:' onclick='StyleSwitcher.switchTo("blue")' class='navelement' title='yotsuba-blue'>&nbsp;yotsuba-b&nbsp;</a></li>
+        <li><a href='javascript:' onclick='StyleSwitcher.switchTo("dark")' class='navelement' title='tomorrow'>&nbsp;tomorrow&nbsp;</a></li>
+        <li><a href='javascript:' onclick='StyleSwitcher.switchTo("pink")' class='navelement' title='yotsuba-pink'>&nbsp;yotsuba-p&nbsp;</a></li>
+        </ul>
+    </li>
+</ul><!--extra-->
+</div>
