@@ -29,7 +29,6 @@ class Thread implements Iterator {
      * Thread constructor. (obvious, change this)
      * 
      * @param string|int $thrdId the thread ID/res number
-     * @param string|int $op the thread ID/res number
      * @param Board $board the thread's board
      * @param bool $sticky
      * @param bool $closed

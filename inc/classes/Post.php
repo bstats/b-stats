@@ -68,7 +68,7 @@ class Post {
     }
 
     function hasImage(){
-        return ($this->filename != "" && $this->filename != null);
+        return ($this->filename != "" && $this->md5 != null);
     }
     function getFilename(){
         return $this->filename;
@@ -81,6 +81,9 @@ class Post {
     }
     function getMD5Filename(){
         return str_replace("/","-",$this->md5);
+    }
+    function getID(){
+        return $this->id;
     }
     /**
      * Function for rendering the post.
@@ -204,6 +207,7 @@ END;
         if($this->md5 != ""){
             $md5code = urlencode($this->md5);
             $md5Filename = str_replace("/","-",$this->md5);
+            $md5hex = bin2hex(base64_decode(str_replace("-","/",$this->md5)));
             $doublecode = urlencode($md5code);
             $humanFilesize = $this->fsize > 0 ? human_filesize($this->fsize).", ":"";
             list($thumbW,$thumbH) = tn_Size($this->w, $this->h);
@@ -217,7 +221,7 @@ END;
                 $thumb = "";
             }
             else {
-                $thumb = "<a class='fileThumb' "."href='//images.b-stats.org/$md5Filename{$this->ext}' target='_blank'>".
+                $thumb = "<a class='fileThumb' href='//images.b-stats.org/src/imghex/{$md5hex[0]}{$md5hex[1]}/$md5hex{$this->ext}' target='_blank'>".
                          "<img class='lazyload' data-original='//thumbs.b-stats.org/$md5Filename.jpg' alt='img' data-md5='{$this->md5}' data-md5-filename='$md5Filename' data-ext='{$this->ext}' width='$thumbW' height='$thumbH' data-width='{$this->w}' data-height='{$this->h}' />".
                          "</a>";
             }

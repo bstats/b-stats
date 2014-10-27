@@ -34,6 +34,9 @@ class Page {
     private $board;
     private $addToHead;
     
+    private $clearHeader;
+    private $clearFooter;
+    
     /**
      * Sets the text in the <code>&lt;title&gt;</code> tags.
      * @param string $title
@@ -54,16 +57,34 @@ class Page {
      * @return string the page's entire HTML
      */
     function display(){
+      if(!$this->clearFooter){
         $this->endTime = microtime(true);
         $this->appendToBody("<p style ='text-align:center'><small>page took ".
                 round($this->endTime - $this->startTime, 4).
                 " seconds to execute</small></p>");
-        $this->footer = file_get_contents(Site::dir."/htmls/pagefoot.html");
-        $out = $this->header.$this->body.$this->footer;
+        $this->footer = Site::parseHtmlFragment("pagefoot.html",["<!--copyright-->"],
+                [file_get_contents("htmls/copyright.html")]);
+      }
+      else{
+        $this->footer = file_get_contents("htmls/pagefoot.html");
+      }
+      $out = $this->header.$this->body.$this->footer;
         
-        return $out;
+      return $out;
     }
-    
+    /**
+     * @return double Current page execution time
+     */
+    function getElapsedTime(){
+        return round(microtime(true) - $this->startTime, 4);
+    }
+    function clearHead(){
+      $this->clearHeader = true;
+      $this->renderHeader();
+    }
+    function clearFoot(){
+      $this->clearFooter = true;
+    }
     /**
      * For pages that take a while to load.
      * @return string Page's header 
@@ -144,9 +165,11 @@ class Page {
     }
     
     function renderHeader(){
-        $navBar = file_get_contents(Site::dir."/htmls/navbar.html");
+      if(!$this->clearHeader){
+        $navBar = file_get_contents(Site::getPath()."/htmls/navbar.html");
+        $navBarExtra = "";
         if($this->user->getPrivilege() == 0){ //If not logged in, show login form.
-            $navBar .= file_get_contents(Site::dir."/htmls/loginform.html");
+            $navBarExtra .= file_get_contents(Site::getPath()."/htmls/loginform.html");
         }
         
         if($this->user->getPrivilege() > 0){
@@ -163,30 +186,33 @@ class Page {
             if($this->user->canSearch())
                 $extraButtons .= "<span class='navelement'>[<a href = '/advsearch.php'>Search</a>]</span>".PHP_EOL;
             
-            $navBar .= str_replace(['%username%','%privilege%','<!-- more buttons -->'],
+            $navBarExtra .= str_replace(['%username%','%privilege%','<!-- more buttons -->'],
                 [$this->user->getUsername(),$this->user->getPrivilege(),$extraButtons],
-                file_get_contents(Site::dir."/htmls/loginticker.html"));
-        }
-        
-        
-        //If admin or better
-        if($this->user->getPrivilege() >= Site::LEVEL_ADMIN){
+                file_get_contents(Site::getPath()."/htmls/loginticker.html"));
             
         }
+        $navBar = str_replace("<!--extra-->",$navBarExtra,$navBar);
+      }
+      else{
+        $navBar = "";
+      }
         
-        if($this->board !== null)
-            $boardTitle = "<hr><br><div class='boardTitle'>/".$this->board->getName()."/ - ".$this->board->getLongName()."</div><hr>";
-        else
-            $boardTitle = "";
         $this->header = Site::parseHtmlFragment('pagehead.html',[
                 '_stylename_','<!-- pageTitle -->',
-                '<!-- additionalHeaders -->','<!-- navbar -->',
-                '<!-- boardTitle -->','<!-- boardlist -->'],
+                '<!-- additionalHeaders -->','<!-- navbar -->'],
                [$this->user->getTheme(),$this->title,
-                $this->addToHead,$navBar,
-                $boardTitle,Board::getBoardList()]);
+                $this->addToHead,$navBar]);
+        if(!$this->clearHeader){
+          if($this->board !== null)
+            $boardTitle = "<hr><br><div class='boardTitle'>/".$this->board->getName()."/ - ".$this->board->getLongName()."</div><hr>";
+          else
+            $boardTitle = "";
+          $this->header .= Site::parseHtmlFragment('pagebody.html', 
+                ['<!-- boardTitle -->','<!-- boardlist -->'],
+                [$boardTitle,Board::getBoardList()]);
         
-        if($_SERVER['SCRIPT_NAME'] != "/index.php"){
+        
+          if($_SERVER['SCRIPT_NAME'] != "/index.php"){
             if($this->board == null)
                 $this->header .= "<div style='text-align:center'>[<a href='/index.php'>HOME</a>]</div>";
             else{
@@ -197,7 +223,8 @@ class Page {
                     $this->header .= " [<a href='/{$this->board->getName()}/catalog'>Catalog</a>]";
                 $this->header .= "</div><br>";
             }
-         }
+          }
+        }
     }
     
     /**
@@ -213,6 +240,8 @@ class Page {
         $this->requiredLevel = $privilege;
         $this->board = $board;
         $this->addToHead = "";
+        $this->clearHeader = false;
+        $this->clearFooter = false;
         $this->user = Site::getUser();
         if($this->user->getPrivilege() >= Site::LEVEL_SEARCH)
             $this->addToHead("<script type='text/javascript'>$(document).ready(function(){ImageHover.init('');});</script>");

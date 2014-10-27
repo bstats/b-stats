@@ -14,7 +14,7 @@ class Model {
         $q = Config::getConnection()->query("SELECT * FROM `boards` ORDER BY `group` ASC, `shortname` ASC");
         $return = array();
         while($r = $q->fetch_assoc())
-            $return[] = $r;
+            $return[$r['shortname']] = $r;
         return $return;
     }
     
@@ -39,15 +39,17 @@ class Model {
      * 
      * @param string $board The board shortname.
      * @param int $no The post id#.
+     * @param boolean $deleted If true, only return [Deleted] posts.
      * @return array Mysqli result sets for thread, then post.
      */
-    static function getThread($board,$no){
+    static function getThread($board,$no,$deleted=false){
         $dbl = Config::getConnection();
         $board = $dbl->real_escape_string($board);
         $board = $board."_";
         $no = $dbl->real_escape_string($no);
         $threadQ = $dbl->query("SELECT * FROM `{$board}thread` WHERE `threadid`='$no'");
-        $postQ = $dbl->query("SELECT * FROM `{$board}post` WHERE `threadid`='$no' ORDER BY `no` ASC");
+        
+        $postQ = $dbl->query("SELECT * FROM `{$board}post` WHERE `threadid`='$no' ".($deleted?"AND (`deleted`='1' OR `no`=`threadid`)":"")."ORDER BY `no` ASC");
         if(!($threadQ->num_rows > 0))
             throw new Exception ("Thread does not exist in the archive.");
         return array($threadQ,$postQ);
@@ -66,7 +68,7 @@ class Model {
         $board = $board."_";
         $no = $dbl->real_escape_string($no);
         $postQ = $dbl->query("SELECT * FROM `{$board}post` WHERE `no`='$no'");
-        if($postQ->num_rows === 0){
+        if($postQ == false || $postQ->num_rows === 0){
             throw new Exception("No such post $no exists in this archive");
         }
         return $postQ;
@@ -95,6 +97,25 @@ class Model {
         $pageQuery = "SELECT {$tTable}.*, {$pTable}.*  FROM {$tTable} LEFT JOIN {$pTable} ON {$pTable}.no = {$tTable}.threadid WHERE {$tTable}.active = 1 ORDER BY {$tTable}.lastreply DESC";
         $q = $dbl->query($pageQuery);
         return $q;
+    }
+    
+    static function getPostsWithLinkToPost($board,$post){
+        $dbl = Config::getConnection();
+        $board = $dbl->real_escape_string($board);
+        $post = (int)$post;
+        $tPost = $board."_post";
+        $tCom = $board."_comment";
+        $query = "SELECT `$tPost`.`no` FROM `$tCom` ".
+                 "JOIN `$tPost` ON `$tPost`.`no`=`$tCom`.`no` ".
+                 "WHERE MATCH(`$tCom`.`comment_plaintext`) AGAINST('$post') ".
+                 "AND `$tPost`.`comment` LIKE '%;$post%' ".
+                 "ORDER BY `$tPost`.`no` ASC";
+        $ret = array();
+        $result = $dbl->query($query);
+        while($row = $result->fetch_array()){
+            $ret[] = (int)$row[0];
+        }
+        return $ret;
     }
     
     static function getDeletedPosts($board){
@@ -157,6 +178,23 @@ class Model {
     }
     
     /**
+     * 
+     * @param int|string $tim
+     * @param string $board
+     * @return array `md5`,`ext`
+     */
+    static function getMD5FromTim($tim,$board){
+        $dbl = Config::getConnection();
+        $board = $dbl->real_escape_string($board);
+        $tim = $dbl->real_escape_string($tim);
+        $q = $dbl->query("SELECT `md5`,`ext` FROM `{$board}_post` WHERE `tim`='$tim'");
+        if(!$dbl->errno)
+            return $q->fetch_assoc();
+        else
+            return false;
+    }
+    
+    /**
      * Checks a username/password combo and returns a User object.
      * @param string $username
      * @param string $password
@@ -183,8 +221,11 @@ class Model {
     public static function getReports(){
         $dbl = Config::getConnection();
         $query = $dbl->query("SELECT *, COUNT(*) as count FROM `reports` GROUP BY `no` ORDER BY count DESC, time ASC");
+        
         $ret = [];
         while($row = $query->fetch_assoc()){
+            $md5 = $dbl->query("SELECT md5 FROM {$row['board']}_post WHERE `no`={$row['no']}")->fetch_array()[0];
+            $row['md5'] = $md5;
             $ret[] = $row;
         }
         return $ret;
@@ -212,7 +253,19 @@ class Model {
         $ip = $dbl->real_escape_string($ip);
         return $dbl->query("SELECT * FROM `bans` WHERE `ip`='$ip'")->fetch_assoc();
     }
-    
+    public static function banHash($hash){
+        $dbl = Config::getConnectionRW();
+        $hashcln = $dbl->real_escape_string($hash);
+        if(bin2hex(hex2bin($hashcln)) === $hash){
+            $dbl->query("INSERT IGNORE INTO `banned_hashes` (`hash`) VALUES (UNHEX('$hashcln'))");
+            if($dbl->errno){
+                throw new Exception($dbl->error);
+            }
+        }
+        else{
+            throw new Exception("Invalid hash: $hash");
+        }
+    }
     public static function deletePost($no,$board){
         $dbl = Config::getConnectionRW();
         $no = (int)$no;
@@ -320,5 +373,154 @@ class Model {
     }
     public static function denyRequest($ip){
         
+    }
+    public static function setUpTables(){
+        $db = Config::getConnectionRW();
+        $err = false;
+        /*
+         * Table: Users
+         */
+        echo "Creating table `users`...".PHP_EOL;
+        $db->query("CREATE TABLE IF NOT EXISTS `users` (
+          `uid` int(11) NOT NULL AUTO_INCREMENT,
+          `username` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+          `password_hash` binary(16) NOT NULL,
+          `privilege` int(11) NOT NULL,
+          `theme` varchar(24) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'yotsuba',
+          `email` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+          PRIMARY KEY (`uid`)
+        ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1;");
+        if ($db->error == "") {
+            echo "Success!" . PHP_EOL;
+        } else {
+            $err = true;
+            echo "Error! : " . $db->error;
+        }
+
+        /*
+         * Table: Searches
+         */
+        echo "Creating table `search`...".PHP_EOL;
+        $db->query("CREATE TABLE IF NOT EXISTS `search` (
+          `id` int(11) NOT NULL AUTO_INCREMENT,
+          `user_id` int(11) NOT NULL,
+          `timestamp` int(11) NOT NULL,
+          `query` text CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
+          `results` int(11) NOT NULL,
+          `exec_time` double NOT NULL,
+          PRIMARY KEY (`id`)
+        ) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;");
+        if ($db->error == "") {
+            echo "Success!" . PHP_EOL;
+        } else {
+            $err = true;
+            echo "Error! : " . $db->error;
+        }
+
+        /*
+         * Table: News
+         */
+        echo "Creating table `news`...".PHP_EOL;
+        $db->query("CREATE TABLE IF NOT EXISTS `news` (
+          `article_id` int(11) NOT NULL AUTO_INCREMENT,
+          `author_id` int(11) NOT NULL,
+          `title` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+          `time` int(11) NOT NULL,
+          `content` text COLLATE utf8_unicode_ci NOT NULL,
+          `update` int(11) NOT NULL,
+          PRIMARY KEY (`article_id`)
+        ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;");
+        if ($db->error == "") {
+            echo "Success!" . PHP_EOL;
+        } else {
+            $err = true;
+            echo "Error! : " . $db->error;
+        }
+
+        /*
+         * Table: Bans
+         */
+        echo "Creating table `bans`...".PHP_EOL;
+        $db->query("CREATE TABLE IF NOT EXISTS `bans` (
+          `ip` varchar(44) COLLATE utf8_unicode_ci NOT NULL,
+          `reason` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+          PRIMARY KEY (`ip`)
+        ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;");
+        if ($db->error == "") {
+            echo "Success!" . PHP_EOL;
+        } else {
+            $err = true;
+            echo "Error! : " . $db->error;
+        }
+
+        /*
+         * Table: Reports
+         */
+        echo "Creating table `reports`...".PHP_EOL;
+        $db->query("CREATE TABLE IF NOT EXISTS `reports` (
+          `no` int(11) NOT NULL,
+          `uid` int(11) NOT NULL,
+          `threadid` int(11) NOT NULL,
+          `board` varchar(6) COLLATE utf8_unicode_ci NOT NULL,
+          `time` int(11) NOT NULL,
+          UNIQUE KEY `no` (`no`,`uid`)
+        ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;");
+        if ($db->error == "") {
+            echo "Success!" . PHP_EOL;
+        } else {
+            $err = true;
+            echo "Error! : " . $db->error;
+        }
+        
+        /*
+         * Table: Boards
+         */
+        echo "Creating table `boards`...".PHP_EOL;
+        $db->query("CREATE TABLE IF NOT EXISTS `boards` (
+          `id` int(11) NOT NULL,
+          `shortname` varchar(5) COLLATE utf8_unicode_ci NOT NULL,
+          `longname` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+          `worksafe` tinyint(4) NOT NULL,
+          `pages` int(11) NOT NULL,
+          `perpage` int(11) NOT NULL,
+          `privilege` int(11) NOT NULL DEFAULT '0',
+          `swf_board` tinyint(4) NOT NULL DEFAULT '0',
+          `is_archive` tinyint(1) NOT NULL DEFAULT '1',
+          `last_crawl` int(11) NOT NULL DEFAULT '0',
+          `group` int(11) NOT NULL
+        ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1;");
+        if($db->error == ""){
+          $db->query("ALTER TABLE `boards`
+            ADD PRIMARY KEY (`id`), ADD UNIQUE KEY `shortname` (`shortname`);");
+        }
+        if ($db->error == "") {
+            echo "Success!" . PHP_EOL;
+        } else {
+            $err = true;
+            echo "Error! : " . $db->error;
+        }
+        /*
+         * Table: Requests
+         */
+        echo "Creating table `requests`...".PHP_EOL;
+        $db->query("CREATE TABLE IF NOT EXISTS `request` (
+          `ip` varchar(45) COLLATE utf8_unicode_ci NOT NULL,
+          `reason` text COLLATE utf8_unicode_ci NOT NULL,
+          `username` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+          `password` binary(16) NOT NULL,
+          `email` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+          `time` int(11) NOT NULL,
+          `accepted` tinyint(1) NOT NULL
+        ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;");
+        if($db->error == ""){
+          $db->query("ALTER TABLE `request` ADD PRIMARY KEY (`ip`);");
+        }
+        if ($db->error == "") {
+            echo "Success!" . PHP_EOL;
+        } else {
+            $err = true;
+            echo "Error! : " . $db->error;
+        }
+        return !$err;
     }
 }

@@ -31,7 +31,8 @@ class User{
     
     function setTheme($theme){
         if(in_array($theme, ['yotsuba','tomorrow','yotsuba-pink','yotsuba-blue'])){
-            Config::getConnectionRW()->query("UPDATE `users` SET `theme`='$theme' WHERE `uid`=$this->uid");
+            if($this->uid != 0)
+                Config::getConnectionRW()->query("UPDATE `users` SET `theme`='$theme' WHERE `uid`=$this->uid");
             $_SESSION['style'] = $theme;
             $this->theme = $theme;
         }

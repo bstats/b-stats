@@ -1,7 +1,5 @@
 <?php 
 class Site {
-    const dir = "/var/www/archive";
-    
     const LEVEL_TERRANCE = 9;
     const LEVEL_ADMIN = 3;
     const LEVEL_SEARCH = 2;
@@ -38,24 +36,48 @@ class Site {
         return true;
     }
     
+    /**
+     * 
+     * @return User
+     */
     static function getUser(){
-        return $_SESSION['user'] instanceof User ? $_SESSION['user'] : new User(0,"guest",0,"yotsuba");
+        if($_SESSION['user'] instanceof User){
+            return $_SESSION['user'];
+        }
+        else{
+            $_SESSION['user'] = new User(0,"guest",0,"yotsuba");
+            return $_SESSION['user'];
+        }
     }
-    
+    static function getPath(){
+       if(strtoupper(substr(PHP_OS, 0, 3)) === 'WIN'){
+           return "C:/wamp/www/chanarchive";
+       }
+       else{
+           return "/var/www/archive";
+       }
+    }
     static function getImageHostname(){
-        return "images.b-stats.org";
+        return Config::getCfg("images")['hostname'];
     }
     static function getThumbHostname(){
-        return "thumbs.b-stats.org";
+        return Config::getCfg("images")['hostname'];
     }
     static function getSiteHostname(){
-        return $_SERVER['HTTP_HOST'];
+        return Config::getCfg("site")["hostname"];
     }
+    static function formatImageLink($md5bin,$ext){
+        
+    }
+    /**
+     * Get the current protocol through which the user is viewing the site.
+     * @return string
+     */
     static function getSiteProtocol(){
         return isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off' ? 'https:' : 'http:';
     }
     static function parseHtmlFragment($filename,$search,$replace){
-        $html = file_get_contents(self::dir."/htmls/$filename");
+        $html = file_get_contents(self::getPath()."/htmls/$filename");
         return str_replace($search,$replace,$html);
     }
 }
