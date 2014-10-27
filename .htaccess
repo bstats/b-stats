@@ -8,47 +8,48 @@ ErrorDocument 403 /404.php
 RewriteEngine on
 
 ##
+# Cleaner URLs
+##
+RewriteRule ^news news.php [L]
+RewriteRule ^faq faq.php [L]
+
+##
 # 4chan URL compatibility
 ##
-RewriteRule ^(b|f|hm|lgbt)$ /$1/ [R]
-RewriteRule ^(b|f|hm|lgbt)/$ /board.php?b=$1
-RewriteRule ^(b|f|hm|lgbt)/([0-9]+)/$ /$1/$2 [R]
-RewriteRule ^(b|f|hm|lgbt)/([0-9]+)$ /board.php?b=$1&page=$2
-RewriteRule ^(b|f|hm|lgbt)/(res|thread)/([0-9]+) /thread.php?b=$1&t=$3
-RewriteRule ^(b|f|hm|lgbt)/res/$ /$1/ [R]
-RewriteRule ^(b|f|hm|lgbt)/res$ /$1/ [R]
-RewriteRule ^(b|f|hm|lgbt)/post/([0-9]+) /postRedirect.php?b=$1&no=$2
-RewriteRule ^(b|f|hm|lgbt)/catalog /catalog.php?b=$1
+RewriteRule ^([a-z]{1,4})$ /$1/ [R]
+RewriteRule ^([a-z]{1,4})/$ /board.php?b=$1
+RewriteRule ^([a-z]{1,4})/([0-9]+)/$ /$1/$2 [R]
+RewriteRule ^([a-z]{1,4})/([0-9]+)$ /board.php?b=$1&page=$2
+RewriteRule ^([a-z]{1,4})/(res|thread)/([0-9]+) /thread.php?b=$1&t=$3
+RewriteRule ^([a-z]{1,4})/res/$ /$1/ [R]
+RewriteRule ^([a-z]{1,4})/res$ /$1/ [R]
+RewriteRule ^([a-z]{1,4})/post/([0-9]+) /postRedirect.php?b=$1&no=$2
+RewriteRule ^([a-z]{1,4})/catalog /catalog.php?b=$1
 
 ##
 # b-stats custom URLs
 ##
-RewriteRule ^(b|f|hm|lgbt)/res/images/([0-9]+) /threadImg.php?b=$1&t=$2&images=true
-RewriteRule ^(b|f|hm|lgbt)/deleted/ /deleted.php?b=$1
-RewriteRule ^(b|f|hm|lgbt)/filedeleted/ /deleted.php?b=$1&file=true
+RewriteRule ^([a-z]{1,4})/res/images/([0-9]+) /threadImg.php?b=$1&t=$2&images=true
+RewriteRule ^([a-z]{1,4})/deleted/ /deleted.php?b=$1
+RewriteRule ^([a-z]{1,4})/filedeleted/ /deleted.php?b=$1&file=true
+RewriteRule ^([a-z]{1,4})/(res|thread)/deleted/([0-9]+) /thread.php?b=$1&t=$3&d=true
 
 
 
 ##
 # FoolFuuka URL scheme compatibility
 ##
-RewriteRule ^(b|f|hm|lgbt)/thread/([0-9]+)/ /$1/res/$2 [R]
-RewriteRule ^(b|f|hm|lgbt)/full_image/([0-9]{13})(\.png|\.jpg|\.gif)?/? /notimplemented.html
+RewriteRule ^([a-z]{1,4})/thread/([0-9]+)/ /$1/res/$2 [R]
+RewriteRule ^([a-z]{1,4})/full_image/([0-9]{13})(\.png|\.jpg|\.gif)?/? /notimplemented.html
 
-RewriteRule ^(b|f|hm|lgbt)/search/filename/(.*) /search_redir.php?filename=$2&b=$1
-RewriteRule ^(b|f|hm|lgbt)/search/image/(.*)  /search_redir.php?md5=$2&b=$1 [B]
-RewriteRule ^(b|f|hm|lgbt)/search/md5/(.*)$  /search_redir.php?md5=$2&b=$1 [B]
-RewriteRule ^(b|f|hm|lgbt)/search/id/(.*)$  /search_redir.php?id=$2&b=$1 [B]
-RewriteRule ^(b|f|hm|lgbt)/search/name/(.*) /notimplemented.html [B]
-RewriteRule ^(b|f|hm|lgbt)/search/tripcode/(.*) /notimplemented.html [B]
+RewriteRule ^([a-z]{1,4})/search/filename/(.*) /search_redir.php?filename=$2&b=$1
+RewriteRule ^([a-z]{1,4})/search/image/(.*)  /search_redir.php?md5=$2&b=$1 [B]
+RewriteRule ^([a-z]{1,4})/search/md5/(.*)$  /search_redir.php?md5=$2&b=$1 [B]
+RewriteRule ^([a-z]{1,4})/search/id/(.*)$  /search_redir.php?id=$2&b=$1 [B]
+RewriteRule ^([a-z]{1,4})/search/name/(.*) /notimplemented.html [B]
+RewriteRule ^([a-z]{1,4})/search/tripcode/(.*) /notimplemented.html [B]
 
-RewriteRule ^api/(b|f|hm|lgbt)/post/([0-9]+)(\.json)? /jsonApi.php?a=getPost&board=$1&num=$2
-RewriteRule ^api/(b|f|hm|lgbt)/res/([0-9]+)(\.json)? /jsonApi.php?a=getThread&board=$1&num=$2
+RewriteRule ^api/([a-z]{1,4})/post/([0-9]+)(\.json)? /jsonApi.php?a=getPost&board=$1&num=$2
+RewriteRule ^api/([a-z]{1,4})/res/([0-9]+)(\.json)? /jsonApi.php?a=getThread&board=$1&num=$2
 RewriteRule ^_/api/chan/post/ /jsonApi.php?a=getPost&foolfuuka=true [QSA]
 RewriteRule ^_/api/chan/thread/ /jsonApi.php?a=getThread&foolfuuka=true [QSA]
-
-##
-# Cleaner URLs
-##
-RewriteRule ^news news.php
-RewriteRule ^faq faq.php
