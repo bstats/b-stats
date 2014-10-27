@@ -2,6 +2,9 @@
 	background-color:#B3B9DB;
 	box-shadow: 0 0 3px 3px rgba(0,0,0,0.35);
 }
+.navelement {
+    background-color:#B3B9DB;
+}
 .navelement:hover{
 	background-color:#9AC;
 	color:#00C;

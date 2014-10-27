@@ -940,7 +940,7 @@ s:hover a,table.exif td b
   font-size:small!important;
 }
 
-@media screen and -webkit-min-device-pixel-ratio0 {
+@media screen {
   tbody textarea
   {
     margin-bottom:-3px!important;

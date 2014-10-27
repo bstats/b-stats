@@ -3,13 +3,11 @@ h1,h2,h3,h4,h5,h6{
 }
 
 .navbar{
-	height:22px;
 	position:fixed;
 	z-index:100;
 	top:0px;
         left:0px;
         right:0px;
-	overflow:hidden;
 	vertical-align:middle;
 	cursor:default;
 	display:inline-block;
@@ -27,7 +25,7 @@ h1,h2,h3,h4,h5,h6{
 }
 
 .navelement{
-	height:20px;
+	height:18px;
 	display:inline-block;
 	width:auto;
 	margin: 0px 3px;
@@ -263,4 +261,36 @@ a.clicked, a.clicked:hover {
     text-overflow: ellipsis;
     white-space: nowrap;
     word-wrap: break-word;
+}
+
+ul.stylemenu {
+    list-style:none;
+    display: inline;
+    width:100%;
+    
+    /* Bring the nav above everything else--uncomment if needed.
+    position:relative;
+    z-index:5;
+    */
+}
+ul.stylemenu li {
+    float:right;
+    margin-right:2px;
+    position:relative;
+}
+ul.stylemenu a {
+    display:block;
+}
+ul.stylemenu ul{
+    background:rgba(255,255,255,0); /* But! Let's make the background fully transparent where we can, we don't actually want to see it if we can help it... */
+    list-style:none;
+    position:absolute;
+    z-index: 101;
+    left:-9999px; /* Hide off-screen when not needed (this is more accessible than display:none;) */
+}
+ul.stylemenu ul li{
+    float:none;
+}
+ul.stylemenu li:hover ul{ /* Display the dropdown on hover */
+    left:-43px; /* Bring back on-screen when needed */
 }

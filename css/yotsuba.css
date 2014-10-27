@@ -900,7 +900,7 @@ s:hover a,table.exif td b
     color: red;
 }
 
-@media screen and -webkit-min-device-pixel-ratio0 {
+@media screen {
   tbody textarea
   {
     margin-bottom:-3px!important;
