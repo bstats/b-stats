@@ -425,6 +425,40 @@ var reportPost = function(link,board,post,thread){
                });
     }
 };
+var secsToDHMS = function(seconds){
+    var days = (seconds > 60*60*24) ? Math.floor(seconds/(60*60*24)) : 0;
+    seconds -= days*60*60*24;
+    var hours = (seconds > 60*60) ? Math.floor(seconds/(60*60)) : 0;
+    seconds -= hours*60*60;
+    var minutes = (seconds > 60) ? Math.floor(seconds/60) : 0;
+    seconds -= minutes*60;
+    return [days,hours,minutes,seconds];
+}
+var ago = function(timestamp){
+    var time = Math.round((new Date()).getTime() / 1000);
+    var duration = time - timestamp;
+    if(duration < 5){
+        return("just now");
+    }
+    var dhms = secsToDHMS(duration);
+    var ret = Array();
+    if(dhms[0] != 0){ //days
+        ret[ret.length] = dhms[0]+" day"+(dhms[0] > 1 ? "s":"");
+    }
+    if(dhms[1] != 0){ //hours
+        ret[ret.length] = dhms[1]+" hour"+(dhms[1] > 1 ? "s":"");
+    }
+    if(dhms[2] != 0){ //minutes
+        ret[ret.length] = dhms[2]+" minute"+(dhms[2] > 1 ? "s":"");
+    }
+    if(dhms[3] != 0){
+        ret[ret.length] = dhms[3]+" second"+(dhms[3] > 1 ? "s":"");
+    }
+    return(ret.join(", ") + " ago");
+}
+var updateAgo = function($el){
+    $el.text(ago($el.attr("data-utc")));
+}
 
 $(document).ready(function(){
     fixAllCrossLinks('');
@@ -433,4 +467,7 @@ $(document).ready(function(){
     ExpandImage.init();
     initAdditions();
     $("img.lazyload").lazyload();
+    $.each($(".ago"),function(index,element){
+        setInterval(function(){updateAgo($(element))},1000);
+    });
 });
