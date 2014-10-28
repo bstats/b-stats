@@ -7,7 +7,7 @@ $page->appendToBody("<h2>News</h2>");
 
 $articles = Model::getAllNewsArticles();
 
-$articleHtml = file_get_contents(Site::dir."/htmls/article.html");
+$articleHtml = file_get_contents(Site::getPath()."/htmls/article.html");
 foreach($articles as $article){
     $date = date("Y-m-d g:i a",$article['time']);
     $content = nl2br($article['content']);

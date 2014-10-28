@@ -6,10 +6,12 @@ $page = new Page("Report Queue","<h2>Report Queue</h2>",Site::LEVEL_ADMIN);
 $reports = Model::getReports();
 $html = "<table class='reportTable'><tr><th colspan='3'>Report Queue</th></tr><tr><th style='width:3em;'>Times</th><th>Post</th><th style='width:20em;'>Options</th></tr>";
 foreach($reports as $report){
+    $hash = bin2hex(base64_decode(str_replace("-","/",$report['md5'])));
     $html .= "<tr id='report{$report['no']}'>";
     $html .= "<td>".$report['count']."</td>";
     $html .= "<td><a href='{$report['threadid']}#p{$report['no']}' data-board='{$report['board']}' data-thread='{$report['threadid']}' data-post='{$report['no']}' class='quotelink noEmbed'>&gt;&gt;{$report['no']}</a></td>";
     $html .= "<td><a class='button' href='javascript:deletePost({$report['no']},\"{$report['board']}\");' >Delete&nbsp;Post</a>&nbsp;";
+    $html .= "<a class='button' href='javascript:banImage(\"$hash\");' id='ban$hash'>Ban&nbsp;Image</a>&nbsp;";
     $html .= "<a class='button' href='javascript:deleteReport({$report['no']},\"{$report['board']}\");'>Delete&nbsp;Report</a>&nbsp;";
     $html .= "<a class='button' href='javascript:banReporter({$report['no']},\"{$report['board']}\");'>Ban&nbsp;Reporter</a></td>";
     $html .= "</tr>";

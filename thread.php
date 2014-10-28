@@ -31,7 +31,7 @@ $page->setBoard($board);
 
 
 try{
-    list($threadQ,$postQ) = $board->getThread($_GET['t']);
+    list($threadQ,$postQ) = $board->getThread($_GET['t'],isset($_GET['d'])?$_GET['d']:false);
 }
 catch(Exception $e){
     $page->setTitle($page->getTitle()." - 404 ;_;");
@@ -60,12 +60,12 @@ while($row = $postQ->fetch_assoc()){
 $dur = secsToDHMS($lastTime - $firstTime);
 $html = "<div class='board'>";
 $html .= Site::parseHtmlFragment("threadStats.html",
-    ["__threadid__","__posts__","__images__","__lifetime__","__deleted__"],
+    ["__threadid__","__posts__","__images__","__lifetime__","__deleted__","<!--4chanLink-->"],
     [$threadDetails['threadid'],
-     $threadDetails['replies'] - ($deleted - 1)." (".($threadDetails['replies']).")",
+     $threadDetails['replies']." (<span style='border-bottom:1px dotted !important' title='inc. deletions'>".($threadDetails['replies'] + $deleted)."</span>)",
      $threadDetails['images'],
      "{$dur[0]}d {$dur[1]}h {$dur[2]}m {$dur[3]}s",
-     $deleted]);
+     $deleted,$threadDetails['active'] ? "<a target='_blank' href='//boards.4chan.org/$board/thread/{$threadDetails['threadid']}'>View on 4chan</a>" : "Thread is dead."]);
 $html .= "<div class='thread'>";
 
 $html .= $thread->displayThread();
