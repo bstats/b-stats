@@ -55,6 +55,21 @@ class Archivers {
                 return true;
             }
         }
+        else {
+          $boardsjson = json_decode(file_get_contents(Site::getPath()."/backend/boards.json"),true);
+          if(key_exists($board, $boardsjson)){
+            if(self::getStatus($board) == self::STOPPED || self::getStatus($board) == self::STOPPED_UNCLEAN){
+                $user = Config::getSqlCfg("read-write")["username"];
+                $host = Config::getSqlCfg("read-write")["server"];
+                $pass = Config::getSqlCfg("read-write")["password"];
+                $db = Config::getSqlCfg("read-write")["db"];
+                exec("cd ".Site::getPath()."/backend/ && ".
+                     "screen -dmS $board php archiver.php ".
+                     "-b $board -u $user -p $pass -d $db -h $host");
+                return true;
+            }
+          }
+        }
         return false;
     }
     

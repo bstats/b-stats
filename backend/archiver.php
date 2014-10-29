@@ -46,11 +46,6 @@ else{
     }
   }
   if($board == "" || $mysql_username == "" || $mysql_db == ""){
-  echo  $board;
-   echo $mysql_username;
-   echo $mysql_password;
-   echo $mysql_db;
-   echo $mysql_host;
     goto failure;
   }
 }
@@ -172,7 +167,7 @@ $dbl->query("CREATE TABLE IF NOT EXISTS `{$board}_comment` (
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;");
     o("-Done.");
     
-$lastTime = 0;
+$lastTime = (int)($dbl->query("SELECT `last_crawl` FROM `boards` WHERE `shortname`='$board'")->fetch_array()[0]);
 
 /*
  * Begin Main loop

@@ -56,4 +56,8 @@ class Config {
         self::$cfg[$key] = $value;
         file_put_contents(dirname(__FILE__)."../cfg.json",json_encode(self::$cfg));
     }
+    
+    static function getSqlCfg($type){
+      return self::$sql_cfg[$type];
+    }
 }
