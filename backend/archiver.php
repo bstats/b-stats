@@ -183,14 +183,8 @@ while(!file_exists("$board.kill")){
     $downloadedThreadsTemp = array();
 
     //Getting important API stuffs.
-        o("Downloading threadlists...");
+        o("Downloading threads.json...");
     $threadsjson = json_decode(dlUrl("http://a.4cdn.org/{$board}/threads.json"),true);
-    $catalog = json_decode(dlUrl("http://a.4cdn.org/{$board}/catalog.json"),true);
-        o("-4chan done.");
-
-    //Reset active threads.
-        o("Updating active threads...");
-    $dbl->query("UPDATE `{$board}_thread` SET `active`='0' WHERE 1; ");
         o("-Done.");
     
     //Parse threads.json
@@ -202,13 +196,28 @@ while(!file_exists("$board.kill")){
                 $threadsToDownload[] = $thread['no'];
         }
     }
-        o("-Done: ".count($threadsToDownload)." threads have changed.");
-        
+      o("-Done: ".count($threadsToDownload)." threads have changed.");
+      
+    if(count($threadsToDownload) == 0){
+      o("That's not enough!");
+      goto wait;
+    }
+    
+      o("Downloading catalog.json...");
+    $catalog = json_decode(dlUrl("http://a.4cdn.org/{$board}/catalog.json"),true);
+      o("Done!");
+      
+    //Reset active threads.
+      o("Updating active threads...");
+    $dbl->query("UPDATE `{$board}_thread` SET `active`='0' WHERE 1; ");
     $activethreadindic = "(".implode(",",$everyThread).")";
     $dbl->query("UPDATE `{$board}_thread` SET `active`='1' WHERE `threadid` IN $activethreadindic");
+      o("-Done.");
+        
+
     
     //Parse 4chan Catalog
-        o("Parsing catalog...");
+        o("Parsing catalog.json...");
     foreach($catalog as $page){
         foreach($page['threads'] as $thread){
             if(in_array($thread['no'],$threadsToDownload))
@@ -356,6 +365,7 @@ while(!file_exists("$board.kill")){
         o("-Done.");
         
     if((time() - $startTime) < EXEC_TIME){
+      wait:
         o("Waiting ".(EXEC_TIME - (time() - $startTime))." seconds...");
         echo "---------------------\n\n";
         sleep(EXEC_TIME - (time() - $startTime));

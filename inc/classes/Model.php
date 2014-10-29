@@ -11,10 +11,10 @@ class Model {
      * @return array 
      */
     static function getBoards(){
-        $q = Config::getConnection()->query("SELECT * FROM `boards` ORDER BY `group` ASC, `shortname` ASC");
+        $q = Config::getConnection()->query("SELECT `shortname` FROM `boards` ORDER BY `group` ASC, `shortname` ASC");
         $return = array();
         while($r = $q->fetch_assoc())
-            $return[$r['shortname']] = $r;
+            $return[$r['shortname']] = new Board($r['shortname']);
         return $return;
     }
     
@@ -32,6 +32,22 @@ class Model {
         else
             $r = false;
         return $r;
+    }
+    
+    public static function getNumberOfThreads($board){
+        $dbl = Config::getConnection();
+        $board = $dbl->real_escape_string($board);
+        $data = $dbl->query("SELECT COUNT(threadid) as count FROM `{$board}_thread`")->fetch_assoc();
+        $ret = $data['count'];
+        return $ret;
+    }
+    
+    public static function getNumberOfPosts($board){
+        $dbl = Config::getConnection();
+        $board = $dbl->real_escape_string($board);
+        $data = $dbl->query("SELECT COUNT(`no`) as count FROM `{$board}_post`")->fetch_assoc();
+        $ret = $data['count'];
+        return $ret;
     }
     
     /**

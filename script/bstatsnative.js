@@ -152,7 +152,7 @@ function fixAllCrossLinks(container){
     $(container + " .deadlink").each(function(index){
         var id = this.innerHTML.substring(8);
         var myBoard = $(this).attr("data-board"); //works 99% of the time
-        $(this).replaceWith($("<a href='../post/"+id+"#p"+id+"' data-board='"+myBoard+"' data-post='"+id+"' class='quotelink'>"+this.innerHTML+" (Dead)</a>"));
+        $(this).replaceWith($("<a href='/"+myBoard+"/post/"+id+"#p"+id+"' data-board='"+myBoard+"' data-post='"+id+"' class='quotelink'>"+this.innerHTML+" (Dead)</a>"));
     });
 }
 
