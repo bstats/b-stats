@@ -96,8 +96,8 @@ $dbl->set_charset("utf8");
 $dbl->query(file_get_contents("boards.sql"));
 
 $dbl->query("INSERT INTO `boards`"
-      ."(`shortname`,`longname`,`worksafe`,`pages`,`perpage`,`group`)"
-      ."VALUES ('$board','$boardname','$worksafe','$pages','$perpage','$group') "
+      ."(`shortname`,`longname`,`worksafe`,`pages`,`perpage`,`first_crawl`,`group`)"
+      ."VALUES ('$board','$boardname','$worksafe','$pages','$perpage',UNIX_TIMESTAMP(),'$group') "
       ."ON DUPLICATE KEY UPDATE `shortname`=VALUES(`shortname`)");
 
 $dbl->query("CREATE TABLE IF NOT EXISTS `{$board}_post` (

@@ -9,6 +9,7 @@ class Board implements ArrayAccess, JsonSerializable {
   private $swf_board;
   private $archive;
   private $privilege;
+  private $first_crawl;
   private $last_crawl;
   private $no_threads;
   private $no_posts;
@@ -40,20 +41,15 @@ class Board implements ArrayAccess, JsonSerializable {
   public function getPrivilege(){
       return $this->privilege;
   }
+  public function getFirstCrawl(){
+    return $this->first_crawl;
+  }
   public function getLastCrawl(){
       return $this->last_crawl;
   }
 
   public function getBoardInfo(){
-      return ["shortname"=>$this->name,
-              "longname"=>$this->name_long,
-              "worksafe"=>$this->worksafe,
-              "pages"=>$this->pages,
-              "perpage"=>$this->perpage,
-              "swf_board"=>$this->swf_board,
-              "privilege"=>$this->privilege,
-              "group"=>$this->group,
-              "last_crawl"=>$this->last_crawl];
+      return $this->jsonSerialize();
   }
 
   public function __construct($shortname) {
@@ -68,6 +64,7 @@ class Board implements ArrayAccess, JsonSerializable {
       $this->swf_board = $shortname === 'f' ? true : false;
       $this->privilege = $boardInfo['privilege'];
       $this->group = $boardInfo['group'];
+      $this->first_crawl = $boardInfo['first_crawl'];
       $this->last_crawl = $boardInfo['last_crawl'];
       $this->archive = true; //no `real` boards here. maybe in the future
   }
@@ -140,6 +137,8 @@ class Board implements ArrayAccess, JsonSerializable {
         return $this->name;
       case "longname":
         return $this->name_long;
+      case "first_crawl":
+        return $this->first_crawl;
       case "last_crawl":
         return $this->last_crawl;
       case "pages":
@@ -175,6 +174,7 @@ class Board implements ArrayAccess, JsonSerializable {
     return [
       'shortname'=>$this->name,
       'longname'=>$this->name_long,
+      'first_crawl'=>$this->first_crawl,
       'last_crawl'=>$this->last_crawl,
       'pages'=>$this->pages,
       'perpage'=>$this->perpage,

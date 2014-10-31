@@ -69,7 +69,10 @@ try{
         while($row = $pageResult->fetch_assoc()){
             $thread = new Thread($row['threadid'], $board , $row['sticky'], $row['closed']);
             $thread->addPost(new Post($row));
-            $thread->loadLastN(3);
+            if($board->getName() == "b")
+              $thread->loadLastN(3);
+            else
+              $thread->loadLastN(5);
             $page->appendToBody($thread->displayThread());
             $page->appendToBody("\n<hr>\n");
         }

@@ -254,6 +254,10 @@ a.clicked, a.clicked:hover {
     text-decoration: underline;
 }
 
+.boardLinkBig:hover .miniBoardInfo
+{
+  opacity: 1;
+}
 .name-col
 {
     max-width: 250px;

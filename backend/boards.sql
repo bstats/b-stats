@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS `boards` (
   `privilege` int(11) NOT NULL DEFAULT '0',
   `swf_board` tinyint(4) NOT NULL DEFAULT '0',
   `is_archive` tinyint(1) NOT NULL DEFAULT '1',
+  `first_crawl` int(11) NOT NULL,
   `last_crawl` int(11) NOT NULL DEFAULT '0',
   `group` int(11) NOT NULL,
   PRIMARY KEY (`id`)

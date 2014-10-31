@@ -5,6 +5,7 @@ class Site {
     const LEVEL_SEARCH = 2;
     const LEVEL_USER = 1;
     const LEVEL_GUEST = 0;
+    static $html_cache = [];
     
     static function isLoggedIn(){
         return isset($_SESSION['privilege']) ? $_SESSION['privilege'] > 0 : false; 
@@ -77,7 +78,13 @@ class Site {
         return isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off' ? 'https:' : 'http:';
     }
     static function parseHtmlFragment($filename,$search,$replace){
+      if(!isset(self::$html_cache[$filename])){
         $html = file_get_contents(self::getPath()."/htmls/$filename");
+        $html_cache[$filename] = $html;
+      }
+      else{
+        $html = $html_cache[$filename];
+      }
         return str_replace($search,$replace,$html);
     }
 }
