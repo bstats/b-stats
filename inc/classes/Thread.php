@@ -1,26 +1,79 @@
 <?php
 class Thread implements Iterator {
+    static function fromDB($board,$id)
+    {
+      $details = Model::getThreadDetails((string)$board, (int)$id);
+      return Thread::fromArray($board, $details);
+    }
     
+    static function fromArray($board,$details)
+    {
+      return new Thread($details['threadid'],
+                        $board,
+                        $details['sticky'],
+                        $details['closed'],
+                        (isset($details['tag']) ? $details['tag'] : 
+                         isset($details['type']) ? $details['type'] : null),
+                        $details['active'],
+                        $details['replies'],
+                        $details['images']);
+    }
     /**
-     * @var int
+     * @var int The OP's ID; the value of resto
      */
     private $threadId;
+    
     /**
      * @var array posts 
      */
     private $posts;
+    
     /**
      * @var Board
      */
     private $board;
+    
     /**
      * @var bool
      */
     private $sticky;
+    
     /**
      * @var bool
      */
     private $closed;
+    
+    /**
+     * @var int Number of image posts, according to 4chan
+     */
+    private $chan_images;
+    
+    /**
+     * @var int Number of posts, according to 4chan
+     */
+    private $chan_posts;
+    
+    /**
+     * @var int Number of images, actually in archive.
+     */
+    private $num_images;
+    
+    /**
+     * @var int Actual number of posts marked as deleted in archive.
+     */
+    private $num_deleted;
+    
+    /**
+     * @var int Actual number of posts in archive.
+     */
+    private $num_posts;
+    
+    
+    /**
+     *
+     * @var string The tag (e.g. for /f/, or the Tripfag-Finder mark for /b/)
+     */
+    private $tag;
     
     /** @var int Current iterator index*/
     private $index;
@@ -33,7 +86,7 @@ class Thread implements Iterator {
      * @param bool $sticky
      * @param bool $closed
      */
-    function __construct($thrdId, $board, $sticky=false, $closed=false){
+    function __construct($thrdId, $board, $sticky=false, $closed=false,$tag=null, $active = null, $chanPosts = null, $chanImages = null){
         if(!$board instanceof Board)
             throw new Exception("Board must be a Board object.");
         if(!is_numeric($thrdId))
@@ -43,9 +96,48 @@ class Thread implements Iterator {
         $this->board = $board;
         $this->sticky = $sticky;
         $this->closed = $closed;
-        
+        $this->chan_posts = $chanPosts;
+        $this->chan_images = $chanImages;
+        $this->tag = $tag;
+        $this->active = $active;
     }
+    // Getters and setters //
     
+    /**
+     * 
+     * @return string The thread's tag.
+     */
+    function getTag(){
+      return $this->tag;
+    }
+    function getDeleted(){
+      return $this->num_deleted;
+    }
+    function getChanPosts(){
+      return $this->chan_posts;
+    }
+    function getPosts(){
+      return $this->num_posts;
+    }
+    function getChanImages(){
+      return $this->chan_images;
+    }
+    function getImages(){
+      return $this->num_images;
+    }
+    /** 
+     * @param int $n
+     * @return Post The post at the index, or null
+     */
+    function getPost($n){
+      if($n < count($this->posts))
+        return $this->posts[$n];
+      else
+        return null;
+    }
+    function isActive(){
+      return $this->active;
+    }
     /**
      * Loads the entire thread from the DB.
      * Only works if no posts have been loaded yet.
@@ -53,25 +145,37 @@ class Thread implements Iterator {
      */
     function loadAll(){
         if(count($this->posts) == 0){
-            $tmp = Model::getThread($this->board, $this->threadId);
-            while($row = $tmp[1]->fetch_assoc()){
-                $this->addPost(new Post($row));
+            $this->num_deleted = 0;
+            $this->num_posts = 0;
+            $this->num_images = 0;
+            $tmp = Model::getAllPosts((string)$this->board,$this->threadId);
+            foreach($tmp as $post){
+                $this->addPost($post);
+                $this->num_posts ++;
+                if($post->isDeleted())
+                  $this->num_deleted++;
+                if($post->hasImage())
+                  $this->num_images++;
             }
         }
         else
         {
-            throw new Exception("posts not 0");
+            throw new Exception("Cannot load all posts if thread already contains posts.");
         }
         return $this;
     }
-    
+
     /**
      * Loads only the OP. If OP is already loaded, does nothing.
      * @return \Thread reference to self
      */
     function loadOP(){
         if(count($this->posts) == 0){
-            
+            $op = Model::getPost($this->board,$this->threadId);
+            $this->addPost($op);
+            $this->tag = ($op->getTag() ? $op->getTag() : null);
+            $this->num_posts = 1;
+            $this->num_images = 1;
         }
         return $this;
     }
@@ -82,11 +186,17 @@ class Thread implements Iterator {
      * @return \Thread reference to self
      */
     function loadLastN($n){
+      try{
         $posts = Model::getLastNPosts($this->board->getName(), $this->threadId, $n);
         foreach($posts as $p){
             $this->addPost(new Post($p));
         }
-        return $this;
+      }
+      catch(Exception $e)
+      {
+        
+      }
+      return $this;
     }
     
     /**

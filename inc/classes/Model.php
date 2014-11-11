@@ -72,13 +72,33 @@ class Model {
     }
     
     /**
-     * Fetches a single post.
+     * Fetch all the thread's details. Useful for creating a thread.
+     * 
+     * @param string $board The board (shortname)
+     * @param int $threadid The thread id
+     */
+    static function getThreadDetails($board,$threadid)
+    {
+      $dbl = Config::getConnection();
+      $board = $dbl->real_escape_string($board);
+      $threadid = $dbl->real_escape_string($threadid);
+      $q = $dbl->query("SELECT * FROM `{$board}_thread` WHERE `threadid`='$threadid'");
+      
+      if ($q->num_rows > 0) {
+        return $q->fetch_assoc();
+      } else {
+        throw new Exception("Thread does not exist in the archive.");
+      }
+  }
+    
+    /**
+     * Fetches a single post query object.
      * 
      * @param string $board The board shortname.
      * @param int $no The post id#.
      * @return mysqli_result Mysqli result set.
      */
-    static function getPost($board,$no){
+    static function getPostQuery($board,$no){
         $dbl = Config::getConnection();
         $board = $dbl->real_escape_string($board);
         $board = $board."_";
@@ -90,18 +110,56 @@ class Model {
         return $postQ;
     }
     
+    static function getPost($board,$no)
+    {
+      $dbl = Config::getConnection();
+      $board = $dbl->real_escape_string($board);
+      $board = $board."_";
+      $no = $dbl->real_escape_string($no);
+      $postQ = $dbl->query("SELECT * FROM `{$board}post` WHERE `no`='$no'");
+      if($postQ == false || $postQ->num_rows === 0){
+          throw new Exception("No such post $no exists in this archive");
+      }
+      return new Post($postQ->fetch_assoc());
+    }
+    
+    static function getAllPosts($board,$threadid)
+    {
+      $dbl = Config::getConnection();
+      $board = $dbl->real_escape_string($board);
+      $board = $board."_";
+      $threadid = $dbl->real_escape_string($threadid);
+      $postQ = $dbl->query("SELECT * FROM `{$board}post` WHERE `threadid`='$threadid'");
+      if($postQ == false || $postQ->num_rows === 0){
+          throw new Exception("Thread #$threadid exists, but contains no posts.");
+      }
+      $posts = [];
+      while($row = $postQ->fetch_assoc()){
+        $posts[] = new Post($row,$board);
+      }
+      return $posts;
+    }
+    /**
+     * Get all the Threads for a given page #
+     * @param Board $board
+     * @param int $page
+     * @return array Array of Thread objecsts
+     */
     static function getPage($board,$page){
         $page--;
         $dbl = Config::getConnection();
         $prefix = $board->getName()."_";
         $perpage = $board->getThreadsPerPage();
-        $pTable = $prefix."post";
         $tTable = $prefix."thread";
         $page = $dbl->real_escape_string($page);
         $number = $page*$perpage;
-        $pageQuery = "SELECT {$tTable}.*, {$pTable}.*  FROM {$tTable} LEFT JOIN {$pTable} ON {$pTable}.no = {$tTable}.threadid WHERE {$tTable}.active = 1 ORDER BY ({$tTable}.sticky + {$tTable}.active) DESC, {$tTable}.lastreply DESC LIMIT $number,$perpage";
+        $pageQuery = "SELECT {$tTable}.*  FROM {$tTable} WHERE {$tTable}.active = 1 ORDER BY ({$tTable}.sticky + {$tTable}.active) DESC, {$tTable}.lastreply DESC LIMIT $number,$perpage";
         $q = $dbl->query($pageQuery);
-        return $q;
+        $threads = [];
+        while($row = $q->fetch_assoc()){
+          $threads[] = Thread::fromArray($board, $row);
+        }
+        return $threads;
     }
     
     static function getCatalog($board){
@@ -170,8 +228,14 @@ class Model {
         $query = "SELECT * FROM $pTable WHERE threadid='$threadId' AND `threadid` <> `no` ORDER BY `no` DESC LIMIT 0,$n";
         $result = $dbl->query($query);
         $postArr = array();
-        while($row = $result->fetch_assoc())
-            $postArr[] = $row;
+        if($result->num_rows > 0){
+          while($row = $result->fetch_assoc())
+              $postArr[] = $row;
+        }
+        else
+        {
+          throw new Exception("Thread $thread contains no posts!");
+        }
         return array_reverse($postArr);
     }
     

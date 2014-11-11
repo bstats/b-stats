@@ -144,8 +144,8 @@ a.button:hover, input.button:hover{
 }
 
 .expanded {
-    max-width: 100vw;
-    max-height: 95vh;
+    max-width: 80vw;
+    max-height: 80vh;
 }
 
 table.flashListing tr:not(:first-of-type) * {

@@ -12,6 +12,8 @@ error_reporting(E_ALL);
  * -Added a message for non-existent boards.
  * 0.03
  * -Now using the Board class.
+ * 0.04
+ * -Now using OOP more effectively
  */
 
 include("inc/config.php");
@@ -29,7 +31,7 @@ try{
     if($board->isSwfBoard()){
         $pageNo = 1;
     }
-    $pageResult = $board->getPage($pageNo);
+    $threads = $board->getPage($pageNo);
 
     $page->appendToBody("<div class='board'>");
 
@@ -46,17 +48,19 @@ try{
                             "<td class='postblock'>Date</td><td class='postblock'>Replies</td>".
                             "<td class='postblock'></td>".
                             "</tr>");
-        while($row = $pageResult->fetch_assoc()){
+        foreach($threads as $thread){
+          $thread->loadOP();
+          $op = $thread->getPost(0);
             $tr = "<tr>".
-                "<td>{$row['no']}</td>".
-                "<td class='name-col'><span class='name'>{$row['name']}</span>".($row['trip'] != '' ? " <span class='postertrip'>{$row['trip']}</span>" : "")."</td>".
-                "<td>[<a href='//images.b-stats.org/f/src/".str_replace("/","-",$row['md5']).".swf' title='".str_replace("'","&#39;",$row['filename'])."' data-width='{$row['w']}' data-height='{$row['h']}' target='_blank'>".(strlen($row['filename']) > 33 ? substr($row['filename'], 0,30)."(...)" : $row['filename'])."</a>]</td>".
-                "<td>[".str_replace("O","?",substr($row['tag'],0,1))."]</td>".
-                "<td class='subject'><span title='".str_replace("'","&#39;",$row['subject'])."'>".(strlen($row['subject']) > 33 ? substr($row['subject'], 0,30)."(...)" : $row['subject'])."</span></td>".
-                "<td>".human_filesize($row['fsize'],2)."</td>".
-                "<td>".date("Y-m-d(D)H:i",$row['time'])."</td>".
-                "<td>{$row['replies']}</td>".
-                "<td>[<a href='thread/{$row['no']}'>View</a>]</td>".
+                "<td>{$op->getNo()}</td>".
+                "<td class='name-col'><span class='name'>{$op->getName()}</span>".($op->getTripcode() != '' ? " <span class='postertrip'>{$op->getTripcode()}</span>" : "")."</td>".
+                "<td>[<a href='//images.b-stats.org/f/src/".$op->getMD5Filename().".swf' title='".str_replace("'","&#39;",$op->getFilename())."' data-width='{$op->getWidth()}' data-height='{$op->getHeight()}' target='_blank'>".(strlen($op->getFilename()) > 33 ? substr($op->getFilename(), 0,30)."(...)" : $op->getFilename())."</a>]</td>".
+                "<td>[".str_replace("O","?",substr($thread->getTag(),0,1))."]</td>".
+                "<td class='subject'><span title='".str_replace("'","&#39;",$op->getSubject())."'>".(strlen($op->getSubject()) > 33 ? substr($op->getSubject(), 0,30)."(...)" : $op->getSubject())."</span></td>".
+                "<td>".human_filesize($op->getFilesize(),2)."</td>".
+                "<td>".date("Y-m-d(D)H:i",$op->getTime())."</td>".
+                "<td>{$thread->getChanPosts()}</td>".
+                "<td>[<a href='thread/{$op->getNo()}'>View</a>]</td>".
                 "</tr>";
             $page->appendToBody($tr);
         }
@@ -66,13 +70,13 @@ try{
      * Standard formatting.
      */
     else{
-        while($row = $pageResult->fetch_assoc()){
-            $thread = new Thread($row['threadid'], $board , $row['sticky'], $row['closed']);
-            $thread->addPost(new Post($row));
-            if($board->getName() == "b")
+        foreach($threads as $thread){
+            $thread->loadOP();
+            if($board->getName() == "b"){
               $thread->loadLastN(3);
-            else
+            } else {
               $thread->loadLastN(5);
+            }
             $page->appendToBody($thread->displayThread());
             $page->appendToBody("\n<hr>\n");
         }

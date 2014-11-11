@@ -11,7 +11,7 @@ switch($_GET['a']){
         $no = $_GET['num'];
         $board = $_GET['board'];
         try{
-            $data = fourChanFormat(Model::getPost($board, $no)->fetch_assoc());
+            $data = fourChanFormat(Model::getPostQuery($board, $no)->fetch_assoc());
         }
         catch(Exception $e){
             header("HTTP/1.1 404 Not Found");

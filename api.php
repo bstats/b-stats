@@ -5,7 +5,7 @@ switch($_REQUEST['a']){
         $board = isset($_REQUEST['b']) ? $_REQUEST['b'] : 'b';
         $no = $_REQUEST['id'];
         try{
-            $post = new Post(Model::getPost($board, $no)->fetch_assoc(),$board);
+            $post = new Post(Model::getPostQuery($board, $no)->fetch_assoc(),$board);
             echo str_replace('data-original','src',$post->display());
         }
         catch(Exception $e){
