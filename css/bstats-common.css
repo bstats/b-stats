@@ -298,3 +298,19 @@ ul.stylemenu ul li{
 ul.stylemenu li:hover ul{ /* Display the dropdown on hover */
     left:-43px; /* Bring back on-screen when needed */
 }
+strike strike {
+    text-decoration: none;
+    position: relative;
+}
+strike strike:after{
+    content: ' ';
+    font-size: inherit;
+    display: block;
+    position: absolute;
+    right: 0;
+    left: 0;
+    top: 40%;
+    bottom: 40%;
+    border-top: 1px solid #000;
+    border-bottom: 1px solid #000;
+}
