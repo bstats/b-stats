@@ -254,7 +254,7 @@ while(!file_exists("$board.kill")){
         $comment =  $dbl->real_escape_string(isset($thread['com']) ? $thread['com'] : "");
         $capcode =  $dbl->real_escape_string(isset($thread['capcode']) ? $thread['capcode'] : "");
         
-        $file_deleted =  $dbl->real_escape_string(isset($thread['file_deleted']) ? $thread['file_deleted'] : "");
+        $file_deleted =  $dbl->real_escape_string(isset($thread['filedeleted']) ? $thread['filedeleted'] : "");
         
         $replies =  $dbl->real_escape_string($thread ['replies']);
         $images =   $dbl->real_escape_string($thread ['images']);
@@ -305,7 +305,7 @@ while(!file_exists("$board.kill")){
             $w        = $dbl->real_escape_string(isset($reply['w']) ? $reply['w'] : 0);
             $h        = $dbl->real_escape_string(isset($reply['h']) ? $reply['h'] : 0);
             
-            $file_deleted =  $dbl->real_escape_string(isset($reply['file_deleted']) ? $reply['file_deleted'] : '');
+            $file_deleted =  $dbl->real_escape_string(isset($reply['filedeleted']) ? $reply['filedeleted'] : '');
             
             if($i++ > 0){ $postInsertQuery .= ",\n"; }
             $postInsertQuery .= 
