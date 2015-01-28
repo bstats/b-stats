@@ -129,7 +129,7 @@ class Model {
       $board = $dbl->real_escape_string($board);
       $board = $board."_";
       $threadid = $dbl->real_escape_string($threadid);
-      $postQ = $dbl->query("SELECT * FROM `{$board}post` WHERE `threadid`='$threadid'");
+      $postQ = $dbl->query("SELECT * FROM `{$board}post` WHERE `threadid`='$threadid' ORDER BY `no` ASC");
       if($postQ == false || $postQ->num_rows === 0){
           throw new Exception("Thread #$threadid exists, but contains no posts.");
       }
