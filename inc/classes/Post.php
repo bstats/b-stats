@@ -31,7 +31,17 @@ class Post {
   private $capcode;
   private $board;
   private $deleted;
-
+  
+  /**
+   * 
+   * @param Board|string $board
+   * @param int|string $no
+   * @return Post
+   */
+  public static function fromDB($board,$no) {
+    return Model::getPost($board,$no);
+  }
+  
   function __construct($no,$board='b'){
     if(is_array($no)){
       $arr = $no;
@@ -73,6 +83,9 @@ class Post {
   }
   function getNo(){
     return $this->no;
+  }
+  function getThreadId(){
+    return $this->threadid;
   }
   function getName(){
     return $this->name;
