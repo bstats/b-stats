@@ -4,8 +4,9 @@
  * Holds static functions and constants relating to the starting/stopping
  * of archivers.
  * 
- * Note: Does not currently work with the generic "archiver.php" script.
- * (At present all archive scripts are slightly modified for each board)
+ * Note: will load [board]-archiver.php if it exists, otherwise loads
+ * the generic "archiver.php" with proper command line arguments.
+ * Still requires GNU screen.
  */
 class Archivers {
     const STOPPED_UNCLEAN = -1;
