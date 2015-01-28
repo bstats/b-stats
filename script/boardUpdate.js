@@ -12,5 +12,11 @@ setInterval(function(){
         $.each($(".ago"),function(id,el){
             $(el).attr("data-utc",data[$(el).attr("data-board")]['last_crawl']);
         });
+        $.each($(".threadcount"),function(id,el){
+          $(el).text(data[$(el).attr("data-board")]['threads']);
+        });
+        $.each($(".postcount"),function(id,el){
+          $(el).text(data[$(el).attr("data-board")]['posts']);
+        });
     });
 },10000);
