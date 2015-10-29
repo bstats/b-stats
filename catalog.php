@@ -16,7 +16,7 @@ catch(Exception $e){
 $page = new Page("/".$board->getName()."/ - ".$board->getLongName(),"",$board->getPrivilege());
 $page->setBoard($board);
 $page->addToHead("<link rel='stylesheet' href='/css/bstats-catalog.css' type='text/css'>");
-$catalog = Model::getCatalog($board);
+$catalog = Model::getCatalog($board,false);
 $html="<div id='threads' class='extended-small'>";
 while($thread = $catalog->fetch_assoc()){
     $post = new Post($thread,$board);
