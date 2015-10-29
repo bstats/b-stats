@@ -38,7 +38,7 @@ class Archivers {
                         break;
                     }
                 }
-                if($running = false){
+                if($running == false){
                     return self::STOPPED_UNCLEAN;
                 }
                 else{
