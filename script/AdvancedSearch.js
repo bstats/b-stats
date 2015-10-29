@@ -15,6 +15,7 @@ var filters = {
                "extension":"extension",
                "capcode":"capcode",
                "comment":"comment (raw, w/html)",
+               "comment_clean":"comment (clean, slow)",
                "md5":"md5",
                "deleted":"deleted (1 or 0)"
               };
@@ -71,7 +72,7 @@ var checkFilters = function(){
         var op = $("select[name='operator["+no+"]']");
         
         //comments are speshul
-        if(this.value === 'comment'){
+        if(this.value === 'comment' || this.value==='comment_clean'){
             op.children().css("display","none");
             op.children("[value=LIKE]").css("display","");
             op.val("LIKE");

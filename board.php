@@ -54,7 +54,7 @@ try{
             $tr = "<tr>".
                 "<td>{$op->getNo()}</td>".
                 "<td class='name-col'><span class='name'>{$op->getName()}</span>".($op->getTripcode() != '' ? " <span class='postertrip'>{$op->getTripcode()}</span>" : "")."</td>".
-                "<td>[<a href='//images.b-stats.org/f/src/".$op->getMD5Filename().".swf' title='".str_replace("'","&#39;",$op->getFilename())."' data-width='{$op->getWidth()}' data-height='{$op->getHeight()}' target='_blank'>".(strlen($op->getFilename()) > 33 ? substr($op->getFilename(), 0,30)."(...)" : $op->getFilename())."</a>]</td>".
+                "<td>[<a href='".$op->getSwfUrl()."' title='".str_replace("'","&#39;",$op->getFilename())."' data-width='{$op->getWidth()}' data-height='{$op->getHeight()}' target='_blank'>".(strlen($op->getFilename()) > 33 ? substr($op->getFilename(), 0,30)."(...)" : $op->getFilename())."</a>]</td>".
                 "<td>[".str_replace("O","?",substr($thread->getTag(),0,1))."]</td>".
                 "<td class='subject'><span title='".str_replace("'","&#39;",$op->getSubject())."'>".(strlen($op->getSubject()) > 33 ? substr($op->getSubject(), 0,30)."(...)" : $op->getSubject())."</span></td>".
                 "<td>".human_filesize($op->getFilesize(),2)."</td>".

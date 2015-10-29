@@ -162,13 +162,21 @@ class Model {
         return $threads;
     }
     
-    static function getCatalog($board){
+    /**
+     * Gets a query for the board catalog.
+     * @param Board $board
+     * @param boolean $active
+     * @return mysqli::query
+     */
+    static function getCatalog($board,$active = true){
         $dbl = Config::getConnection();
-        $board = $dbl->real_escape_string($board);
-        $prefix = $board."_";
+        $board_shortname = $dbl->real_escape_string($board->getName());
+        $prefix = $board_shortname."_";
         $pTable = $prefix."post";
         $tTable = $prefix."thread";
-        $pageQuery = "SELECT {$tTable}.*, {$pTable}.*  FROM {$tTable} LEFT JOIN {$pTable} ON {$pTable}.no = {$tTable}.threadid WHERE {$tTable}.active = 1 ORDER BY {$tTable}.lastreply DESC";
+        $pageQuery = "SELECT {$tTable}.*, {$pTable}.*  FROM {$tTable} LEFT JOIN {$pTable} ON {$pTable}.no = {$tTable}.threadid ";
+        if($active) $pageQuery .= "WHERE {$tTable}.active = 1 ";
+        $pageQuery .= "ORDER BY {$tTable}.lastreply DESC LIMIT 0,{$board->getMaxActiveThreads()}";
         $q = $dbl->query($pageQuery);
         return $q;
     }
@@ -345,6 +353,19 @@ class Model {
         else{
             throw new Exception("Invalid hash: $hash");
         }
+    }
+    static $banned_hashes = null;
+    public static function getBannedHashes(){
+      if(self::$banned_hashes != null){
+        return self::$banned_hashes;
+      }
+      $dbl = Config::getConnection();
+      $q = $dbl->query("SELECT `hash` FROM `banned_hashes`");
+      while($row = $q->fetch_assoc()){
+        $ret[] = bin2hex($row['hash']);
+      }
+      self::$banned_hashes = $ret;
+      return $ret;
     }
     public static function deletePost($no,$board){
         $dbl = Config::getConnectionRW();

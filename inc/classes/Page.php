@@ -203,19 +203,22 @@ class Page {
                [$this->user->getTheme(),$this->title,
                 $this->addToHead,$navBar]);
         if(!$this->clearHeader){
-          if($this->board !== null)
-            $boardTitle = "<hr><br><div class='boardTitle'>/".$this->board->getName()."/ - ".$this->board->getLongName()."</div><hr>";
-          else
+          if($this->board !== null){
+            $boardTitle = "<hr><br><div class='boardTitle'>/".$this->board->getName()."/ - ".$this->board->getLongName()."</div>"
+                    . "<a target='_blank' rel=noreferrer href='//boards.4chan.org/".$this->board->getName()."/'>View Board on 4chan</a>"
+                    . "<hr>";
+          } else {
             $boardTitle = "";
+          }
           $this->header .= Site::parseHtmlFragment('pagebody.html', 
                 ['<!-- boardTitle -->','<!-- boardlist -->'],
                 [$boardTitle,Board::getBoardList()]);
         
         
           if($_SERVER['SCRIPT_NAME'] != "/index.php"){
-            if($this->board == null)
+            if($this->board == null) {
                 $this->header .= "<div style='text-align:center'>[<a href='/index.php'>HOME</a>]</div>";
-            else{
+            } else {
                 $this->header .= "<div style='position:relative; top: -20px;' id='topLinks'>[<a href='/index.php'>Home</a>]";
                 if($_SERVER['SCRIPT_NAME'] != "/board.php")
                     $this->header .= " [<a href='/{$this->board->getName()}/'>Return</a>]";

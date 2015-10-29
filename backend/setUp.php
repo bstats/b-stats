@@ -15,7 +15,7 @@ if(!function_exists("readline")){
 
 echo "------------------------------------------------------------".PHP_EOL;
 echo "                    ARCHIVE SET UP SCRIPT                   ".PHP_EOL;
-echo "                           v 0.1                            ".PHP_EOL;
+echo "                           v 0.2                            ".PHP_EOL;
 echo "------------------------------------------------------------".PHP_EOL;
 echo PHP_EOL.PHP_EOL;
 
@@ -140,7 +140,32 @@ else{
     $password_rw = readline("Enter your new read+write user's password: ");
 }
 
-echo "Writing MySQL configuration to ../inc/mysql.json ... ";
+echo PHP_EOL.PHP_EOL.PHP_EOL."[  SERVER CONFIG  ]".PHP_EOL.PHP_EOL;
+echo "The site must know its servers for the front-end, thumbs, images, and swfs.".PHP_EOL;
+$servers = [];
+foreach(["site","images","thumbs","swf"] as $server)
+{
+  echo "Server: $server";
+  $servers[$server]["http"] =  strtolower(readline("Use http (y/n): ")) == "y";
+  $servers[$server]["hostname"] = readline("Enter HTTP hostname: ");
+  $servers[$server]["port"] = readline("Enter HTTP port: ");
+  $servers[$server]["https"] = strtolower(readline("Use https (y/n): ")) == "y";
+  $servers[$server]["httpshostname"] = readline("Enter HTTPS hostname: ");
+  $servers[$server]["httpsport"] = readline("Enter HTTPS port: ");
+}
+
+echo PHP_EOL."For the image, thumbs, and swf servers we need the URL format.".PHP_EOL;
+echo "The format should look like this:".PHP_EOL;
+echo "/dir/%hex%%ext%".PHP_EOL;
+echo "Available paramaters:".PHP_EOL;
+echo "%hex% : the media's MD5 hash".PHP_EOL;
+echo "%ext% : the media's file extension".PHP_EOL;
+foreach(["images","thumbs","swf"] as $server)
+{
+  $servers[$server]["format"] = readline("Enter $server URL format: ");
+}
+
+echo "Writing configuration to ../inc/cfg.json ... ";
 $mysql = array();
 $mysql["read-only"]["username"] = $username_ro;
 $mysql["read-only"]["password"] = $password_ro;
@@ -151,8 +176,11 @@ $mysql["read-write"]["password"] = $password_rw;
 $mysql["read-write"]["db"] = $database;
 $mysql["read-write"]["server"] = 'localhost';
 
-$json = json_encode($mysql,JSON_PRETTY_PRINT);
-file_put_contents("../inc/mysql.json", $json);
+$cfg = array();
+$cfg["mysql"] = $mysql;
+$cfg["servers"] = $servers;
+$json = json_encode($cfg,JSON_PRETTY_PRINT);
+file_put_contents("../inc/cfg.json", $json);
 
 echo "Done.".PHP_EOL;
 

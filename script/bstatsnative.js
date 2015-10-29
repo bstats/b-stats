@@ -215,12 +215,12 @@ var ExpandImage = {
             newImg.attr("data-width",width).attr("data-height",height);
             newImg.load(function(){ExpandImage.loaded(this);});
             $(thumb).after(newImg);             
-            newImg.attr("src","https://images.b-stats.org/"+md5+ext);
+            newImg.attr("src",$(thumb).attr("data-full-img"));
         }
         else {
             var newImg = $("<video id='"+md5+"' class='expanded' style='display:block' alt='video' loop autoplay controls />");
             newImg.attr("data-width",width).attr("data-height",height);
-            newImg.attr("src","https://images.b-stats.org/"+md5+ext+"#t="+document.getElementById("hoverImg").currentTime);
+            newImg.attr("src",thumb.attr("data-full-img")+"#t="+document.getElementById("hoverImg").currentTime);
             $(thumb).removeClass("expand-loading").addClass("expand-loaded").after(newImg)
             $("#hoverImg").remove();
             ImageHover.checkScale(newImg);
@@ -269,17 +269,17 @@ var ImageHover = {
             $("#hoverImg").css("position","absolute").css("top","0px").css("left","0px").css("position","fixed").fadeIn("slow");
             ImageHover.checkScale(document.getElementById("hoverImg"));
             $("#hoverImg").on("load",function(){
-                thumb.attr("src","//images.b-stats.org/"+md5+ext);
+                thumb.attr("src",thumb.attr("data-full-img"));
                 thumb.mousemove();
                 $("#hoverImg").css("visibility","visible");
             });
-            $("#hoverImg").attr("src","//images.b-stats.org/"+md5+ext);
+            $("#hoverImg").attr("src",thumb.attr("data-full-img"));
         }
         else{
             $("body").append("<video id='hoverImg' autoplay loop alt=''/>");
             $("#hoverImg").attr("data-width",width).attr("data-height",height)
                 .css("top","0px").css("left","0px").css("position","fixed")
-                .attr("src","//images.b-stats.org/"+md5+ext);
+                .attr("src",thumb.attr("data-full-img"));
             ImageHover.checkScale(document.getElementById("hoverImg"));
             thumb.mousemove();
         }
@@ -401,7 +401,7 @@ var StyleSwitcher = {
 function initAdditions(){
     if(/\/(b|hm|f)\//.test(location.pathname)){
         $("#topLinks").html($("#topLinks").html() + 
-          //" [<a href='javascript:;' onclick='ExpandImage.expandAll();'>Expand Images</a>]"+
+          " [<a href='javascript:;' onclick='ExpandImage.expandAll();'>Expand Images</a>]"+
           " [<a href='javascript:;' onclick='ExpandImage.shrinkAll();'>Shrink Images</a>]"+
           " [<a href='javascript:;' onclick='ImageHover.revertAll();'>Reset Thumbs</a>]");
     }
@@ -469,5 +469,10 @@ $(document).ready(function(){
     $("img.lazyload").lazyload();
     $.each($(".ago"),function(index,element){
         setInterval(function(){updateAgo($(element))},1000);
+    });
+    $(window).resize(function(){
+      $.each($(".expanded"), function(index, element){
+        ImageHover.checkScale(element);
+      });
     });
 });

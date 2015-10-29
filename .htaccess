@@ -7,6 +7,8 @@ ErrorDocument 403 /404.php
 
 RewriteEngine on
 
+#RewriteRule ^.*\.php$ backupInProgress.php [L]
+
 ##
 # Cleaner URLs
 ##

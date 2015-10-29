@@ -156,6 +156,7 @@ $dbl->query("CREATE TABLE IF NOT EXISTS `{$board}_thread` (
   `lastcrawl` int(15) UNSIGNED NOT NULL DEFAULT '0',
   `sticky` tinyint(1) NOT NULL DEFAULT '0',
   `closed` tinyint(1) NOT NULL DEFAULT '0',
+  `ips` int(15) NOT NULL DEFAULT '0',
   PRIMARY KEY (`threadid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;");
 
@@ -233,7 +234,7 @@ while(!file_exists("$board.kill")){
     }
         o("Preparing insert of OPs...");
     $i=0;
-    $threadInsertQuery = "INSERT INTO `{$board}_thread` (`threadid`,`active`,`replies`,`images`,`firstreply`,`sticky`,`closed`) VALUES ";
+    $threadInsertQuery = "INSERT INTO `{$board}_thread` (`threadid`,`active`,`replies`,`images`,`firstreply`,`sticky`,`closed`,`lastcrawl`) VALUES ";
     $postInsertQuery = "INSERT INTO `{$board}_post` (`no`,`threadid`,`time`,`tim`,`name`,`trip`,`subject`,`email`,`capcode`,`md5`,`filename`,`ext`,`comment`,`w`,`h`,`fsize`,`file_deleted`) VALUES ";
     foreach($postInsertArr as $thread) {
         $threadId = $dbl->real_escape_string($thread['no']);
@@ -261,10 +262,10 @@ while(!file_exists("$board.kill")){
         $sticky =   $dbl->real_escape_string(isset($thread['sticky']) ? $thread['sticky'] : "");
         $closed =   $dbl->real_escape_string(isset($thread['closed']) ? $thread['closed'] : "");
         if($i++ > 0){ $threadInsertQuery .= ","; $postInsertQuery .= ","; }
-        $threadInsertQuery .= "('$threadId','1','$replies','$images','$time','$sticky','$closed')";
+        $threadInsertQuery .= "('$threadId','1','$replies','$images','$time','$sticky','$closed',UNIX_TIMESTAMP())";
         $postInsertQuery .= "('$threadId','$threadId','$time','$tim','$name','$trip','$subject','$email','$capcode','$md5','$filename','$ext','$comment','$w','$h','$fsize','$file_deleted')";
     }
-    $threadInsertQuery .= " ON DUPLICATE KEY UPDATE `active`=1,`replies`=VALUES(replies),`images`=VALUES(images),`sticky`=VALUES(sticky),`closed`=VALUES(closed)";
+    $threadInsertQuery .= " ON DUPLICATE KEY UPDATE `active`=1,`replies`=VALUES(replies),`images`=VALUES(images),`sticky`=VALUES(sticky),`closed`=VALUES(closed),`lastcrawl`=UNIX_TIMESTAMP()";
     $postInsertQuery .= " ON DUPLICATE KEY UPDATE `comment`=VALUES(comment), `deleted`=0,`file_deleted`=VALUES(file_deleted)";
         o("-Done.");
 

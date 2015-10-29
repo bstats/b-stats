@@ -17,6 +17,25 @@ var deleteReport = function(no,board){
     }
 };
 
+var banImage = function(hash){
+    if(confirm("Really ban (and delete) the image "+hash+"?")){
+        $.ajax({
+                dataType: "json",
+                headers: {"X-Requested-With":"Ajax"},
+                url: protocol+'//'+host+'/adminAPI.php',
+                type: "POST",
+                data: "a=banImage&hash="+hash }).
+        success(function(data){
+            if(data.err === true){
+                alert("Error: "+data.errmsg);
+            }
+            else{
+                $('#ban'+hash).remove();
+            }
+        });
+    }
+};
+
 var deletePost = function(no,board){
     if(confirm("Really delete post #"+no+"?")){
         $.ajax({
@@ -102,6 +121,6 @@ var removeRow = function(selector){
 $(document).ready(function(){
     var stats = $("#threadStats");
     if(stats != null){
-        stats.append("<table class='borderless' style='width:30em'><tr><th>Admin Tools:</th><td><a id='adm_fixdel' href='javascript:;' onclick='javascript:fixDeleted("+stats.attr("data-thread")+");'>[Deleted] Fix</a></td></tr></table>");
+        //stats.append("<table class='borderless' style='width:30em'><tr><th>Admin Tools:</th><td><a id='adm_fixdel' href='javascript:;' onclick='javascript:fixDeleted("+stats.attr("data-thread")+");'>[Deleted] Fix</a></td></tr></table>");
     }
 });
