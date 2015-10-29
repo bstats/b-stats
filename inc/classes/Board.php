@@ -35,6 +35,9 @@ class Board implements ArrayAccess, JsonSerializable {
   public function getThreadsPerPage(){
       return $this->perpage;
   }
+  public function getMaxActiveThreads(){
+    return $this->pages * $this->perpage;
+  }
   public function isArchive(){
       return $this->archive;
   }
@@ -162,7 +165,7 @@ class Board implements ArrayAccess, JsonSerializable {
   public function offsetSet($offset, $value) {
     return;
   }
-
+  
   public function offsetUnset($offset) {
     return;
   }
