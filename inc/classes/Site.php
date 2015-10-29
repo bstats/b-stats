@@ -59,13 +59,13 @@ class Site {
        }
     }
     static function getImageHostname(){
-        return Config::getCfg("images")['hostname'];
+        return Config::getCfg("servers")["images"]['hostname'];
     }
     static function getThumbHostname(){
-        return Config::getCfg("images")['hostname'];
+        return Config::getCfg("servers")["thumbs"]['hostname'];
     }
     static function getSiteHostname(){
-        return Config::getCfg("site")["hostname"];
+        return Config::getCfg("servers")["site"]["hostname"];
     }
     static function formatImageLink($md5bin,$ext){
         
@@ -77,7 +77,7 @@ class Site {
     static function getSiteProtocol(){
         return isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off' ? 'https:' : 'http:';
     }
-    static function parseHtmlFragment($filename,$search,$replace){
+    static function parseHtmlFragment($filename,$search=[],$replace=[]){
       if(!isset(self::$html_cache[$filename])){
         $html = file_get_contents(self::getPath()."/htmls/$filename");
         $html_cache[$filename] = $html;

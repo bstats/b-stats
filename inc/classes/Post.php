@@ -2,11 +2,10 @@
 /**
  * The Post class for rendering posts in html or json.
  * 
- * @todo Add json display option
  * @todo Use getters and setters rather than public attributes.
  * @todo Use HTML fragment parsing rather than mixed PHP and HTML
  */
-class Post {
+class Post implements JsonSerializable {
 
   public $no;
   public $threadid;
@@ -31,10 +30,11 @@ class Post {
   private $capcode;
   private $board;
   private $deleted;
+  private $imgbanned;
   
   /**
    * 
-   * @param Board|string $board
+   * @param Board $board
    * @param int|string $no
    * @return Post
    */
@@ -56,6 +56,7 @@ class Post {
       $this->sub = $arr['subject'];
       $this->trip = $arr['trip'];
       $this->md5 = $arr['md5'];
+      $this->md5bin = base64_decode(str_replace("-","/",$arr['md5']));
       $this->filename = $arr['filename'];
       $this->fsize = $arr['fsize'];
       $this->ext = $arr['ext'];
@@ -68,6 +69,12 @@ class Post {
       $this->tag = isset($arr['tag']) ? $arr['tag'] : "";
       $this->deleted = $arr['deleted'];
       $this->capcode = $arr['capcode'];
+    }
+    if($this->md5 != '' && in_array(bin2hex(base64_decode(str_replace("-","/",$this->md5))),Model::getBannedHashes())){
+      $this->imgbanned = true;
+    }
+    else{
+      $this->imgbanned = false;
     }
     $this->owner = null;
     $this->backlinks = array();
@@ -150,7 +157,9 @@ class Post {
       $md5Filename = str_replace("/","-",$this->md5);
       return "<div id='thread-{$this->no}' class='thread'>".
       "<a href='/{$this->board}/thread/{$this->no}'>".
-      "<img alt='' id='thumb-{$this->no}' class='thumb lazyload' width='$tnW' height='$tnH' data-original='//thumbs.b-stats.org/$md5Filename.jpg' data-id='{$this->no}'>".
+      ($this->imgbanned ? 
+              Site::parseHtmlFragment("banned_image.html")
+              : "<img alt='' id='thumb-{$this->no}' class='thumb lazyload' width='$tnW' height='$tnH' data-original='//thumbs.b-stats.org/$md5Filename.jpg' data-id='{$this->no}'>").
       "</a>".
       ($this->replies>1? "<div title='(R)eplies / (I)mages' id='meta-{$this->no}' class='meta'>".
       "R: <b>{$this->replies}</b>".($this->images > 1 ? " / I: <b>{$this->images}</b>" : '').
@@ -254,15 +263,14 @@ END;
     /**
      * The following block is only for posts with an image attached.
      */
-    if($this->md5 != ""){
+    if($this->md5 != "" && !$this->imgbanned){
       $md5code = urlencode($this->md5);
       $md5Filename = str_replace("/","-",$this->md5);
-      $md5hex = bin2hex(base64_decode(str_replace("-","/",$this->md5)));
       $doublecode = urlencode($md5code);
       $humanFilesize = $this->fsize > 0 ? human_filesize($this->fsize).", ":"";
       list($thumbW,$thumbH) = tn_Size($this->w, $this->h);
 
-      if($t == 'op'){     //OP thumbs are 250x250 rather than 125x125
+      if($t == 'op' && ($this->w > 125 || $this->h > 125)){     //OP thumbs are 250x250 rather than 125x125
           $thumbW *= 2;
           $thumbH *= 2;
       }
@@ -271,12 +279,12 @@ END;
           $thumb = "";
       }
       else {
-          $thumb = "<a class='fileThumb' href='//images.b-stats.org/src/imghex/{$md5hex[0]}{$md5hex[1]}/$md5hex{$this->ext}' target='_blank'>".
-                   "<img class='lazyload' data-original='//thumbs.b-stats.org/$md5Filename.jpg' alt='img' data-md5='{$this->md5}' data-md5-filename='$md5Filename' data-ext='{$this->ext}' width='$thumbW' height='$thumbH' data-width='{$this->w}' data-height='{$this->h}' />".
+          $thumb = "<a class='fileThumb' href='{$this->getImgUrl()}' target='_blank'>".
+                   "<img class='lazyload' data-original='{$this->getThumbUrl()}' alt='img' data-md5='{$this->md5}' data-md5-filename='$md5Filename' data-ext='{$this->ext}' data-full-img='{$this->getImgUrl()}' width='$thumbW' height='$thumbH' data-width='{$this->w}' data-height='{$this->h}' />".
                    "</a>";
       }
       $chanMedia = $this->board == 'f' ? '//i.4cdn.org/f/src/'.$this->filename.$this->ext : '//i.4cdn.org/'.$this->board.'/src/'.$this->tim.$this->ext;
-      $fullImgLink = $this->board == 'f' ? "//images.b-stats.org/f/src/{$this->md5}.swf" : "//images.b-stats.org/{$this->md5}{$this->ext}";
+      $fullImgLink = $this->board == 'f' ? "//images.b-stats.org/f/src/{$this->md5}.swf" : $this->getImgUrl();
       $ret .= <<<END
 <div id="f{$this->no}" class="file">
 <div class="fileInfo">
@@ -293,6 +301,9 @@ $thumb
 </div>
 END;
     }
+    if($this->imgbanned){
+      $ret .= Site::parseHtmlFragment("banned_image.html");
+    }
 
     /**
      * OPs, unlike reply-styled posts, have the post info below the fileinfo.
@@ -308,5 +319,116 @@ END;
 </div>
 END;
     return $ret;
+  }
+  
+  /**
+   * Returns the post as a PHP array, good for integrating into API calls.
+   * @return array
+   */
+  function asArray(){
+    $returnArr = [];
+    $returnArr['no'] = (int)$this->no;
+    $returnArr['now'] = date("m/d/y(D)H:i:s",$this->time);
+    $returnArr['time'] = (int)$this->time;
+    $returnArr['name'] = $this->name;
+    $returnArr['com'] = $this->com;
+    if($this->tim > 0 && !$this->imgbanned){
+      $returnArr['filename'] = $this->filename;
+      $returnArr['ext'] = $this->ext;
+      $returnArr['w'] = (int)$this->w;
+      $returnArr['h'] = (int)$this->h;
+      list($returnArr['tn_w'],$returnArr['tn_h']) = tn_Size($this->w,$this->h);
+      $returnArr['tim'] = (int)$this->tim;
+      $returnArr['md5'] = str_replace("-","/",$this->md5);
+      $returnArr['fsize'] = (int)$this->fsize;
+    }
+    if($this->sub !=""){
+      $returnArr['sub'] = $this->sub;
+    }
+    if($this->trip !=""){
+      $returnArr['trip'] = $this->trip;
+    }
+    if($this->email !=""){
+      $returnArr['email'] = $this->email;
+    }
+    if($this->id != ''){
+      $returnArr['id'] = $this->id;
+    }
+    $returnArr['resto'] = $this->threadid;
+    if($this->no == $this->threadid){
+        $returnArr['bumplimit'] = 0;
+        $returnArr['imagelimit'] = 0;
+        $returnArr['replies'] = 0;
+        $returnArr['images'] = 0;
+    }
+    return $returnArr;
+  }
+  
+  /*
+   * JsonSerializable implementation
+   */
+  public function jsonSerialize() {
+    return $this->asArray();
+  }
+  
+  /**
+   * Returns the post as a JSON object.
+   * @return string
+   */
+  function asJsonString(){
+    return json_encode($this->asArray());
+  }
+  
+  function getThumbUrl(){
+    if(!$this->hasImage()){
+      return "";
+    }
+    $thumbcfg = Config::getCfg("servers")["thumbs"];
+    if($thumbcfg['https']){
+      $url = 'https://'.$thumbcfg['httpshostname'].
+              ($thumbcfg['httpsport'] != 443 ? ":".$thumbcfg['httpsport'] : "");
+    }
+    else {
+      $url = 'http://'.$thumbcfg['hostname'].
+              ($thumbcfg['port'] != 80 ? ":".$thumbcfg['port'] : "");
+    }
+    return $url.str_replace(['%hex%','%ext%'], 
+                           [bin2hex($this->md5bin),$this->ext], 
+                           $thumbcfg['format']);
+  }
+  function getImgUrl(){
+    if(!$this->hasImage()){
+      return "";
+    }
+    $imgcfg = Config::getCfg("servers")["images"];
+    if($imgcfg['https']){
+      $url = 'https://'.$imgcfg['httpshostname'].
+              ($imgcfg['httpsport'] != 443 ? ":".$imgcfg['httpsport'] : "");
+    }
+    else {
+      $url = 'http://'.$imgcfg['hostname'].
+              ($imgcfg['port'] != 80 ? ":".$imgcfg['port'] : "");
+    }
+    return $url.str_replace(['%hex%','%ext%'], 
+                           [bin2hex($this->md5bin),$this->ext], 
+                           $imgcfg['format']);
+  }
+  
+  function getSwfUrl(){
+    if(!$this->hasImage()){
+      return "";
+    }
+    $swfcfg = Config::getCfg("servers")["swf"];
+    if($swfcfg['https']){
+      $url = 'https://'.$swfcfg['httpshostname'].
+              ($swfcfg['httpsport'] != 443 ? ":".$swfcfg['httpsport'] : "");
+    }
+    else {
+      $url = 'http://'.$swfcfg['hostname'].
+              ($swfcfg['port'] != 80 ? ":".$swfcfg['port'] : "");
+    }
+    return $url.str_replace(['%hex%','%ext%'], 
+                           [bin2hex($this->md5bin),$this->ext], 
+                           $swfcfg['format']);
   }
 }
