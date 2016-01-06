@@ -72,6 +72,7 @@ function threadType($type){
    $arr= array("animu"=>"Animu Thread",
                   "draw"=>"Draw Thread",
                   "gfur"=>"Gfur Thread",
+                  "hfur"=>"Hfur Thread",
                   "pony"=>"Pony Thread",
                   "sfur"=>"Sfur Thread",
                   "trap"=>"Trap Thread",

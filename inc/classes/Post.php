@@ -284,7 +284,7 @@ END;
                    "</a>";
       }
       $chanMedia = $this->board == 'f' ? '//i.4cdn.org/f/src/'.$this->filename.$this->ext : '//i.4cdn.org/'.$this->board.'/src/'.$this->tim.$this->ext;
-      $fullImgLink = $this->board == 'f' ? "//images.b-stats.org/f/src/{$this->md5}.swf" : $this->getImgUrl();
+      $fullImgLink = $this->board == 'f' ? $this->getSwfUrl() : $this->getImgUrl();
       $ret .= <<<END
 <div id="f{$this->no}" class="file">
 <div class="fileInfo">
