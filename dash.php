@@ -1,6 +1,6 @@
 <?php
 include('inc/config.php');
-$page = new Page('b-stats dashboard',"",1);
+$page = new FancyPage('b-stats dashboard',"",1);
 
 $you = Site::getUser();
 
@@ -48,7 +48,7 @@ ob_start();
     </tr>
 </table>
 </form>
-<?
+<?php
 $page->appendToBody(ob_get_clean());
 ob_end_clean();
 echo $page->display();

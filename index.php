@@ -1,6 +1,6 @@
 <?php
 include("inc/config.php");
-$page = new Page("b-stats archive","",0);
+$page = new FancyPage("b-stats archive","",0);
 $html = "<div class='boardlist_big'><h1>Archived Boards</h1><hr style='width:64px;'>";
 foreach(Model::getBoards() as $b){
     $html .= Site::parseHtmlFragment("indexthread.html", 
@@ -12,8 +12,7 @@ foreach(Model::getBoards() as $b){
             "%threads%",
             "%firstcrawl%"
           ], 
-          [
-            ago(time() - $b['last_crawl']),
+          [ ago(time() - $b['last_crawl']),
             $b['last_crawl'],
             $b['shortname'],
             $b['longname'],

@@ -152,7 +152,6 @@ class Post implements JsonSerializable {
    */
   function display($t='reply',$sticky=false,$closed=false){
     if($t=='catalog'){
-      $comTrimmed = Yotsuba::sanitizeComment($this->com);
       list($tnW,$tnH) = tn_Size($this->w, $this->h);
       $md5Filename = str_replace("/","-",$this->md5);
       return "<div id='thread-{$this->no}' class='thread'>".
@@ -166,7 +165,7 @@ class Post implements JsonSerializable {
       "</div>" : "").
       '<div class="teaser">'.
       "<b>{$this->sub}</b>".
-      ($this->sub != ""? ": ".$comTrimmed : $comTrimmed).
+      ($this->sub != ""? ": ".$this->com : $this->com).
       "</div></div>";
 
     }

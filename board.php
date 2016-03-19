@@ -21,7 +21,7 @@ include("inc/config.php");
 try{
     $board = new Board($_GET['b']);
     
-    $page = new Page("/".$board->getName()."/ - ".$board->getLongName(),"",$board->getPrivilege());
+    $page = new FancyPage("/".$board->getName()."/ - ".$board->getLongName(),"",$board->getPrivilege());
     $page->setBoard($board);
 
     /*
@@ -102,7 +102,7 @@ try{
     echo $page->display();
 }
 catch(Exception $e){
-    $page = new Page("b-stats ERROR LOL","<div class='errorMsg'>Error: {$e->getMessage()}</div><br>",0);
+    $page = new FancyPage("b-stats ERROR LOL","<div class='errorMsg'>Error: {$e->getMessage()}</div><br>",0);
     echo $page->display();
     exit;
 }

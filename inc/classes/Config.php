@@ -12,12 +12,17 @@ class Config {
   /** @var array json configuration file for mysql */
   static $sql_cfg;
 
+  /** @var array cache of json cfg files */
+  static $json_cache;
+  
   /** 
    * Gets an instance of mysqli with read-only permissions.
    * @return mysqli 
    */
   static function getConnection(){
     if(self::$mysqli == null){
+      $driver = new mysqli_driver();
+      $driver->report_mode = MYSQLI_REPORT_STRICT;
       self::$mysqli = new mysqli(
               self::getSqlCfg('read-only')['server'],
               self::getSqlCfg('read-only')['username'],
@@ -42,6 +47,8 @@ class Config {
    */
   static function getConnectionRW(){
     if(self::$mysqli_rw == null){
+      $driver = new mysqli_driver();
+      $driver->report_mode = MYSQLI_REPORT_STRICT;
       self::$mysqli_rw = new mysqli(
               self::getSqlCfg('read-write')['server'],
               self::getSqlCfg('read-write')['username'],
@@ -96,5 +103,22 @@ class Config {
    */
   static function getSqlCfg($key){
     return self::getCfg("mysql")[$key];
+  }
+  
+  /**
+   * Get the named config file as an array.
+   * If not found, returns empty array.
+   * @param string $name
+   * @return array
+   */
+  static function getJson($name) {
+    if(isset(self::$json_cache[$name])) {
+      return self::$json_cache[$name];
+    }
+    if(file_exists(dirname(__FILE__)."/../cfg/$name.json")) {
+      self::$json_cache[$name] = json_decode(file_get_contents(dirname(__FILE__)."/../cfg/$name.json"), true);
+      return self::$json_cache[$name];
+    }
+    return [];
   }
 }

@@ -1,7 +1,7 @@
 <?php
 include("inc/config.php");
 
-$page = new Page("b-stats news","",0);
+$page = new FancyPage("b-stats news","",0);
 
 $page->appendToBody("<h2>News</h2>");
 

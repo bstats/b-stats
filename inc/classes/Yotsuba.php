@@ -99,7 +99,7 @@ class Yotsuba {
      * @param string $comment
      * @return string sanitized comment
      */
-    public static function sanitizeComment($comment){
+    public static function toPlainText($comment){
         $search[0] = '/<a href="(.*)" class="quotelink">&gt;&gt;([0-9]+)<\/a>/U';
         $search[1] = '/<span class="deadlink">&gt;&gt;([0-9]+)<\/span>/';
         $search[2] = '~<span class="quote">&gt;(.*)</span>~U';
@@ -138,7 +138,7 @@ class Yotsuba {
      * @param string $comment 
      * @return string HTML-formatted comment
      */
-    public static function reverse_sanitize_comment($comment,$posts){
+    public static function toHtml($comment,$posts){
         $search[0] = '~&gt;&gt;([0-9]{1,9})~'; // >>123 type post links
         $search[1] = "~^&gt;(.*)$~m"; // >greentext
         $search[2] = "~&gt;&gt;&gt;/([a-z]{1,4}/"; // >>>/board/ links

@@ -155,7 +155,7 @@ function getServer($dbl,$nm){
 function human_filesize($bytes, $decimals = 0) {
   $sz = 'BKMGTP';
   $factor = floor((strlen($bytes) - 1) / 3);
-  return sprintf("%.{$decimals}f ", $bytes / pow(1024, $factor)) . @$sz[$factor].($factor>0?"B":"");
+  return sprintf("%.{$decimals}f ", $bytes / pow(1024, $factor)) . $sz[(int)$factor].($factor>0?"B":"");
 }
 
 function secsToDHMS($seconds){

@@ -1,5 +1,11 @@
 <?php
 define("CONFIG_INC_TIME",microtime(true));
+set_exception_handler(function($ex){
+  $page = new Page("Error", "There was an error (probably mysql)"
+          ."{$ex->getMessage()}");
+  echo $page->display();
+  die();
+});
 include "SiteFunctions.php";
 include "SiteClasses.php";
 include "ChanClasses.php";

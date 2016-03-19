@@ -20,7 +20,7 @@ if(isset($_POST['username'])){
     }
 }
 
-$page = new Page(null,null,0);
+$page = new FancyPage(null,null,0);
 
 $q=$db->query("SELECT * FROM `request` WHERE `ip`='{$_SERVER['REMOTE_ADDR']}'");
 

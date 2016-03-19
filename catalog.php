@@ -8,12 +8,12 @@ try{
         throw new Exception("Board is a swf board. Use the normal <a href='/{$_GET['b']}/'>board index</a>.");
 }
 catch(Exception $e){
-    $page = new Page("b-stats ERROR LOL","<div class='errorMsg'>Error: {$e->getMessage()}</div><br>",0);
+    $page = new FancyPage("b-stats ERROR LOL","<div class='errorMsg'>Error: {$e->getMessage()}</div><br>",0);
     echo $page->display();
     exit;
 }
 
-$page = new Page("/".$board->getName()."/ - ".$board->getLongName(),"",$board->getPrivilege());
+$page = new FancyPage("/".$board->getName()."/ - ".$board->getLongName(),"",$board->getPrivilege());
 $page->setBoard($board);
 $page->addToHead("<link rel='stylesheet' href='/css/bstats-catalog.css' type='text/css'>");
 $catalog = Model::getCatalog($board,false);

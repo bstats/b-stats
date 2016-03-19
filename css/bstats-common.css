@@ -2,6 +2,15 @@ h1,h2,h3,h4,h5,h6{
 	text-align:center;
 }
 
+.centertext {
+  text-align:center;
+}
+
+.pageTime {
+  text-align:center;
+  font-size:75%;
+}
+
 .navbar{
 	position:fixed;
 	z-index:100;
@@ -270,11 +279,8 @@ ul.stylemenu {
     list-style:none;
     display: inline;
     width:100%;
-    
-    /* Bring the nav above everything else--uncomment if needed.
-    position:relative;
-    z-index:5;
-    */
+    margin-left: 8px;
+    display:inline;
 }
 ul.stylemenu li {
     float:right;

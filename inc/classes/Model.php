@@ -5,13 +5,14 @@
  * 
  */
 class Model {
+  
     /**
      * Fetches all boards.
      * 
      * @return array 
      */
     static function getBoards(){
-        $q = Config::getConnection()->query("SELECT `shortname` FROM `boards` ORDER BY `group` ASC, `shortname` ASC");
+        $q = Config::getConnection()->query("SELECT `id`,`shortname` FROM `boards` ORDER BY `group` ASC, `shortname` ASC");
         $return = array();
         while($r = $q->fetch_assoc())
             $return[$r['shortname']] = new Board($r['shortname']);
@@ -332,9 +333,13 @@ class Model {
         $dbl->query("INSERT INTO `bans` (`ip`,`reason`,`expires`) VALUES ('$ip','$reason','$expires')");
     }
     public static function banned($ip){
+      try{
         $dbl = Config::getConnection();
         $ip = $dbl->real_escape_string($ip);
         return $dbl->query("SELECT `ip` FROM `bans` WHERE `ip`='$ip'")->num_rows > 0;
+      } catch(Exception $ex) {
+        return false;
+      }
     }
     public static function getBanInfo($ip){
         $dbl = Config::getConnection();
@@ -468,6 +473,16 @@ class Model {
         $query = "SELECT * FROM `request`".$acceptedOnly?" WHERE `accepted`=0":"";
         $q = $db->query($query);
         return $q->fetch_all(MYSQLI_ASSOC);
+    }
+    public static function updateUserTheme($uid, $theme) {
+      try {
+        $db = Config::getConnectionRW();
+        $q = $db->prepare("UPDATE `users` SET `theme`=? WHERE `uid`=?");
+        $q->bind_param("si", $theme, $uid);
+        $q->execute();
+      } catch (Exception $ex) {
+
+      }
     }
     public static function confirmRequest($ip){
         

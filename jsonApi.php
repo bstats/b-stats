@@ -25,7 +25,7 @@ switch($_GET['a']){
             $data['trip_processed'] = isset($data['trip']) ? $data['trip'] : "";
             $data['poster_hash_processed'] = $data['id'];
             $data['poster_hash'] = $data['id'];
-            $data['comment_sanitized'] = Yotsuba::sanitizeComment($data['com']);
+            $data['comment_sanitized'] = Yotsuba::toPlainText($data['com']);
             $data['comment'] = $data['comment_sanitized'];
             if(isset($data['w']) && $data['w'] > 0){
                 $data['media']['op'] = $data['resto'] == 0 ? 1 : 0;

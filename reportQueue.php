@@ -1,7 +1,7 @@
 <?php
 include 'inc/config.php';
 
-$page = new Page("Report Queue","<h2>Report Queue</h2>",Site::LEVEL_ADMIN);
+$page = new FancyPage("Report Queue","<h2>Report Queue</h2>",Site::LEVEL_ADMIN);
 
 $reports = Model::getReports();
 $html = "<table class='reportTable'><tr><th colspan='3'>Report Queue</th></tr><tr><th style='width:3em;'>Times</th><th>Post</th><th style='width:20em;'>Options</th></tr>";
