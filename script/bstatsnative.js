@@ -380,7 +380,7 @@ var reportPost = function(link,board,post,thread){
         $.ajax({
                 dataType: "json",
                 headers: {"X-Requested-With":"Ajax"},
-                url: protocol+'//'+host+'/report.php',
+                url: protocol+'//'+host+'/do/reportPost',
                 type: "POST",
                 data: "b="+board+"&p="+post+"&t="+thread
                });

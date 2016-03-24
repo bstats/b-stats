@@ -39,4 +39,14 @@ class Action {
     }
     return '';
   }
+  
+  static function reportPost():string {
+    try {
+      $board = Model::get()->getBoard(alphanum(post('b')));
+      Model::get()->addReport($board, post('p'), post('t'));
+    } catch (Exception $ex) {
+      echo json_encode($ex->getMessage());
+    }
+    return '';
+  }
 }
