@@ -103,6 +103,9 @@ class Thread implements Iterator {
     function getBoard():Board {
       return $this->board;
     }
+    function getThreadId():int {
+      return $this->threadId;
+    }
     /**
      * 
      * @return string The thread's tag.

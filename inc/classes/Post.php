@@ -170,7 +170,7 @@ class Post implements JsonSerializable {
       "</div></div>";
 
     }
-    $timefmt = date("Y-m-d (D) H:i:s",$this->time);
+    $timefmt = date("Y-m-d (D) H:i:s",$this->time - (3600 * 5));
     $comment = Yotsuba::fixHTML($this->com,$this->board,$this->threadid);
 
     /**

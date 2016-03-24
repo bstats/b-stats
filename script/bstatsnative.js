@@ -360,8 +360,8 @@ var StyleSwitcher = {
 };
 
 function initAdditions(){
-    if(/\/(b|hm|f)\//.test(location.pathname)){
-        $("#topLinks").html($("#topLinks").html() + 
+    if(/\/thread\//.test(location.pathname)){
+        $(".topLinks").html($(".topLinks").html() + 
           " [<a href='javascript:;' onclick='ExpandImage.expandAll();'>Expand Images</a>]"+
           " [<a href='javascript:;' onclick='ExpandImage.shrinkAll();'>Shrink Images</a>]"+
           " [<a href='javascript:;' onclick='ImageHover.revertAll();'>Reset Thumbs</a>]");
