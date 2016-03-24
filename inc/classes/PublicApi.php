@@ -31,7 +31,6 @@
 class PublicApi {
   public static function run(array $breadcrumbs):IPage {
     try {
-      self::setHeaders();
       if($_SERVER['REQUEST_METHOD'] !== 'GET') {
         throw new Exception("HTTP request method not supported");
       }
@@ -110,14 +109,6 @@ class PublicApi {
     $post = $model->getPost($model->getBoard($board), $id);
     
     return $post->asArray();
-  }
-  
-  
-  
-  private static function setHeaders() {
-    header("Access-Control-Allow-Origin: *");
-    header("Access-Control-Allow-Headers: x-requested-with, if-modified-since");
-    header("Access-Control-Allow-Credentials: true");
   }
 }
 

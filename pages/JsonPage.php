@@ -15,7 +15,10 @@ class JsonPage implements IPage {
   }
   //put your code here
   public function display():string {
-    header('Content-Type: application/json');
+    header("Access-Control-Allow-Origin: *");
+    header("Access-Control-Allow-Headers: x-requested-with, if-modified-since");
+    header("Access-Control-Allow-Credentials: true");
+    header("Content-Type: application/json");
     return json_encode($this->data);
   }
 }

@@ -93,20 +93,6 @@ class Config {
   }
 
   /**
-   * Sets a value in the main configuration file
-   * @param string $key
-   * @param mixed $value
-   */
-  static function setCfg($key,$value){
-    //make sure we have the latest version of the config, for good measure.
-    self::$cfg = json_decode(file_get_contents(
-            dirname(__FILE__)."/../cfg.json"),true);
-    self::$cfg[$key] = $value;
-    file_put_contents(dirname(__FILE__)."../cfg.json",
-            json_encode(self::$cfg, JSON_PRETTY_PRINT));
-  }
-
-  /**
    * Load a value from the SQL configuration file.
    * @param string $key
    * @return mixed

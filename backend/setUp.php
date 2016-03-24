@@ -1,7 +1,7 @@
 <?php
 /**
  * Site set-up script.
- * What fun.
+ * TODO: fix for v2.0
  */
 system("clear");
 if(!function_exists("readline")){

@@ -7,7 +7,9 @@ class Action {
     } else {
       throw new Exception("Unknown action");
     }
-    header("Location: $target");
+    if ($target !== '') {
+      header("Location: $target");
+    }
     exit;
   }
   
@@ -23,10 +25,18 @@ class Action {
     return "/";
   }
   
-  static function changepassword():string {
+  static function changePassword():string {
     if(OldModel::changePassword(Site::getUser()->getUID(), post('old'), post('new'))){
       return '/dash?success';
     }
     return '/dash?failure';
+  }
+  
+  static function setStyle():string {
+    $styles = Config::getCfg("styles");
+    if(in_array(post('style'), $styles)) {
+      Site::getUser()->setTheme(post('style'));
+    }
+    return '';
   }
 }

@@ -343,58 +343,19 @@ var ImageHover = {
 };
 
 var StyleSwitcher = {
-    currentStyle : "",
     init : function() {
-        if(/yotsuba/.test(document.getElementsByTagName("head")[0].innerHtml()))
-            this.currentStyle = "light";
-        else
-            this.currentStyle = "dark";
+        
     },
     switchTo : function(style){
-        if(style==="yotsuba"){
-            document.getElementById('chanCSS').href = "/css/yotsuba.css";
-            document.getElementById('statsCSS').href = "/css/bstats-yotsuba.css";
-            $.ajax({
-                dataType: "html",
-                headers: {"X-Requested-With":"Ajax"},
-                url: protocol+'//'+host+'/style.php',
-                type: "GET",
-                data: "style=yotsuba"
-            });
-        }
-        else if(style==="yotsuba-blue"){
-            document.getElementById('chanCSS').href = "/css/yotsuba-blue.css";
-            document.getElementById('statsCSS').href = "/css/bstats-yotsuba-blue.css";
-            $.ajax({
-                dataType: "html",
-                headers: {"X-Requested-With":"Ajax"},
-                url: protocol+'//'+host+'/style.php',
-                type: "GET",
-                data: "style=yotsuba-blue"
-            });
-        }
-        else if(style === "tomorrow"){
-            document.getElementById('chanCSS').href = "/css/tomorrow.css";
-            document.getElementById('statsCSS').href = "/css/bstats-tomorrow.css";
-            $.ajax({
-                dataType: "html",
-                headers: {"X-Requested-With":"Ajax"},
-                url: protocol+'//'+host+'/style.php',
-                type: "GET",
-                data: "style=tomorrow"
-            });
-        }
-        else if (style === "yotsuba-pink"){
-            document.getElementById('chanCSS').href = "/css/yotsuba-pink.css";
-            document.getElementById('statsCSS').href = "/css/bstats-yotsuba-pink.css";
-            $.ajax({
-                dataType: "html",
-                headers: {"X-Requested-With":"Ajax"},
-                url: protocol+'//'+host+'/style.php',
-                type: "GET",
-                data: "style=yotsuba-pink"
-            });
-        }
+        document.getElementById('chanCSS').href = "/css/"+style+".css";
+        document.getElementById('statsCSS').href = "/css/bstats-"+style+".css";
+        $.ajax({
+            dataType: "html",
+            headers: {"X-Requested-With":"Ajax"},
+            url: protocol+'//'+host+'/do/setStyle',
+            type: "POST",
+            data: "style="+style
+        });
     }
 };
 
