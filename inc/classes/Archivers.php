@@ -58,10 +58,10 @@ class Archivers {
       $boardsjson = json_decode(file_get_contents(Site::getPath() . "/backend/boards.json"), true);
       if (key_exists($board, $boardsjson)) {
         if (self::getStatus($board) == self::STOPPED || self::getStatus($board) == self::STOPPED_UNCLEAN) {
-          $user = Config::getSqlCfg("read-write")["username"];
-          $host = Config::getSqlCfg("read-write")["server"];
-          $pass = Config::getSqlCfg("read-write")["password"];
-          $db = Config::getSqlCfg("read-write")["db"];
+          $user = Config::getCfg('mysql')['read-write']["username"];
+          $host = Config::getCfg('mysql')['read-write']["server"];
+          $pass = Config::getCfg('mysql')['read-write']["password"];
+          $db = Config::getCfg('mysql')['read-write']["db"];
           exec("cd " . Site::getPath() . "/backend/ && " .
                   "screen -dmS $board php archiver.php " .
                   "-b $board -u $user -p $pass -d $db -h $host");

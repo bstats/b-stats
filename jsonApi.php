@@ -57,7 +57,7 @@ switch($_GET['a']){
     case "getThread":
         $no = $_GET['num'];
         $board = $_GET['board'];
-        list($thread,$data) = Model::getThread($board, $no);
+        list($thread,$data) = OldModel::getThread($board, $no);
         $ret = array();
         $i=0;
         $thread = $thread->fetch_assoc();

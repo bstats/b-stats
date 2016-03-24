@@ -33,7 +33,7 @@ class User {
   function setTheme($theme) {
     if (in_array($theme, ['yotsuba', 'tomorrow', 'yotsuba-pink', 'yotsuba-blue'])) {
       if ($this->uid != 0) {
-        Model::updateUserTheme($this->uid, $theme);
+        OldModel::updateUserTheme($this->uid, $theme);
       }
       $_SESSION['style'] = $theme;
       $this->theme = $theme;

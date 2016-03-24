@@ -1,6 +1,6 @@
 {
-  "yotsuba":"light",
-  "yotsuba-b":"blue",
-  "tomorrow":"dark",
-  "yotsuba-p":"pink"
+  "yotsuba":"yotsuba",
+  "yotsuba-b":"yotsuba-blue",
+  "tomorrow":"tomorrow",
+  "yotsuba-p":"yotsuba-pink"
 }

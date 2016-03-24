@@ -351,7 +351,7 @@ var StyleSwitcher = {
             this.currentStyle = "dark";
     },
     switchTo : function(style){
-        if(style==="light"){
+        if(style==="yotsuba"){
             document.getElementById('chanCSS').href = "/css/yotsuba.css";
             document.getElementById('statsCSS').href = "/css/bstats-yotsuba.css";
             $.ajax({
@@ -362,7 +362,7 @@ var StyleSwitcher = {
                 data: "style=yotsuba"
             });
         }
-        else if(style==="blue"){
+        else if(style==="yotsuba-blue"){
             document.getElementById('chanCSS').href = "/css/yotsuba-blue.css";
             document.getElementById('statsCSS').href = "/css/bstats-yotsuba-blue.css";
             $.ajax({
@@ -373,7 +373,7 @@ var StyleSwitcher = {
                 data: "style=yotsuba-blue"
             });
         }
-        else if(style === "dark"){
+        else if(style === "tomorrow"){
             document.getElementById('chanCSS').href = "/css/tomorrow.css";
             document.getElementById('statsCSS').href = "/css/bstats-tomorrow.css";
             $.ajax({
@@ -384,7 +384,7 @@ var StyleSwitcher = {
                 data: "style=tomorrow"
             });
         }
-        else if (style === "pink"){
+        else if (style === "yotsuba-pink"){
             document.getElementById('chanCSS').href = "/css/yotsuba-pink.css";
             document.getElementById('statsCSS').href = "/css/bstats-yotsuba-pink.css";
             $.ajax({

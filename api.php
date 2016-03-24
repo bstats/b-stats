@@ -1,11 +1,12 @@
 <?php
 include 'inc/config.php';
+require_once 'inc/globals.php';
 switch($_REQUEST['a']){
     case 'post':
         $board = isset($_REQUEST['b']) ? $_REQUEST['b'] : 'b';
         $no = $_REQUEST['id'];
         try{
-            $post = new Post(Model::getPostQuery($board, $no)->fetch_assoc(),$board);
+            $post = new Post(OldModel::getPostQuery($board, $no)->fetch_assoc(),$board);
             echo str_replace('data-original','src',$post->display());
         }
         catch(Exception $e){
@@ -16,7 +17,7 @@ switch($_REQUEST['a']){
         if(!isset($_REQUEST['b'])) exit;
         header("Content-type: application/json");
         try{
-            $board = new Board($_REQUEST['b']);
+            $board = Model::get()->getBoard($_REQUEST['b']);
             echo json_encode($board->getBoardInfo());
         }
         catch(Exception $ex){
@@ -25,12 +26,12 @@ switch($_REQUEST['a']){
         break;
     case 'allBoardsInfo':
         header("Content-type: application/json");
-        echo json_encode(Model::getBoards());
+        echo json_encode(Model::get()->getBoards());
         break;
     case 'postLinks':
         if(!isset($_REQUEST['b'])) exit;
         $board = $_REQUEST['b'];
         $post = (int)$_REQUEST['p'];
         header("Content-type: application/json");
-        echo json_encode(["posts"=>Model::getPostsWithLinkToPost($board, $post),"time"=>microtime(true)-CONFIG_INC_TIME]);
+        echo json_encode(["posts"=>OldModel::getPostsWithLinkToPost($board, $post),"time"=>microtime(true)-CONFIG_INC_TIME]);
 }

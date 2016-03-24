@@ -1,9 +1,11 @@
 <?php
 
+class_exists('HtmlElement');
+
 /**
  * The Page class contains functions for creating and displaying a page with consistent style.
  */
-class Page {
+class Page implements IPage {
 
   protected $startTime;
   protected $endTime;
@@ -42,12 +44,12 @@ class Page {
 
   private function initNavbar() {
     $this->navbar = div('', 'navbar');
-    foreach (Config::getJson('navlinks') as $name => $link) {
+    foreach (Config::getCfg('navlinks') as $name => $link) {
       $this->navbar->append(
               a(span("&nbsp;$name&nbsp;", 'navelement'), $link));
     }
     $stylelist = el('ul');
-    foreach (Config::getJson("styles") as $name => $code) {
+    foreach (Config::getCfg("styles") as $name => $code) {
       $stylelist->append(
               el('li', a("&nbsp;$name&nbsp;","javascript:")
                       ->set("onclick","StyleSwitcher.switchTo('$code')")
@@ -167,7 +169,7 @@ class Page {
    * Renders and returns the page.
    * @return string the page's entire HTML
    */
-  public function display() {
+  public function display():string {
     $hdr = $this->renderHeader();
     $footer = $this->renderFooter();
     $this->endTime = microtime(true);
@@ -177,144 +179,4 @@ class Page {
             ['class'=>'pageTime']);
     return $hdr . $this->body . $time . $footer;
   }
-
-}
-
-class FancyPage extends Page {
-
-  /**
-   * Access level for the page.
-   * 0 = public, 1 = private, 2 = admin, 3 = terrance
-   * @var int 
-   */
-  private $requiredLevel;
-
-  /**
-   * Access level of the user.
-   * @var int 
-   */
-  private $userLevel;
-  private $board;
-
-  /**
-   * Gets the user's current privilege level.
-   * @return int
-   */
-  function checkPrivilege() {
-    return $this->user->getPrivilege();
-  }
-
-  /**
-   * Sets the board name and description (use if the page is board-specific).
-   * @param Board $board
-   */
-  function setBoard($board) {
-    if (is_object($board) && $board instanceof Board)
-      $this->board = $board;
-    else {
-      try {
-        $this->board = new Board($board);
-      } catch (Exception $e) {
-        $this->board = null;
-      }
-    }
-  }
-
-  function renderHeader() {
-    parent::renderHeader();
-
-    if (!$this->clearHeader) {
-      if ($this->board !== null) {
-        $boardTitle = "<hr><br>"
-                . div("/" . $this->board->getName() . "/ - " . $this->board->getLongName(),'boardTitle')
-                . a("View Board on 4chan","//boards.4chan.org/". $this->board->getName())
-                        ->set('target','_blank')->set('rel','noreferrer')
-                . "<hr>";
-      } else {
-        $boardTitle = "";
-      }
-      $this->header .= Site::parseHtmlFragment('pagebody.html', 
-              ['<!-- boardTitle -->', '<!-- boardlist -->'], 
-              [$boardTitle, Board::getBoardList()]);
-
-
-      if ($_SERVER['SCRIPT_NAME'] != "/index.php") {
-        if ($this->board == null) {
-          $this->header .= div('['.a('HOME','/index.php').']','centertext');
-        } else {
-          $this->header .= "<div style='position:relative; top: -20px;' id='topLinks'>[<a href='/index.php'>Home</a>]";
-          if ($_SERVER['SCRIPT_NAME'] != "/board.php")
-            $this->header .= " [<a href='/{$this->board->getName()}/'>Return</a>]";
-          if ($_SERVER['SCRIPT_NAME'] != "/catalog.php" && $this->board->isSwfBoard() != true)
-            $this->header .= " [<a href='/{$this->board->getName()}/catalog'>Catalog</a>]";
-          $this->header .= "</div><br>";
-        }
-      }
-    }
-    return $this->header;
-  }
-
-  /**
-   * Default constructor
-   * @param string $title Text in the <code>&lt;title&gt;</code> tags.
-   * @param string $body Initial body text.
-   * @param int $privelege The minimum access level to see the page.
-   */
-  function __construct($title, $body = "", $privilege = 1, $board = null) {
-    parent::__construct($title, $body);
-
-    $this->requiredLevel = $privilege;
-    $this->board = $board;
-    if ($this->user->getPrivilege() >= Site::LEVEL_SEARCH) {
-      $this->addToHead("<script type='text/javascript'>$(document).ready(function(){ImageHover.init('');});</script>");
-    }
-    if ($this->user->getPrivilege() >= Site::LEVEL_ADMIN) {
-      $this->addToHead("<script type='text/javascript' src='/script/bstats-admin.js'></script>");
-    }
-
-    if (Model::banned($_SERVER['REMOTE_ADDR'])) {
-      $_SESSION['banned'] = true;
-      $banInfo = Model::getBanInfo($_SERVER['REMOTE_ADDR']);
-      $expires = $banInfo['expires'] == 0 ? "Never" : date("Y-m-d h:i:s T", $banInfo['expires']);
-      $this->body = Site::parseHtmlFragment('banned.html', ['__ip__', '__reason__', '__expires__'], [$_SERVER['REMOTE_ADDR'], $banInfo['reason'], $expires]);
-      $this->title = "/b/ stats: ACCESS DENIED";
-      die($this->display());
-    } else {
-      $_SESSION['banned'] = false;
-    }
-    if ($this->user->getPrivilege() < $this->requiredLevel) {
-      $this->body = Site::parseHtmlFragment('accessDenied.html', ['__privilege__', '__required__'], [$this->user->getPrivilege(), $this->requiredLevel]);
-      $this->title = "/b/ stats: ACCESS DENIED";
-      die($this->display());
-    }
-
-    $navBarExtra = "";
-    if ($this->user->getPrivilege() == 0) { //If not logged in, show login form.
-      $navBarExtra .= file_get_contents(Site::getPath() . "/htmls/loginform.html");
-    }
-
-    if ($this->user->getPrivilege() > 0) {
-      $navBarExtra .= Site::parseHtmlFragment('loginticker.html', 
-              ['%username%', '%privilege%', '<!-- more buttons -->'], 
-              [$this->user->getUsername(), $this->user->getPrivilege(), $this->renderExtraButtons()]);
-    }
-    $this->navbar->append($navBarExtra);
-  }
-
-  private function renderExtraButtons() {
-    $extraButtons = "";
-    if ($this->user->getPrivilege() >= Site::LEVEL_ADMIN) {
-      $no = Model::getNumberOfReports();
-      $reports = $no ? " ($no)" : "";
-      $extraButtons .= span('['.a('Reports'.$reports,'/reportQueue.php').']','navelement').PHP_EOL;
-    }
-    if ($this->user->getPrivilege() > Site::LEVEL_ADMIN) {
-      $extraButtons .= span('['.a('SCP','/scp.php').']','navelement').PHP_EOL;
-    }
-    if ($this->user->canSearch()) {
-      $extraButtons .= span('['.a('Search','/advsearch.php').']','navelement').PHP_EOL;
-    }
-    return $extraButtons;
-  }
-
 }

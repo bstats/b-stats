@@ -188,7 +188,7 @@ include_once '../inc/config.php';
 
 echo "Setting up required tables...".PHP_EOL;
 $driver->report_mode = MYSQLI_REPORT_ERROR;
-if(!Model::setUpTables()){
+if(!OldModel::setUpTables()){
     echo "Could not set up all the tables for some reason! Start over!".PHP_EOL;
     exit;
 }
@@ -200,7 +200,7 @@ echo "an admin user account.".PHP_EOL;
 $username = readline("Enter admin username: ");
 $password = readline("Enter admin password: ");
 
-Model::addUser($username, $password, Site::LEVEL_TERRANCE, "yotsuba");
+OldModel::addUser($username, $password, Site::LEVEL_TERRANCE, "yotsuba");
 
 echo "That's it! Your site is ready to go (hopefully)!".PHP_EOL;
 echo "Thank you for choosing my shitty PHP scripts!".PHP_EOL;

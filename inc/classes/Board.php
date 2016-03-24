@@ -1,7 +1,6 @@
 <?php
 
 class Board implements ArrayAccess, JsonSerializable {
-
   private $name;
   private $name_long;
   private $worksafe;
@@ -31,19 +30,19 @@ class Board implements ArrayAccess, JsonSerializable {
     return (boolean) ($this->worksafe);
   }
 
-  public function isSwfBoard() {
+  public function isSwfBoard():bool {
     return (boolean) ($this->swf_board);
   }
 
-  public function getPages() {
+  public function getPages():int {
     return $this->pages;
   }
 
-  public function getThreadsPerPage() {
+  public function getThreadsPerPage():int {
     return $this->perpage;
   }
 
-  public function getMaxActiveThreads() {
+  public function getMaxActiveThreads():int {
     return $this->pages * $this->perpage;
   }
 
@@ -51,7 +50,7 @@ class Board implements ArrayAccess, JsonSerializable {
     return $this->archive;
   }
 
-  public function getPrivilege() {
+  public function getPrivilege():int {
     return $this->privilege;
   }
 
@@ -67,17 +66,13 @@ class Board implements ArrayAccess, JsonSerializable {
     return $this->jsonSerialize();
   }
 
-  public function __construct($shortname) {
-    $boardInfo = Model::getBoardInfo($shortname);
-    if ($boardInfo == false || $boardInfo['shortname'] !== $shortname) {
-      throw new Exception("Board does not exist");
-    }
-    $this->name = $shortname;
+  public function __construct(array $boardInfo) {
+    $this->name = $boardInfo['shortname'];
     $this->name_long = $boardInfo['longname'];
     $this->worksafe = $boardInfo['worksafe'];
     $this->pages = $boardInfo['pages'];
     $this->perpage = $boardInfo['perpage'];
-    $this->swf_board = $shortname === 'f' ? true : false;
+    $this->swf_board = $this->name === 'f' ? true : false;
     $this->privilege = $boardInfo['privilege'];
     $this->group = $boardInfo['group'];
     $this->first_crawl = $boardInfo['first_crawl'];
@@ -92,19 +87,19 @@ class Board implements ArrayAccess, JsonSerializable {
     return $this->stats;
   }
 
-  public function getThread($res, $deleted = false) {
-    return Model::getThread($this->name, $res, $deleted);
+  public function getThread(int $res):array {
+    return Model::get()->getThread($this, $res);
   }
 
-  public function getPage($no) {
-    return Model::getPage($this, $no);
+  public function getPage(int $no):array {
+    return Model::get()->getPageOfThreads($this, $no);
   }
 
   public function getNoThreads() {
     if (isset($this->no_threads)) {
       return $this->no_threads;
     } else {
-      return $this->no_threads = Model::getNumberOfThreads($this->name);
+      return $this->no_threads = Model::get()->getNumberOfThreads($this);
     }
   }
 
@@ -112,21 +107,13 @@ class Board implements ArrayAccess, JsonSerializable {
     if (isset($this->no_posts)) {
       return $this->no_posts;
     } else {
-      return $this->no_posts = Model::getNumberOfPosts($this->name);
+      return $this->no_posts = Model::get()->getNumberOfPosts($this);
     }
-  }
-
-  public static function getAllBoards() {
-    $boards = Model::getBoards();
-    foreach ($boards as $boardinfo) {
-      $ret[] = new Board($boardinfo['shortname']);
-    }
-    return $ret;
   }
 
   public static function getBoardList() {
     $ret = "";
-    $boards = Model::getBoards();
+    $boards = Model::get()->getBoards();
     $groups = array();
     foreach ($boards as $board) {
       $groups[$board['group']][] = $board;
@@ -193,7 +180,7 @@ class Board implements ArrayAccess, JsonSerializable {
    * JsonSerializable implementation
    */
 
-  public function jsonSerialize() {
+  public function jsonSerialize():array {
     return [
       'shortname' => $this->name,
       'longname' => $this->name_long,

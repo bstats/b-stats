@@ -15,19 +15,44 @@ class Config {
   /** @var array cache of json cfg files */
   static $json_cache;
   
+  /** @var PDO pdo */
+  static $pdo;
+  static $pdo_rw;
+  
+  /**
+   * @return PDO PDO object.
+   */
+  static function getPDOConnection() {
+    if(self::$pdo == null) {
+      $cfg = self::getCfg('mysql')['read-only'];
+      self::$pdo = new PDO("mysql:host={$cfg['server']};dbname={$cfg['db']};charset=utf8", $cfg['username'], $cfg['password']);
+      self::$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    }
+    return self::$pdo;
+  }
+  
+  static function getPDOConnectionRW() {
+    if(self::$pdo_rw == null) {
+      $cfg = self::getCfg('mysql')['read-write'];
+      self::$pdo_rw = new PDO("mysql:host={$cfg['server']};dbname={$cfg['db']};charset=utf8", $cfg['username'], $cfg['password']);
+      self::$pdo_rw->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    }
+    return self::$pdo_rw;
+  }
+  
   /** 
    * Gets an instance of mysqli with read-only permissions.
    * @return mysqli 
    */
-  static function getConnection(){
+  static function getMysqliConnection(){
     if(self::$mysqli == null){
       $driver = new mysqli_driver();
       $driver->report_mode = MYSQLI_REPORT_STRICT;
       self::$mysqli = new mysqli(
-              self::getSqlCfg('read-only')['server'],
-              self::getSqlCfg('read-only')['username'],
-              self::getSqlCfg('read-only')['password'],
-              self::getSqlCfg('read-only')['db']);
+              self::getCfg('mysql')['read-only']['server'],
+              self::getCfg('mysql')['read-only']['username'],
+              self::getCfg('mysql')['read-only']['password'],
+              self::getCfg('mysql')['read-only']['db']);
       self::$mysqli->set_charset("utf8");
     }
     return self::$mysqli;
@@ -36,7 +61,7 @@ class Config {
   /**
    * Close the read-only connection.
    */
-  static function closeConnection(){
+  static function closeMysqliConnection(){
     self::$mysqli->close();
     self::$mysqli = null;
   }
@@ -45,15 +70,15 @@ class Config {
    * Gets an instance of mysqli with read+write permissions.
    * @return mysqli 
    */
-  static function getConnectionRW(){
+  static function getMysqliConnectionRW(){
     if(self::$mysqli_rw == null){
       $driver = new mysqli_driver();
       $driver->report_mode = MYSQLI_REPORT_STRICT;
       self::$mysqli_rw = new mysqli(
-              self::getSqlCfg('read-write')['server'],
-              self::getSqlCfg('read-write')['username'],
-              self::getSqlCfg('read-write')['password'],
-              self::getSqlCfg('read-write')['db']);
+              self::getCfg('mysql')['read-write']['server'],
+              self::getCfg('mysql')['read-write']['username'],
+              self::getCfg('mysql')['read-write']['password'],
+              self::getCfg('mysql')['read-write']['db']);
       self::$mysqli_rw->set_charset("utf8");
     }
     return self::$mysqli_rw;
@@ -62,24 +87,9 @@ class Config {
   /**
    * Close the read+write connection.
    */
-  static function closeConnectionRW(){
+  static function closeMysqliConnectionRW(){
     self::$mysqli_rw->close();
     self::$mysqli_rw = null;
-  }
-
-  /**
-   * Loads a value from the main configuration file.
-   * The file is cached upon the first call.
-   * Returns null if key doesn't exist.
-   * @param string $key
-   * @return mixed|null
-   */
-  static function getCfg($key){
-    if(self::$cfg == null){
-      self::$cfg = json_decode(file_get_contents(
-              dirname(__FILE__)."/../cfg.json"),true);
-    }
-    return isset(self::$cfg[$key]) ? self::$cfg[$key] : null;
   }
 
   /**
@@ -106,12 +116,13 @@ class Config {
   }
   
   /**
-   * Get the named config file as an array.
-   * If not found, returns empty array.
+   * Get the named config file.
+   * If not found, throws exception.
    * @param string $name
    * @return array
+   * @throws NotFoundException;
    */
-  static function getJson($name) {
+  static function getCfg($name) {
     if(isset(self::$json_cache[$name])) {
       return self::$json_cache[$name];
     }
@@ -119,6 +130,6 @@ class Config {
       self::$json_cache[$name] = json_decode(file_get_contents(dirname(__FILE__)."/../cfg/$name.json"), true);
       return self::$json_cache[$name];
     }
-    return [];
+    throw new NotFoundException("Couldn't find config: $name");
   }
 }

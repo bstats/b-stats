@@ -1,26 +1,29 @@
 <?php
-include("inc/config.php");
-$page = new FancyPage("b-stats archive","",0);
-$html = "<div class='boardlist_big'><h1>Archived Boards</h1><hr style='width:64px;'>";
-foreach(Model::getBoards() as $b){
-    $html .= Site::parseHtmlFragment("indexthread.html", 
-          [ "%ago%",
-            "%crawltime%",
-            "%shortname%",
-            "%longname%",
-            "%posts%",
-            "%threads%",
-            "%firstcrawl%"
-          ], 
-          [ ago(time() - $b['last_crawl']),
-            $b['last_crawl'],
-            $b['shortname'],
-            $b['longname'],
-            $b->getNoPosts(),
-            $b->getNoThreads(),
-            date("j F Y",$b->getFirstCrawl())]);
+
+define("START_TIME", microtime(true));
+
+require_once('inc/config.php');
+require_once('inc/globals.php');
+
+// Page router
+try {
+  if (Site::backupInProgress()) {
+    die((new Page("Backup in Progress", "<h2>Backing Up</h2><div class='centertext'>Please come back later.</div>"))->display());
+  }
+  if (Site::isBanned()) {
+    die((new Banned())->display());
+  }
+
+  Router::route(strtok($_SERVER["REQUEST_URI"], '?'));
+
+} catch (NotFoundException $ex) {
+  echo (new FourOhFour($ex->getMessage()))->display();
+} catch (Exception $ex) {
+  $page = new FancyPage("Error", "", 0);
+  $page->setBody(
+          "<h1>Error</h1>"
+          . "<div class='centertext'>"
+          . "Your request could not be processed. The following error was encountered: "
+          . "<br>" . $ex->getMessage() . "</div>");
+  echo $page->display();
 }
-$html .= "</div>";
-$html .= "<script type='text/javascript' src='/script/boardUpdate.js'></script>";
-$page->setBody($html);
-echo $page->display();

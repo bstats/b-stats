@@ -17,6 +17,7 @@ class Post implements JsonSerializable {
   private $sub;
   private $trip;
   private $md5;
+  private $md5bin;
   private $filename;
   private $ext;
   public $com;
@@ -39,7 +40,7 @@ class Post implements JsonSerializable {
    * @return Post
    */
   public static function fromDB($board,$no) {
-    return Model::getPost($board,$no);
+    return OldModel::getPost($board,$no);
   }
   
   function __construct($no,$board='b'){
@@ -63,14 +64,14 @@ class Post implements JsonSerializable {
       $this->com = $arr['comment'];
       $this->w = $arr['w'];
       $this->h = $arr['h'];
-      $this->dnt = isset($arr['dnt']) ? $arr['dnt'] : 0;
-      $this->images = isset($arr['images']) ? $arr['images'] : 0;
-      $this->replies = isset($arr['replies']) ? $arr['replies'] : 0;
-      $this->tag = isset($arr['tag']) ? $arr['tag'] : "";
+      $this->dnt = $arr['dnt'] ?? 0;
+      $this->images = $arr['images'] ?? 0;
+      $this->replies = $arr['replies'] ?? 0;
+      $this->tag = $arr['tag'] ?? "";
       $this->deleted = $arr['deleted'];
       $this->capcode = $arr['capcode'];
     }
-    if($this->md5 != '' && in_array(bin2hex(base64_decode(str_replace("-","/",$this->md5))),Model::getBannedHashes())){
+    if($this->md5 != '' && in_array(bin2hex(base64_decode(str_replace("-","/",$this->md5))),OldModel::getBannedHashes())){
       $this->imgbanned = true;
     }
     else{
@@ -339,6 +340,7 @@ END;
       list($returnArr['tn_w'],$returnArr['tn_h']) = tn_Size($this->w,$this->h);
       $returnArr['tim'] = (int)$this->tim;
       $returnArr['md5'] = str_replace("-","/",$this->md5);
+      $returnArr['md5_hex'] = bin2hex($this->md5bin);
       $returnArr['fsize'] = (int)$this->fsize;
     }
     if($this->sub !=""){
@@ -353,7 +355,7 @@ END;
     if($this->id != ''){
       $returnArr['id'] = $this->id;
     }
-    $returnArr['resto'] = $this->threadid;
+    $returnArr['resto'] = (int)$this->threadid;
     if($this->no == $this->threadid){
         $returnArr['bumplimit'] = 0;
         $returnArr['imagelimit'] = 0;
