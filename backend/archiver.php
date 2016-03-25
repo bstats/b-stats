@@ -1,7 +1,7 @@
 <?php
 /*
  * 4chan archival script
- * v4.0
+ * v4.2
  * by terrance
  * 
  * This thing is awful. It works sometimes. I run it using GNU screen.
@@ -12,6 +12,7 @@
  * I use a different script for /b/ and /f/ because /b/ needs namesync and
  * /f/ is an upload board which is quite different.
  */
+require_once '../inc/config.php';
 
 if(php_sapi_name() != "cli"){
   die("This script must be run from the command line.".PHP_EOL);
@@ -52,23 +53,21 @@ else{
 
 error_reporting(E_ALL);
 
-define("EXEC_TIME",60);
 define("MAX_TIME",200);
 
 //Board config is stored in a flat file.
-$cfg = json_decode(file_get_contents("boards.json"),true);
-if(!isset($cfg[$board])){
-  die("Board has not been configured yet. Add it to boards.json.".PHP_EOL);
+try {
+  $boardObj = Model::get()->getBoard($board);
+  define("EXEC_TIME", $boardObj->getArchiveTime());
+} catch(Exception $ex){
+  die("Board $board has not been configured yet. Add it to boards.json.".PHP_EOL);
 }
-$boardname = $cfg[$board]['title'];
-$pages = $cfg[$board]['pages'];
-$perpage = $cfg[$board]['per_page'];
-$worksafe = $cfg[$board]['ws_board'];
-$group = $cfg[$board]['group'];
 
 
 file_put_contents("$board.pid", getmypid());
-unlink("$board.kill");
+if(file_exists("$board.kill")) {
+  unlink("$board.kill");
+}
 $startTime = time();
 
 function o($msg,$newline = true){
@@ -93,11 +92,6 @@ $dbl->set_charset("utf8");
     o("-Done.");
 
     o("Setting up DB");
-$dbl->query(file_get_contents("boards.sql"));
-
-$dbl->query("INSERT IGNORE INTO `boards`"
-      ."(`shortname`,`longname`,`worksafe`,`pages`,`perpage`,`first_crawl`,`group`)"
-      ."VALUES ('$board','$boardname','$worksafe','$pages','$perpage',UNIX_TIMESTAMP(),'$group')");
 
 $dbl->query("CREATE TABLE IF NOT EXISTS `{$board}_post` (
   `no` int(13) NOT NULL,
@@ -333,7 +327,6 @@ while(!file_exists("$board.kill")){
     }
     $tempThreads = implode(",", $downloadedThreadsTemp);
         o("Sending query...");
-        o($tempThreads);
     $dbl->query("UPDATE `{$board}_post` SET `deleted` = 1 WHERE `threadid` IN ($tempThreads)");
         o("-Done.");
     $postInsertQuery .= " ON DUPLICATE KEY UPDATE `comment`=VALUES(`comment`),`deleted`='0',`file_deleted`=VALUES(file_deleted),`subject`=VALUES(`subject`)";
