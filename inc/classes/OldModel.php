@@ -20,7 +20,7 @@ class OldModel {
         $no = $dbl->real_escape_string($no);
         $threadQ = $dbl->query("SELECT * FROM `{$board}thread` WHERE `threadid`='$no'");
         
-        $postQ = $dbl->query("SELECT * FROM `{$board}post` WHERE `resto`='$no' ".($deleted?"AND (`deleted`='1' OR `no`=`resto`)":"")."ORDER BY `no` ASC");
+        $postQ = $dbl->query("SELECT * FROM `{$board}post` WHERE `threadid`='$no' ".($deleted?"AND (`deleted`='1' OR `no`=`threadid`)":"")."ORDER BY `no` ASC");
         if(!($threadQ->num_rows > 0))
             throw new NotFoundException ("Thread does not exist in the archive.");
         return array($threadQ,$postQ);
@@ -42,6 +42,28 @@ class OldModel {
             throw new NotFoundException("No such post $no exists in this archive");
         }
         return $postQ;
+    }
+    /**
+     * Get all the Threads for a given page #
+     * @param Board $board
+     * @param int $page
+     * @return array Array of Thread objecsts
+     */
+    static function getPage($board,$page){
+        $page--;
+        $dbl = Config::getMysqliConnection();
+        $prefix = $board->getName()."_";
+        $perpage = $board->getThreadsPerPage();
+        $tTable = $prefix."thread";
+        $page = $dbl->real_escape_string($page);
+        $number = $page*$perpage;
+        $pageQuery = "SELECT {$tTable}.*  FROM {$tTable} WHERE {$tTable}.active = 1 ORDER BY ({$tTable}.sticky + {$tTable}.active) DESC, {$tTable}.lastreply DESC LIMIT $number,$perpage";
+        $q = $dbl->query($pageQuery);
+        $threads = [];
+        while($row = $q->fetch_assoc()){
+          $threads[] = Thread::fromArray($board, $row);
+        }
+        return $threads;
     }
     
     /**
@@ -108,13 +130,14 @@ class OldModel {
      * @param int $n number of posts to get
      * @return array posts
      */
-    static function getLastNPosts($board,$thread, int $n){
+    static function getLastNPosts($board,$thread,$n){
         $dbl = Config::getMysqliConnection();
         $board = $dbl->real_escape_string($board);
         $threadId = $dbl->real_escape_string($thread);
+        $n = abs((int)$n);
         $prefix = $board."_";
         $pTable = $prefix."post";
-        $query = "SELECT * FROM $pTable WHERE resto='$threadId' AND `resto` <> `no` ORDER BY `no` DESC LIMIT 0,$n";
+        $query = "SELECT * FROM $pTable WHERE threadid='$threadId' AND `threadid` <> `no` ORDER BY `no` DESC LIMIT 0,$n";
         $result = $dbl->query($query);
         $postArr = array();
         if($result->num_rows > 0){

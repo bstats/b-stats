@@ -141,10 +141,7 @@ class Model implements \IModel {
     $perpage = (int) $board->getThreadsPerPage();
     $tTable = $prefix . "thread";
     $number = $pageNo * $perpage;
-    $pageQuery = "SELECT $tTable.*  FROM $tTable "
-            . "WHERE $tTable.active = 1 "
-            . "ORDER BY ($tTable.sticky * $tTable.active) DESC, $tTable.lastreply DESC "
-            . "LIMIT $number,$perpage";
+    $pageQuery = "SELECT {$tTable}.*  FROM {$tTable} WHERE {$tTable}.active = 1 ORDER BY ({$tTable}.sticky + {$tTable}.active) DESC, {$tTable}.lastreply DESC LIMIT $number,$perpage";
     $q = $this->conn_ro->query($pageQuery);
     return array_map(function($row) use($board) {
       return Thread::fromArray($board, $row);
@@ -196,25 +193,6 @@ class Model implements \IModel {
     return array_map(function($row) use($t) {
       return new Post($row, $t->getBoard());
     }, $stmt->fetchAll(PDO::FETCH_ASSOC));
-  }
-  
-  function getLastNPosts(Thread $t, int $n) {
-    $board = $t->getBoard();
-    $threadId = $t->getThreadId();
-    $prefix = $board->getName()."_";
-    $pTable = $prefix."post";
-    $query = "SELECT * FROM $pTable WHERE resto='$threadId' AND `resto` <> `no` ORDER BY `no` DESC LIMIT 0,$n";
-    $result = $dbl->query($query);
-    $postArr = array();
-    if($result->num_rows > 0){
-      while($row = $result->fetch_assoc())
-          $postArr[] = $row;
-    }
-    else
-    {
-      throw new Exception("Thread $thread contains no posts!");
-    }
-    return array_reverse($postArr);
   }
 
   /**

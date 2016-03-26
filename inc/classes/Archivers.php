@@ -70,8 +70,13 @@ class Archivers {
     } else {
       Model::get()->getBoard($board);
       if (self::getStatus($board) == self::STOPPED || self::getStatus($board) == self::STOPPED_UNCLEAN) {
+        $user = Config::getCfg('mysql')['read-write']["username"];
+        $host = Config::getCfg('mysql')['read-write']["server"];
+        $pass = Config::getCfg('mysql')['read-write']["password"];
+        $db = Config::getCfg('mysql')['read-write']["db"];
         exec("cd " . Site::getPath() . "/backend/ && " .
-                "screen -dmS $board php archiver.php -b $board");
+                "screen -dmS $board php archiver.php " .
+                "-b $board -u $user -p $pass -d $db -h $host");
         return true;
       }
     }

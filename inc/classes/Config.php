@@ -22,7 +22,7 @@ class Config {
   /**
    * @return PDO PDO object.
    */
-  static function getPDOConnection():PDO {
+  static function getPDOConnection() {
     if(self::$pdo == null) {
       $cfg = self::getCfg('mysql')['read-only'];
       self::$pdo = new PDO("mysql:host={$cfg['server']};dbname={$cfg['db']};charset=utf8mb4", $cfg['username'], $cfg['password']);
@@ -32,10 +32,7 @@ class Config {
     return self::$pdo;
   }
   
-  /**
-   * @return \PDO
-   */
-  static function getPDOConnectionRW():PDO {
+  static function getPDOConnectionRW() {
     if(self::$pdo_rw == null) {
       $cfg = self::getCfg('mysql')['read-write'];
       self::$pdo_rw = new PDO("mysql:host={$cfg['server']};dbname={$cfg['db']};charset=utf8mb4", $cfg['username'], $cfg['password']);
