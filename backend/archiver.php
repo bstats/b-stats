@@ -2,16 +2,15 @@
 
 /*
  * 4chan archival script
- * v4.2
+ * v5
  * by terrance
  * 
- * This thing is awful. It works sometimes. I run it using GNU screen.
+ * This thing is okay. It works sometimes. I run it using GNU screen.
  * 
- * Usage: php archiver.php -b board -u mysql_username -p mysql_password -d mysql_db
+ * Usage: php archiver.php -b board
  * 
  * It will archive an entire standard imageboard.
- * I use a different script for /b/ and /f/ because /b/ needs namesync and
- * /f/ is an upload board which is quite different.
+ * I use a different script for /b/ because /b/ needs namesync.
  */
 require_once '../inc/config.php';
 
@@ -73,13 +72,10 @@ function dlUrl($url) {
 o("Connecting...");
 /** @var PDO */
 $pdo = Config::getPDOConnectionRW();
-$dbl = Config::getMysqliConnectionRW();
-$dbl->set_charset("utf8mb4");
 o("-Done.");
 
 o("Setting up DB");
-$dbl->multi_query(str_replace(['%BOARD%'], [$board], file_get_contents("newboard.sql")));
-echo $dbl->error;
+$pdo->exec(str_replace(['%BOARD%'], [$board], file_get_contents("newboard.sql")));
 o("-Done.");
 
 $lastTime = $boardObj->getLastCrawl();
@@ -220,40 +216,48 @@ while (!file_exists("$board.kill")) {
           . "`com`=VALUES(com),`deleted`=0,`filedeleted`=VALUES(filedeleted)";
   o("-Done.");
   o("Inserting thread infos...");
-  $stmt = $pdo->prepare($threadInsertQuery);
-  $stmt->execute($threadFields);
+  $pdo->prepare($threadInsertQuery)->execute($threadFields);
   o("-Done.");
   o("Inserting post infos...");
-  $stmt = $pdo->prepare($postInsertQuery);
-  $stmt->execute($postFields);
+  $pdo->prepare($postInsertQuery)->execute($postFields);
   o("-Done.");
   
   /*
    * Individual thread post loading
    */
   
-  $postInsertQuery = "INSERT INTO `{$board}_post` "
-          . "(`no`,`resto`,`time`,"
-          . "`name`,`trip`,`email`,`sub`,`capcode`,`country`,`country_name`,`com`,"
-          . "`tim`,`filename`,`ext`,`fsize`,`md5`,`w`,`h`,`filedeleted`,`spoiler`,`tag`) VALUES ";
+  
   o("Downloading threads...");
   $i = 0;
+  $queryNum = 0;
+  $maxPerQuery = 50000;
   $downloadedThreads = array();
   $first = true;
   $postFields = [];
+  $placeholders = [];
+  $postFields[0] = [];
+  $placeholders[0] = "";
   foreach ($threadsToDownload as $thread) {
     $apiThread = json_decode(dlUrl("http://a.4cdn.org/{$board}/thread/$thread.json"), true);
 
     //Go through each reply.
     
     foreach ($apiThread["posts"] as $reply) {
+      $i += 21;
+      if($i > $maxPerQuery) {
+        $i = 0;
+        $queryNum++;
+        $postFields[$queryNum] = [];
+        $placeholders[$queryNum] = "";
+        $first = true;
+      }
       if(!$first) {
-        $postInsertQuery .= ",(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+        $placeholders[$queryNum] .= ",(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
       } else {
         $first = false;
-        $postInsertQuery .= "(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+        $placeholders[$queryNum] .= "(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
       }
-      array_push($postFields,
+      array_push($postFields[$queryNum],
             $reply['no'],
             $reply['resto'],
             $reply['time'],
@@ -275,8 +279,6 @@ while (!file_exists("$board.kill")) {
             $reply['filedeleted'] ?? null,
             $reply['spoiler'] ?? null,
             $reply['tag'] ?? null);
-
-
       if (isset($reply['md5'])) {
         $picsToDL[] = [ "md5" => $reply['md5'],
           "tim" => $reply['tim'],
@@ -291,7 +293,7 @@ while (!file_exists("$board.kill")) {
     echo ".";
   }
   echo PHP_EOL;
-  o("-Done.");
+  o("-Done. $i / ".count($postFields));
 
   o("Marking deleted posts... ");
   foreach ($downloadedThreads as $key => $thread) {
@@ -301,10 +303,18 @@ while (!file_exists("$board.kill")) {
   o("Sending query...");
   $pdo->query("UPDATE `{$board}_post` SET `deleted` = 1 WHERE `resto` IN ($tempThreads)");
   o("-Done.");
-  $postInsertQuery .= " ON DUPLICATE KEY UPDATE "
-          . "`com`=VALUES(com),`deleted`=0,`filedeleted`=VALUES(filedeleted)";
   o("Inserting threads...");
-  $pdo->prepare($postInsertQuery)->execute($postFields);
+  foreach($postFields as $key=>$value) {
+    $postInsertQuery = "INSERT INTO `{$board}_post` "
+          . "(`no`,`resto`,`time`,"
+          . "`name`,`trip`,`email`,`sub`,`capcode`,`country`,`country_name`,`com`,"
+          . "`tim`,`filename`,`ext`,`fsize`,`md5`,`w`,`h`,`filedeleted`,`spoiler`,`tag`) VALUES "
+          . $placeholders[$key]
+          . " ON DUPLICATE KEY UPDATE "
+          . "`com`=VALUES(com),`deleted`=0,`filedeleted`=VALUES(filedeleted)";
+    $pdo->prepare($postInsertQuery)->execute($postFields[$key]);
+    o("Sent query $key");
+  }
   o("-Done.");
   o("Updating thread lastreply...");
   foreach($downloadedThreads as $key=>$thread){
@@ -323,7 +333,7 @@ while (!file_exists("$board.kill")) {
    * Update "Last updated" server var
    */
   o("Updating last update time: " . date("Y-m-d H:i:s"));
-  $dbl->query("UPDATE `boards` SET `last_crawl`='" . time() . "' WHERE `shortname`='$board'");
+  $pdo->query("UPDATE `boards` SET `last_crawl`='" . time() . "' WHERE `shortname`='$board'");
   o("-Done.");
 
   if ((time() - $startTime) < EXEC_TIME) {
@@ -336,6 +346,6 @@ while (!file_exists("$board.kill")) {
 }
 
 o("Received kill request. Stopping.");
-$dbl->close();
+$pdo = null;
 unlink($board . ".pid");
 unlink($board . ".kill");
