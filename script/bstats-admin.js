@@ -1,3 +1,41 @@
+/**
+ * Call the admin API using GET
+ * 
+ * @param {String} endpoint the endpoint, like "/archivers" or "/archivers/y/start"
+ * @param {Function} callback for returned data
+ * @returns {undefined}
+ */
+var adminApi_get = function(endpoint, callback, error) {
+  $.ajax({
+    dataType: "json",
+    headers: {"X-Requested-With":"Ajax"},
+    url: protocol+'//'+host+'/admin'+endpoint,
+    type: "GET",
+    error: error,
+    success: callback
+  });
+}
+
+/**
+ * Call the admin API using POST
+ * 
+ * @param {String} endpoint the endpoint, like "/archivers" or "/archivers/y/start"
+ * @param {String|Array} data
+ * @param {Function} callback for returned data
+ * @returns {undefined}
+ */
+var adminApi_post = function(endpoint, data, callback, error) {
+  $.ajax({
+    dataType: "json",
+    headers: {"X-Requested-With":"Ajax"},
+    url: protocol+'//'+host+'/admin'+endpoint,
+    type: "POST",
+    error: error,
+    success: callback,
+    data: data
+  });
+}
+
 var deleteReport = function(no,board){
     if(confirm("Really delete the report for "+no+"?")){
         $.ajax({
@@ -88,26 +126,6 @@ var restorePost = function(no,board){
             }
             else{
                 removeRow("#report"+no);
-            }
-        });
-    }
-};
-
-var fixDeleted = function(threadid){
-    if(confirm("Remove all [Deleted] marks? Warning: This is IRREVERSIBLE")){
-        $.ajax({
-                dataType: "json",
-                headers: {"X-Requested-With":"Ajax"},
-                url: protocol+'//'+host+'/adminAPI.php',
-                type: "POST",
-                data: "a=fixDeleted&t="+threadid }).
-        success(function(data){
-            if(data.err === true){
-                alert("Error: "+data.errmsg);
-            }
-            else{
-                $("#adm_fixdel").replaceWith('<a style="opacity:0.5;">[Deleted] Fix</span>');
-                $(".warning").remove();
             }
         });
     }

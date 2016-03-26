@@ -28,7 +28,7 @@ class Apply extends FancyPage {
       if ($err != '') {
         $this->appendToBody("<p class='center'>$err</p>");
       }
-      $this->appendToBody(Site::parseHtmlFragment('reqForm.html', ['__captcha__'], ['<img src="captcha.php">']));
+      $this->appendToBody(Site::parseHtmlFragment('reqForm.html', ['__captcha__'], ['<img src="captcha.php" alt="captcha">']));
     }
     else {
       $r = $q->fetch_assoc();

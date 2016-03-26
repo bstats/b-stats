@@ -18,12 +18,18 @@ try {
 
 } catch (NotFoundException $ex) {
   echo (new FourOhFour($ex->getMessage()))->display();
+} catch (PermissionException $ex) {
+  die((new Page("/b/ stats: ACCESS DENIED", 
+          Site::parseHtmlFragment('accessDenied.html', 
+                  ['__privilege__', '__required__'], 
+                  [$ex->has, $ex->required])))
+          ->display());
 } catch (Exception $ex) {
   $page = new FancyPage("Error", "", 0);
   $page->setBody(
           "<h1>Error</h1>"
           . "<div class='centertext'>"
           . "Your request could not be processed. The following error was encountered: "
-          . "<br>" . $ex->getMessage() . "</div>");
+          . "<br>" . $ex->getMessage() . " at ".$ex->getFile().":".$ex->getLine()."</div>");
   echo $page->display();
 }

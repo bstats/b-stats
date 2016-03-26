@@ -4,14 +4,15 @@ header("Access-Control-Allow-Headers: x-requested-with, if-modified-since");
 header("Access-Control-Allow-Credentials: true");
 header("Content-Type: application/json");
 include('inc/config.php');
+include('inc/globals.php');
 if(!isset($_GET['board']))
     die("no board specified");
 switch($_GET['a']){
     case "getPost":
-        $no = $_GET['num'];
-        $board = $_GET['board'];
+        $no = get('num');
+        $board = Model::get()->getBoard(get('board'));
         try{
-            $data = Post::fromDB($board,$no)->asArray();
+            $data = Model::get()->getPost($board,$no)->asArray();
         }
         catch(Exception $e){
             header("HTTP/1.1 404 Not Found");

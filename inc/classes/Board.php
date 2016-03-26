@@ -13,6 +13,7 @@ class Board implements ArrayAccess, JsonSerializable {
   private $last_crawl;
   private $no_threads;
   private $no_posts;
+  private $archive_time;
 
   public function __toString() {
     return $this->name;
@@ -65,6 +66,10 @@ class Board implements ArrayAccess, JsonSerializable {
   public function getBoardInfo() {
     return $this->jsonSerialize();
   }
+  
+  public function getArchiveTime():int {
+    return $this->archive_time;
+  }
 
   public function __construct(array $boardInfo) {
     $this->name = $boardInfo['shortname'];
@@ -77,6 +82,7 @@ class Board implements ArrayAccess, JsonSerializable {
     $this->group = $boardInfo['group'];
     $this->first_crawl = $boardInfo['first_crawl'];
     $this->last_crawl = $boardInfo['last_crawl'];
+    $this->archive_time = $boardInfo['archive_time'];
     $this->archive = true; //no `real` boards here. maybe in the future
   }
 

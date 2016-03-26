@@ -27,12 +27,13 @@ class Model implements \IModel {
 
   /**
    * Get all the boards in this DB.
-   * 
+   * @param bool $hidden Show hidden boards?
    * @return Board[] array of all boards in this database.
    */
-  function getBoards(): array {
+  function getBoards(bool $hidden = false): array {
+    $clause = $hidden ? "": "WHERE `hidden`=0";
     $b = $this->conn_ro
-            ->query("SELECT * FROM `boards` ORDER BY `group` ASC, `shortname` ASC")
+            ->query("SELECT * FROM `boards` $clause ORDER BY `group` ASC, `shortname` ASC")
             ->fetchAll();
     $ret = [];
     foreach ($b as $boardinfo) {
@@ -41,6 +42,30 @@ class Model implements \IModel {
     return $ret;
   }
 
+  /**
+   * 
+   * @param string $shortname
+   * @param string $longname
+   * @param bool $worksafe
+   * @param int $pages
+   * @param int $per_page
+   * @param int $privilege
+   * @param bool $swf_board
+   * @param int $group
+   * @param bool $hidden
+   */
+  function addBoard(string $shortname, string $longname, bool $worksafe,
+          int $pages, int $per_page, int $privilege, bool $swf_board,
+          int $group, bool $hidden) {
+    $stmt = $this->conn_rw->prepare("INSERT INTO `boards` "
+            . "(`shortname`, `longname`, `worksafe`, `pages`, `perpage`, `privilege`, `swf_board`,"
+            . " `is_archive`, `first_crawl`, `last_crawl`, `group`, `hidden`) VALUES "
+            . "(:short, :long, :ws, :pages, :per, :priv, :swf, 1, UNIX_TIMESTAMP(), 0, :group, :hidden)");
+    $stmt->execute([':short'=>$shortname, ':long'=>$longname, ':ws'=>$worksafe, 
+      ':pages'=>$pages, ':per'=>$per_page, ':priv'=>$privilege, ':swf'=>$swf_board,
+      ':group'=>$group, ':hidden'=>$hidden]);
+  }
+  
   /**
    * Tries to load the given board shortname, else throws a NotFoundException.
    * 
@@ -94,8 +119,8 @@ class Model implements \IModel {
   function getThread(Board $b, int $id): Thread {
     $board = alphanum($b->getName());
     $stmt = $this->conn_ro
-                    ->prepare("SELECT * FROM `{$board}_thread` WHERE `threadid`=:id");
-    if($stmt->execute([":id"=>$id]) && $stmt->rowCount() === 1) {
+            ->prepare("SELECT * FROM `{$board}_thread` WHERE `threadid`=:id");
+    if ($stmt->execute([":id" => $id]) && $stmt->rowCount() === 1) {
       return Thread::fromArray($b, $stmt->fetch(PDO::FETCH_ASSOC));
     }
     throw new NotFoundException("Thread $id not found on board $board");
@@ -108,19 +133,19 @@ class Model implements \IModel {
    * @return Thread[] array of threads.
    */
   function getPageOfThreads(Board $board, int $pageNo): array {
-    if($pageNo < 1) {
+    if ($pageNo < 1) {
       throw new InvalidArgumentException("Invalid page number given");
     }
     $pageNo--;
-    $prefix = alphanum($board->getName())."_";
-    $perpage = (int)$board->getThreadsPerPage();
-    $tTable = $prefix."thread";
-    $number = $pageNo*$perpage;
+    $prefix = alphanum($board->getName()) . "_";
+    $perpage = (int) $board->getThreadsPerPage();
+    $tTable = $prefix . "thread";
+    $number = $pageNo * $perpage;
     $pageQuery = "SELECT {$tTable}.*  FROM {$tTable} WHERE {$tTable}.active = 1 ORDER BY ({$tTable}.sticky + {$tTable}.active) DESC, {$tTable}.lastreply DESC LIMIT $number,$perpage";
     $q = $this->conn_ro->query($pageQuery);
-    return array_map(function($row) use($board) { 
-                  return Thread::fromArray($board, $row);
-                }, $q->fetchAll(PDO::FETCH_ASSOC));
+    return array_map(function($row) use($board) {
+      return Thread::fromArray($board, $row);
+    }, $q->fetchAll(PDO::FETCH_ASSOC));
   }
 
   /**
@@ -142,10 +167,10 @@ class Model implements \IModel {
    */
   function getPost(Board $board, int $id): Post {
     $dbl = Config::getMysqliConnection();
-    $postTbl = alphanum($board->getName())."_post";
+    $postTbl = alphanum($board->getName()) . "_post";
     $stmt = $this->conn_ro->prepare("SELECT * FROM `$postTbl` WHERE `no`=:no");
-    if($stmt->execute([':no'=>$id]) == false || $stmt->rowCount() === 0){
-        throw new NotFoundException("No such post $no exists in this archive");
+    if ($stmt->execute([':no' => $id]) == false || $stmt->rowCount() === 0) {
+      throw new NotFoundException("No such post $id exists on board {$board->getName()} in this archive");
     }
     return new Post($stmt->fetch(PDO::FETCH_ASSOC));
   }
@@ -156,7 +181,18 @@ class Model implements \IModel {
    * @return Post[] the posts in order by ID.
    */
   function getAllPosts(Thread $t): array {
+    $dbl = $this->conn_ro;
+    $board = alphanum($t->getBoard()->getName());
+    $board = $board . "_";
+    $threadid = $t->getThreadId();
+    $stmt = $dbl->prepare("SELECT * FROM `{$board}post` WHERE `resto`=:thread ORDER BY `no` ASC");
     
+    if (!$stmt->execute([':thread'=>$t->getThreadId()]) || $stmt->rowCount() === 0) {
+      throw new NotFoundException("Thread #$threadid exists, but contains no posts.");
+    }
+    return array_map(function($row) use($t) {
+      return new Post($row, $t->getBoard());
+    }, $stmt->fetchAll(PDO::FETCH_ASSOC));
   }
 
   /**
@@ -176,21 +212,17 @@ class Model implements \IModel {
    * @param string $password
    * @throws NotFoundException if the user cannot be found.
    */
-  function getUser(string $username, string $password): User {
-    throw new Exception("not implemented");
-    $password = md5($password);
+  function getUser(string $username, string $password):User {
+    $hashedPass = md5($password);
     /** @var PDOStatement $stmt */
     $stmt = $this->conn_ro
-            ->prepare("SELECT * FROM `users` WHERE `username`=:name AND `password_hash`=UNHEX('$password')")
-            ->execute([':name' => $username]);
-    if ($query->num_rows) {
-      $result = $query->fetch_assoc();
-      $user = new User($result['uid'], $result['username'], $result['privilege'], $result['theme']);
+            ->prepare("SELECT * FROM `users` WHERE `username`=:name AND `password_hash`=UNHEX('$hashedPass')");
+    if ($stmt->execute([':name' => $username]) && $stmt->rowCount() == 1) {
+      $result = $stmt->fetch(PDO::FETCH_ASSOC);
+      return new User($result['uid'], $result['username'], $result['privilege'], $result['theme']);
     } else {
-      $user = null;
+      throw new Exception("Username/password pair not found.");
     }
-
-    return $user;
   }
 
   /**
@@ -200,23 +232,23 @@ class Model implements \IModel {
    * @return Board[]
    */
   function getActiveMedia(\Board $board): array {
-    $pt = alphanum($board->getName()) . "_post";
-    $tt = alphanum($board->getName()) . "_thread";
-    $threads = implode(',',$this->conn_ro
-            ->query("SELECT `threadid` FROM `$tt` WHERE `active`='1'")
-            ->fetchAll(PDO::FETCH_COLUMN, 0));
-    if($threads === "") {
+    $pt = "`".alphanum($board->getName()) . "_post`";
+    $tt = "`".alphanum($board->getName()) . "_thread`";
+    $threads = implode(',', $this->conn_ro
+                    ->query("SELECT `threadid` FROM $tt WHERE `active`='1'")
+                    ->fetchAll(PDO::FETCH_COLUMN, 0));
+    if ($threads === "") {
       return [];
     }
     $q = "SELECT "
-            . "$pt.`md5`,$pt.`fsize`,$pt.`w`,$pt.`h`,$pt.ext,$pt.tim,$pt.filename "
-            . "FROM $pt WHERE $pt.threadid IN ($threads) AND "
+            . "$pt.`md5`,$pt.`fsize`,$pt.`w`,$pt.`h`,$pt.`ext`,$pt.`tim`,$pt.`filename` "
+            . "FROM $pt WHERE $pt.`resto` IN ($threads) AND "
             . "$pt.`md5` != '' AND $pt.`deleted` = '0'";
     $query = $this->conn_ro->query($q);
     $pics = [];
     while ($reply = $query->fetch(PDO::FETCH_ASSOC)) {
-      $pics[] = [ "md5" => $reply['md5'],
-        "tim" => (int)$reply['tim'],
+      $pics[] = [ "md5" => base64_encode($reply['md5']),
+        "tim" => (int) $reply['tim'],
         "filename" => $reply['filename'],
         "ext" => $reply['ext'],
         "fsize" => (int) $reply['fsize'],
@@ -231,11 +263,11 @@ class Model implements \IModel {
   public function getBannedHashes() {
     if ($this->banned_hashes == null) {
       $q = $this->conn_ro->query("SELECT `hash` FROM `banned_hashes`");
-      
+
       $ret = array_map(function($val) {
         return bin2hex($val);
       }, $q->fetchAll(PDO::FETCH_COLUMN, 0));
-      
+
       $this->banned_hashes = $ret;
     }
     return $this->banned_hashes;
@@ -244,16 +276,16 @@ class Model implements \IModel {
   public function getReports() {
     $query = $this->conn_ro->query("SELECT *, COUNT(*) as count FROM `reports` GROUP BY `no` ORDER BY count DESC, time ASC");
     $ret = [];
-    while($row = $query->fetch(PDO::FETCH_ASSOC)){
-        $md5 = $this->conn_ro
-                ->query("SELECT md5 FROM {$row['board']}_post WHERE `no`={$row['no']}")
-                ->fetchColumn();
-        $row['md5'] = $md5;
-        $ret[] = $row;
+    while ($row = $query->fetch(PDO::FETCH_ASSOC)) {
+      $md5 = $this->conn_ro
+              ->query("SELECT md5 FROM {$row['board']}_post WHERE `no`={$row['no']}")
+              ->fetchColumn();
+      $row['md5'] = $md5;
+      $ret[] = $row;
     }
     return $ret;
   }
-  
+
   public function addReport(\Board $board, int $post, int $thread) {
     $time = time();
     $uid = Site::getUser()->getUID();
@@ -262,5 +294,5 @@ class Model implements \IModel {
             ->query("INSERT INTO `reports` (`uid`,`board`,`time`,`ip`,`no`,`threadid`) "
                     . "VALUES ('$uid','{$board->getName()}',$time,'$ip',$post,$thread)");
   }
-  
+
 }

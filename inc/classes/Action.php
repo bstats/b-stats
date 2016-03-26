@@ -14,9 +14,7 @@ class Action {
   }
   
   static function login():string {
-    if(!Site::logIn(post('username'), post('password'))) {
-      throw new Exception("Invalid username or password");
-    }
+    Site::logIn(post('username'), post('password'));
     return $_SERVER['HTTP_REFERER'] ?? "/";
   }
   

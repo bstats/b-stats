@@ -25,8 +25,9 @@ class Config {
   static function getPDOConnection() {
     if(self::$pdo == null) {
       $cfg = self::getCfg('mysql')['read-only'];
-      self::$pdo = new PDO("mysql:host={$cfg['server']};dbname={$cfg['db']};charset=utf8", $cfg['username'], $cfg['password']);
+      self::$pdo = new PDO("mysql:host={$cfg['server']};dbname={$cfg['db']};charset=utf8mb4", $cfg['username'], $cfg['password']);
       self::$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+      self::$pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
     }
     return self::$pdo;
   }
@@ -34,8 +35,9 @@ class Config {
   static function getPDOConnectionRW() {
     if(self::$pdo_rw == null) {
       $cfg = self::getCfg('mysql')['read-write'];
-      self::$pdo_rw = new PDO("mysql:host={$cfg['server']};dbname={$cfg['db']};charset=utf8", $cfg['username'], $cfg['password']);
+      self::$pdo_rw = new PDO("mysql:host={$cfg['server']};dbname={$cfg['db']};charset=utf8mb4", $cfg['username'], $cfg['password']);
       self::$pdo_rw->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+      self::$pdo_rw->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
     }
     return self::$pdo_rw;
   }

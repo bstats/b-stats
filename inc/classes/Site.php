@@ -12,6 +12,15 @@ class Site {
 
   static $html_cache = [];
 
+  /**
+   * @throws PermissionException
+   */
+  static function requirePrivilege(int $privilege) {
+    if (self::getUser()->getPrivilege() < $privilege) {
+      throw new PermissionException(self::getUser()->getPrivilege(), $privilege);
+    }
+  }
+
   static function isLoggedIn(): bool {
     return self::getUser()->getPrivilege() > 0;
   }
@@ -27,27 +36,34 @@ class Site {
   static function isOwner(): bool {
     return self::getUser()->getPrivilege() === Config::getCfg('permissions')['owner'];
   }
-  
+
   static function isBanned(): bool {
     return OldModel::banned($_SERVER['REMOTE_ADDR']);
   }
-  static function ip():string {
+
+  static function ip(): string {
     return $_SERVER['REMOTE_ADDR'];
   }
-  static function backupInProgress():bool {
-    return file_exists(self::getPath()."/inc/cfg/backup");
+
+  static function backupInProgress(): bool {
+    return file_exists(self::getPath() . "/inc/cfg/backup");
   }
-  static function logIn($username, $password): bool {
-    $user = OldModel::checkUsernamePasswordCombo($username, $password);
-    if ($user instanceof User) {
-      $_SESSION['user'] = $user;
-      $uid = $user->getUID();
-      $time = time();
-      $ip = $_SERVER['REMOTE_ADDR'];
-      Config::getMysqliConnectionRW()->query("INSERT INTO `logins` (`uid`,`time`,`ip`) VALUES ($uid,$time,'$ip')");
-      return true;
-    }
-    return false;
+
+  /**
+   * Logs in the session user. Throws exception if username
+   * and password don't match any users.
+   * 
+   * @param string $username
+   * @param string $password
+   * @throws NotFoundException
+   */
+  static function logIn(string $username, string $password) {
+    $user = Model::get()->getUser($username, $password);
+    $_SESSION['user'] = $user;
+    $uid = $user->getUID();
+    $time = time();
+    $ip = $_SERVER['REMOTE_ADDR'];
+    Config::getMysqliConnectionRW()->query("INSERT INTO `logins` (`uid`,`time`,`ip`) VALUES ($uid,$time,'$ip')");
   }
 
   static function logOut() {

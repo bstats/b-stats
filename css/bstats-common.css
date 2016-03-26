@@ -10,13 +10,12 @@ h1,h2,h3,h4,h5,h6{
   text-align:center;
   font-size:75%;
 }
-
 .navbar{
 	position:fixed;
 	z-index:100;
 	top:0px;
-        left:0px;
-        right:0px;
+    left:0px;
+    right:0px;
 	vertical-align:middle;
 	cursor:default;
 	display:inline-block;
@@ -186,7 +185,7 @@ a.clicked, a.clicked:hover {
     
 }
 .dashTable td{
-    width:50%;
+    /*width:50%;*/
 }
 .dashTable tr td:first-of-type {
     font-weight: bold;
@@ -295,13 +294,15 @@ ul.stylemenu ul{
     list-style:none;
     position:absolute;
     z-index: 101;
-    left:-9999px; /* Hide off-screen when not needed (this is more accessible than display:none;) */
+    width: 8em;
+    margin-top: 5px;
+    right:9999em; /* Hide off-screen when not needed (this is more accessible than display:none;) */
 }
 ul.stylemenu ul li{
     float:none;
 }
 ul.stylemenu li:hover ul{ /* Display the dropdown on hover */
-    left:-43px; /* Bring back on-screen when needed */
+    right:0px; /* Bring back on-screen when needed */
 }
 strike strike {
     text-decoration: none;

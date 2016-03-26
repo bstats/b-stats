@@ -19,14 +19,15 @@ class Router {
         // API endpoints begin with api
         $page = PublicApi::run($exploded);
         break;
-      case "adminapi":
-        
+      case "admin":
+        $page = AdminApi::run($exploded);
         break;
       case "_":
         // Fuuka API support
         $page = FuukaApiAdaptor::run($exploded);
         break;
       default:
+        $pages = json_decode(file_get_contents("inc/cfg/pages.json"), true);
         $boards = Model::get()->getBoards();
         if (array_key_exists($base, $boards)) {
           $board = $boards[$base];
@@ -44,6 +45,11 @@ class Router {
                   throw new Exception("Invalid thread id provided");
                 }
                 break;
+              case "post":
+                $post = Model::get()->getPost($board, $exploded[3] ?? 0);
+                header("Location: /{$board->getName()}/thread/{$post->getThreadId()}#{$post->getNo()}");
+                exit;
+                break;
               case "":
                 $page = new BoardIndexPage($boards[$base], 1);
                 break;
@@ -55,12 +61,13 @@ class Router {
                 }
                 break;
             }
-          } else {
+          } else if(!array_key_exists($base, $pages)) {
             header("Location: $path/");
             exit;
+          } else {
+            $page = new $pages[$base]();
           }
         } else {
-          $pages = json_decode(file_get_contents("inc/cfg/pages.json"), true);
           if (array_key_exists($base, $pages)) {
             $page = new $pages[$base]();
           }

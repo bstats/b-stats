@@ -33,37 +33,27 @@ class Post implements JsonSerializable {
   private $deleted;
   private $imgbanned;
   
-  /**
-   * 
-   * @param Board $board
-   * @param int|string $no
-   * @return Post
-   */
-  public static function fromDB($board,$no) {
-    return OldModel::getPost($board,$no);
-  }
-  
   function __construct($no,$board='b'){
     if(is_array($no)){
       $arr = $no;
       $this->no = $arr['no'];
-      $this->threadid = $arr['threadid'];
+      $this->threadid = $arr['resto'];
       $this->time = $arr['time'];
       $this->tim = $arr['tim'];
       $this->id = (isset($arr['id']) && $arr['id'] != '') ? $arr['id'] :
                   (isset($arr['ns_id']) && $arr['ns_id'] != '' ? $arr['ns_id'] : "");
       $this->name = $arr['name'];
       $this->email = $arr['email'];
-      $this->sub = $arr['subject'];
+      $this->sub = $arr['sub'];
       $this->trip = $arr['trip'];
-      $this->md5 = $arr['md5'];
-      $this->md5bin = base64_decode(str_replace("-","/",$arr['md5']));
-      $this->filename = $arr['filename'];
-      $this->fsize = $arr['fsize'];
-      $this->ext = $arr['ext'];
-      $this->com = $arr['comment'];
-      $this->w = $arr['w'];
-      $this->h = $arr['h'];
+      $this->com = $arr['com'];
+      $this->md5 = base64_encode($arr['md5']) ?? null;
+      $this->md5bin = $arr['md5'] ?? null;
+      $this->filename = $arr['filename'] ?? "";
+      $this->fsize = $arr['fsize'] ?? 0;
+      $this->ext = $arr['ext'] ?? "";
+      $this->w = $arr['w'] ?? 0;
+      $this->h = $arr['h'] ?? 0;
       $this->dnt = $arr['dnt'] ?? 0;
       $this->images = $arr['images'] ?? 0;
       $this->replies = $arr['replies'] ?? 0;
@@ -234,7 +224,7 @@ END;
     else
       $ret =  <<<END
 <div class="postContainer {$t}Container" id="pc{$this->no}">
-<a class="anchor" id="p{$this->no}"></a><div id="p{$this->no}" class="post {$t}">
+<div id="p{$this->no}" class="post {$t}">
 END;
 
     $icons =($sticky ? PHP_EOL.'<img src="/image/sticky.gif" alt="Sticky" title="Sticky" class="stickyIcon">' : '').
@@ -280,7 +270,7 @@ END;
       }
       else {
           $thumb = "<a class='fileThumb' href='{$this->getImgUrl()}' target='_blank'>".
-                   "<img class='lazyload' data-original='{$this->getThumbUrl()}' alt='img' data-md5='{$this->md5}' data-md5-filename='$md5Filename' data-ext='{$this->ext}' data-full-img='{$this->getImgUrl()}' width='$thumbW' height='$thumbH' data-width='{$this->w}' data-height='{$this->h}' />".
+                   "<img class='lazyload' data-original='{$this->getThumbUrl()}' src='data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACwAAAAAAQABAAACAkQBADs=' alt='' data-md5='{$this->md5}' data-md5-filename='$md5Filename' data-ext='{$this->ext}' data-full-img='{$this->getImgUrl()}' width='$thumbW' height='$thumbH' data-width='{$this->w}' data-height='{$this->h}' />".
                    "</a>";
       }
       $chanMedia = $this->board == 'f' ? '//i.4cdn.org/f/src/'.$this->filename.$this->ext : '//i.4cdn.org/'.$this->board.'/src/'.$this->tim.$this->ext;

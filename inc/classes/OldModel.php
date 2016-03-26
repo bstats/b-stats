@@ -5,52 +5,6 @@
  * 
  */
 class OldModel {
-  
-    /**
-     * Fetches all boards.
-     * 
-     * @return array 
-     */
-    static function getBoards(){
-        $q = Config::getMysqliConnection()->query("SELECT `id`,`shortname` FROM `boards` ORDER BY `group` ASC, `shortname` ASC");
-        $return = array();
-        while($r = $q->fetch_assoc())
-            $return[$r['shortname']] = new Board($r['shortname']);
-        return $return;
-    }
-    
-    /**
-     * Fetches board name and related info.
-     * 
-     * @param string $board The board shortname.
-     * @return mixed array [shortname,longname,worksafe,pages,perpage], or FALSE on failure.
-     */
-    static function getBoardInfo($board){
-        $board = Config::getMysqliConnection()->real_escape_string($board);
-        $q = Config::getMysqliConnection()->query("SELECT * FROM `boards` WHERE `shortname`='$board'");
-        if($q->num_rows > 0)
-            $r = $q->fetch_assoc();
-        else
-            $r = false;
-        return $r;
-    }
-    
-    public static function getNumberOfThreads($board){
-        $dbl = Config::getMysqliConnection();
-        $board = $dbl->real_escape_string($board);
-        $data = $dbl->query("SELECT COUNT(threadid) as count FROM `{$board}_thread`")->fetch_assoc();
-        $ret = $data['count'];
-        return $ret;
-    }
-    
-    public static function getNumberOfPosts($board){
-        $dbl = Config::getMysqliConnection();
-        $board = $dbl->real_escape_string($board);
-        $data = $dbl->query("SELECT COUNT(`no`) as count FROM `{$board}_post`")->fetch_assoc();
-        $ret = $data['count'];
-        return $ret;
-    }
-    
     /**
      * Fetches a complete thread.
      * 
@@ -71,27 +25,6 @@ class OldModel {
             throw new NotFoundException ("Thread does not exist in the archive.");
         return array($threadQ,$postQ);
     }
-    
-    /**
-     * Fetch all the thread's details. Useful for creating a thread.
-     * 
-     * @param string $board The board (shortname)
-     * @param int $threadid The thread id
-     */
-    static function getThreadDetails($board,$threadid)
-    {
-      $dbl = Config::getMysqliConnection();
-      $board = $dbl->real_escape_string($board);
-      $threadid = $dbl->real_escape_string($threadid);
-      $q = $dbl->query("SELECT * FROM `{$board}_thread` WHERE `threadid`='$threadid'");
-      
-      if ($q->num_rows > 0) {
-        return $q->fetch_assoc();
-      } else {
-        throw new NotFoundException("Thread does not exist in the archive.");
-      }
-  }
-    
     /**
      * Fetches a single post query object.
      * 
@@ -109,36 +42,6 @@ class OldModel {
             throw new NotFoundException("No such post $no exists in this archive");
         }
         return $postQ;
-    }
-    
-    static function getPost($board,$no)
-    {
-      $dbl = Config::getMysqliConnection();
-      $board = $dbl->real_escape_string($board);
-      $board = $board."_";
-      $no = $dbl->real_escape_string($no);
-      $postQ = $dbl->query("SELECT * FROM `{$board}post` WHERE `no`='$no'");
-      if($postQ == false || $postQ->num_rows === 0){
-          throw new NotFoundException("No such post $no exists in this archive");
-      }
-      return new Post($postQ->fetch_assoc());
-    }
-    
-    static function getAllPosts($board,$threadid)
-    {
-      $dbl = Config::getMysqliConnection();
-      $board = $dbl->real_escape_string($board);
-      $board = $board."_";
-      $threadid = $dbl->real_escape_string($threadid);
-      $postQ = $dbl->query("SELECT * FROM `{$board}post` WHERE `threadid`='$threadid' ORDER BY `no` ASC");
-      if($postQ == false || $postQ->num_rows === 0){
-          throw new NotFoundException("Thread #$threadid exists, but contains no posts.");
-      }
-      $posts = [];
-      while($row = $postQ->fetch_assoc()){
-        $posts[] = new Post($row,$board);
-      }
-      return $posts;
     }
     /**
      * Get all the Threads for a given page #
@@ -281,30 +184,6 @@ class OldModel {
             return $q->fetch_assoc();
         else
             return false;
-    }
-    
-    /**
-     * Checks a username/password combo and returns a User object.
-     * @param string $username
-     * @param string $password
-     * @return User|null A User object for the user, or null.
-     */
-    static function checkUsernamePasswordCombo($username,$password){
-        $dbl = Config::getMysqliConnection();
-        
-        $username = $dbl->real_escape_string($username);
-        $password = md5($password);
-        
-        $query = $dbl->query("SELECT * FROM `users` WHERE `username`='$username' AND `password_hash`=UNHEX('$password')");
-        if($query->num_rows){
-            $result = $query->fetch_assoc();
-            $user = new User($result['uid'],$result['username'],$result['privilege'],$result['theme']);
-        }
-        else{
-            $user = null;
-        }
-        
-        return $user;
     }
     
     public static function getReports(){

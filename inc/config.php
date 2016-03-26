@@ -1,10 +1,10 @@
 <?php
 // Set class autoloader
 function loader($className) {
-  if(file_exists("inc/classes/$className.php")) {
-    require_once "inc/classes/$className.php";
-  } elseif (file_exists("pages/$className.php")) {
-    require_once "pages/$className.php";
+  if(file_exists(__DIR__."/classes/$className.php")) {
+    require_once __DIR__."/classes/$className.php";
+  } elseif (file_exists(__DIR__."/pages/$className.php")) {
+    require_once __DIR__."/pages/$className.php";
   }
   return false;
 }

@@ -85,9 +85,7 @@ class FancyPage extends Page {
     }
 
     if ($this->user->getPrivilege() < $this->requiredLevel) {
-      $this->body = Site::parseHtmlFragment('accessDenied.html', ['__privilege__', '__required__'], [$this->user->getPrivilege(), $this->requiredLevel]);
-      $this->title = "/b/ stats: ACCESS DENIED";
-      die($this->display());
+      throw new PermissionException($this->user->getPrivilege(), $this->requiredLevel);
     }
 
     $navBarExtra = "";

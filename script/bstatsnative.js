@@ -421,6 +421,10 @@ var updateAgo = function($el){
     $el.text(ago($el.attr("data-utc")));
 }
 
+$(window).on("hashchange", function() {
+  window.scrollTo(window.scrollX, window.scrollY - 30);
+});
+
 $(document).ready(function(){
     fixAllCrossLinks('');
     preview('');

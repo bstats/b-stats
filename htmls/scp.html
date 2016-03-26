@@ -1,0 +1,79 @@
+<br>
+<div class="centertext">[<a href="/">HOME</a>]</div>
+<h2>Server Control Panel</h2>
+<div class="centertext">
+  <!-- uptime -->
+</div><br>
+<table class='reportTable center'>
+  <thead>
+  <tr>
+    <th colspan='5'>Users</th>
+  </tr>
+  <tr>
+    <th style='width:1.5em;'>ID</th><th>Username</th><th style='width:3em;'>Priv</th><th style='width:5em;'>Style</th><th>Actions</th>
+  </tr>
+  </thead>
+  <tbody id='userTable' style='max-height:20em; overflow-y:scroll;'>
+    <tr><td>1</td><td>terrance</td><td>9</td><td>yotsuba</td><td></td></tr>
+  </tbody>
+</table>
+<br>
+<table class='dashTable center'>
+    <tr>
+        <th colspan='2'>Add User</th>
+    </tr>
+    <tr>
+        <td>Username</td> <td><input style='width:90%' type='text' name='username'></td>
+    </tr>
+    <tr>
+        <td>Password</td> <td><input style='width:90%' type='text' name='password'></td>
+    </tr>
+    <tr>
+        <td>Theme</td><td><select name='theme'><option>yotsuba</option><option>tomorrow</option></select></td>
+    </tr>
+    <tr>
+        <td>Level</td><td><select name='privilege'>
+                <option value='1'>1 - normal user</option>
+                <option value='2'>2 - normal + search</option>
+                <option value='3'>3 - moderator</option>
+                <option value='9'>9 - terrance / admin</option>
+                </select></td>
+    </tr>
+    <tr>
+      <td class='center' colspan='2'><button>Add</button></td>
+    </tr>
+</table>
+<h3>Archivers</h3>
+<table class='dashTable center'>
+  <thead>
+    <tr><th colspan='3'>
+        <a href='javascript:Archivers.load()'>Refresh</a></th></tr>
+    <tr><th style='width:4em'>Board</th><th>Status</th><th>Actions</th></tr>
+  </thead>
+  <tbody id='archiverTable'>
+    <tr>
+      <td>b</td><td>Running</td><td>start/stop</td>
+    </tr>
+  </tbody>
+</table>
+<p class='center centertext'>
+  <textarea readonly style='font-family:"Courier New",monospace;background-color:black; color:white;' rows=20 cols=83 id='buffer'></textarea>
+</p>
+<br>
+<table class='reportTable center' style='width:1024px'>
+  <thead>
+    <tr>
+      <th colspan='7'>Requests</th>
+    </tr>
+    <tr>
+      <th>IP</th><th>Username</th><th>Email</th><th>Reason</th><th>Time</th><th>Accepted</th><th>Actions</th>
+    </tr>
+  </thead>
+  <tbody id='requestsTable' style='max-height:20em; overflow-y:scroll;'>
+    <tr>
+      <td>ip</td><td>name</td><td>email</td><td>reason</td><td>time</td><td>accepted</td><td>actions</td>
+    </tr>
+  </tbody>
+</table>
+
+<script type='text/javascript' src='/script/scp.js'></script>
