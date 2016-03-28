@@ -1,7 +1,8 @@
 <?php
 
 class User {
-
+  public static $guest;
+  
   private $uid;
   private $username;
   private $privilege;
@@ -35,7 +36,6 @@ class User {
       if ($this->uid != 0) {
         OldModel::updateUserTheme($this->uid, $theme);
       }
-      $_SESSION['style'] = $theme;
       $this->theme = $theme;
     }
   }
@@ -43,5 +43,6 @@ class User {
   function canSearch() {
     return $this->privilege >= Site::LEVEL_SEARCH;
   }
-
 }
+
+User::$guest = new User(0, "guest", 0, "yotsuba");

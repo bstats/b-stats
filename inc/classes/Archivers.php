@@ -16,7 +16,7 @@ class Archivers {
   const RUNNING = "Running";
   const STOPPING = "Stopping";
 
-  static function getStatus($board):string {
+  static function getStatus(string $board):string {
     if (file_exists(Site::getPath() . "/backend/$board.pid")) {
       $pid = file_get_contents(Site::getPath() . "/backend/$board.pid");
       if (PHP_OS == "Linux") {
@@ -48,7 +48,13 @@ class Archivers {
     return self::STOPPED;
   }
   
-  static function getRecentOutput($board):string {
+  /**
+   * Gets the output history of the archiver from screen.
+   * 
+   * @param type $board
+   * @return string output history
+   */
+  static function getOutput(string $board):string {
     $status = self::getStatus($board);
     if($status == "Running" || $status == "Stopping") {
       $path = Site::getPath()."/backend/$board.buff";
@@ -60,8 +66,16 @@ class Archivers {
     }
     return "";
   }
+  
+  /**
+   * 
+   * @param type $board
+   */
+  static function getDetailedStatus(string $board):array {
+    
+  }
 
-  static function run($board):bool {
+  static function run(string $board):bool {
     if (file_exists(Site::getPath() . "/backend/$board-archiver.php")) {
       if (self::getStatus($board) == self::STOPPED || self::getStatus($board) == self::STOPPED_UNCLEAN) {
         exec("cd " . Site::getPath() . "/backend/ && screen -dmS $board php $board-archiver.php");

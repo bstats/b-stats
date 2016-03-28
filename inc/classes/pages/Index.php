@@ -2,7 +2,7 @@
 
 class Index extends FancyPage {
   function __construct() {
-    parent::__construct("b-stats archive","",0);
+    parent::__construct(Config::getCfg('site')['pagetitle'],"",0);
     $html = "<div class='boardlist_big'><h1>Archived Boards</h1><hr style='width:64px;'>";
     foreach(Model::get()->getBoards() as $b){
       $html .= Site::parseHtmlFragment("indexthread.html", 

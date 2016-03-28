@@ -1,5 +1,6 @@
 {
   "search" : 2,
   "delete" : 3,
+  "admin" : 3,
   "owner" : 9
 }

@@ -24,6 +24,12 @@ try {
                   ['__privilege__', '__required__'], 
                   [$ex->has, $ex->required])))
           ->display());
+} catch (PDOException $ex) {
+  $page = new Page("Database Error","");
+  $page->appendToBody(div('There was an error with the database.<br>'
+          . 'It may be misconfigured.','centertext'));
+  header("HTTP/1.0 500 Internal Server Error");
+  echo $page->display();
 } catch (Exception $ex) {
   $page = new FancyPage("Error", "", 0);
   $page->setBody(

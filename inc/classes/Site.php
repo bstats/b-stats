@@ -63,11 +63,11 @@ class Site {
     $uid = $user->getUID();
     $time = time();
     $ip = $_SERVER['REMOTE_ADDR'];
-    Config::getMysqliConnectionRW()->query("INSERT INTO `logins` (`uid`,`time`,`ip`) VALUES ($uid,$time,'$ip')");
+    Config::getPDOConnectionRW()->query("INSERT INTO `logins` (`uid`,`time`,`ip`) VALUES ($uid,$time,'$ip')");
   }
 
   static function logOut() {
-    $_SESSION['user'] = null;
+    $_SESSION['user'] = User::$guest;
   }
 
   /**
@@ -76,20 +76,20 @@ class Site {
    */
   static function getUser(): User {
     if (!isset($_SESSION['user'])) {
-      $_SESSION['user'] = new User(0, "guest", 0, "yotsuba");
+      $_SESSION['user'] = User::$guest;
     }
     return $_SESSION['user'];
   }
 
-  static function getPath() {
+  static function getPath():string {
     return dirname(__FILE__, 3);
   }
 
-  static function getImageHostname() {
+  static function getImageHostname():string {
     return Config::getCfg("servers")["images"]['hostname'];
   }
 
-  static function getThumbHostname() {
+  static function getThumbHostname():string {
     return Config::getCfg("servers")["thumbs"]['hostname'];
   }
 

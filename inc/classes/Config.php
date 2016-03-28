@@ -63,14 +63,6 @@ class Config {
     return self::$mysqli;
   }
 
-  /**
-   * Close the read-only connection.
-   */
-  static function closeMysqliConnection(){
-    self::$mysqli->close();
-    self::$mysqli = null;
-  }
-
   /** 
    * Gets an instance of mysqli with read+write permissions.
    * @return mysqli 
@@ -88,23 +80,6 @@ class Config {
     }
     return self::$mysqli_rw;
   }
-
-  /**
-   * Close the read+write connection.
-   */
-  static function closeMysqliConnectionRW(){
-    self::$mysqli_rw->close();
-    self::$mysqli_rw = null;
-  }
-
-  /**
-   * Load a value from the SQL configuration file.
-   * @param string $key
-   * @return mixed
-   */
-  static function getSqlCfg($key){
-    return self::getCfg("mysql")[$key];
-  }
   
   /**
    * Get the named config file.
@@ -117,8 +92,8 @@ class Config {
     if(isset(self::$json_cache[$name])) {
       return self::$json_cache[$name];
     }
-    if(file_exists(dirname(__FILE__)."/../cfg/$name.json")) {
-      self::$json_cache[$name] = json_decode(file_get_contents(dirname(__FILE__)."/../cfg/$name.json"), true);
+    if(file_exists(dirname(__FILE__,3)."/cfg/$name.json")) {
+      self::$json_cache[$name] = json_decode(file_get_contents(dirname(__FILE__,3)."/cfg/$name.json"), true);
       return self::$json_cache[$name];
     }
     throw new NotFoundException("Couldn't find config: $name");

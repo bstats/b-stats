@@ -199,13 +199,11 @@ class Thread implements Iterator {
    */
   function loadLastN($n) {
     try {
-      $posts = OldModel::getLastNPosts($this->board->getName(), $this->threadId, $n);
+      $posts = Model::get()->getLastNReplies($this, $n);
       foreach ($posts as $p) {
-        $this->addPost(new Post($p));
+        $this->addPost($p);
       }
-    } catch (Exception $e) {
-      
-    }
+    } catch (Exception $e) { }
     return $this;
   }
 

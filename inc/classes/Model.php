@@ -169,7 +169,6 @@ class Model implements \IModel {
    * @return Post the post
    */
   function getPost(Board $board, int $id): Post {
-    $dbl = Config::getMysqliConnection();
     $postTbl = alphanum($board->getName()) . "_post";
     $stmt = $this->conn_ro->prepare("SELECT * FROM `$postTbl` WHERE `no`=:no");
     if ($stmt->execute([':no' => $id]) == false || $stmt->rowCount() === 0) {
@@ -198,23 +197,23 @@ class Model implements \IModel {
     }, $stmt->fetchAll(PDO::FETCH_ASSOC));
   }
   
-  function getLastNPosts(Thread $t, int $n) {
+  /**
+   * Get the last N replies
+   * @param Thread $t
+   * @param int $n
+   * @return Post[]
+   * @throws Exception
+   */
+  function getLastNReplies(Thread $t, int $n) {
     $board = $t->getBoard();
     $threadId = $t->getThreadId();
-    $prefix = $board->getName()."_";
-    $pTable = $prefix."post";
+    $pTable = $board->getName()."_post";
     $query = "SELECT * FROM $pTable WHERE resto='$threadId' AND `resto` <> `no` ORDER BY `no` DESC LIMIT 0,$n";
-    $result = $dbl->query($query);
-    $postArr = array();
-    if($result->num_rows > 0){
-      while($row = $result->fetch_assoc())
-          $postArr[] = $row;
+    $result = $this->conn_ro->query($query);
+    if ($result->rowCount() > 0) {
+      return array_reverse(array_map(function($el){ return new Post($el); }, $result->fetchAll(PDO::FETCH_ASSOC)));
     }
-    else
-    {
-      throw new Exception("Thread $thread contains no posts!");
-    }
-    return array_reverse($postArr);
+    throw new Exception("Thread $threadId contains no replies!");
   }
 
   /**

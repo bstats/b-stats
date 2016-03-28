@@ -19,15 +19,15 @@ class Board implements ArrayAccess, JsonSerializable {
     return $this->name;
   }
 
-  public function getName() {
+  public function getName():string {
     return $this->name;
   }
 
-  public function getLongName() {
+  public function getLongName():string {
     return $this->name_long;
   }
 
-  public function isWorksafe() {
+  public function isWorksafe():bool {
     return (boolean) ($this->worksafe);
   }
 
@@ -55,15 +55,15 @@ class Board implements ArrayAccess, JsonSerializable {
     return $this->privilege;
   }
 
-  public function getFirstCrawl() {
+  public function getFirstCrawl():int {
     return $this->first_crawl;
   }
 
-  public function getLastCrawl() {
+  public function getLastCrawl():int {
     return $this->last_crawl;
   }
 
-  public function getBoardInfo() {
+  public function getBoardInfo():array {
     return $this->jsonSerialize();
   }
   

@@ -31,6 +31,7 @@
 class AdminApi {
   public static function run(array $breadcrumbs):IPage {
     try {
+      Site::requirePrivilege(Config::getCfg('permissions')['admin']);
       if(count($breadcrumbs) >= 3) {
         $method = strtolower(alphanum($breadcrumbs[2]));
         if($method != "run" && method_exists(self::class, $method)) {
@@ -45,7 +46,6 @@ class AdminApi {
   }
   
   public static function boards4chan(array $path):array {
-    Site::requirePrivilege(Config::getCfg('permissions')['delete']);
     return json_decode(file_get_contents("https://a.4cdn.org/boards.json"), true);
   }
   
@@ -105,7 +105,7 @@ class AdminApi {
         Archivers::stop($board->getName());
         return ['result'=>"Stopping"];
       case "output":
-        return ['output'=>Archivers::getRecentOutput($board->getName())];
+        return ['output'=>Archivers::getOutput($board->getName())];
       default:
         throw new Exception("Invalid command");
     }
@@ -116,7 +116,6 @@ class AdminApi {
   }
   
   public static function banImage(array $path):array {
-    Site::requirePrivilege(Config::getCfg('permissions')['delete']);
   }
   
   public static function banReporter(array $path):array {
@@ -124,14 +123,16 @@ class AdminApi {
   }
   
   public static function deletePost(array $path):array {
-    Site::requirePrivilege(Config::getCfg('permissions')['delete']);
   }
   
   public static function deleteReport(array $path):array {
-    Site::requirePrivilege(Config::getCfg('permissions')['delete']);
   }
   
   public static function restorePost(array $path):array {
+    Site::requirePrivilege(Config::getCfg('permissions')['owner']);
+  }
+  
+  public static function configs(array $path):array {
     Site::requirePrivilege(Config::getCfg('permissions')['owner']);
   }
   

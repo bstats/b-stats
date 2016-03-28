@@ -45,8 +45,8 @@ class FancyPage extends Page {
 
     if (!$this->clearHeader) {
       $this->header .= Site::parseHtmlFragment('pagebody.html', 
-              ['<!-- boardlist -->'], 
-              [Board::getBoardList()]);
+              ['<!-- boardlist -->','<!-- name -->','<!-- subtitle -->'], 
+              [Board::getBoardList(), Config::getCfg('site')['name'], Config::getCfg('site')['subtitle']]);
 
       if ($_SERVER['SCRIPT_NAME'] != "/index.php") {
         if ($this->board == null) {

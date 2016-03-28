@@ -27,7 +27,7 @@ class Router {
         $page = FuukaApiAdaptor::run($exploded);
         break;
       default:
-        $pages = json_decode(file_get_contents("inc/cfg/pages.json"), true);
+        $pages = Config::getCfg('pages');
         $boards = Model::get()->getBoards();
         if (array_key_exists($base, $boards)) {
           $board = $boards[$base];
