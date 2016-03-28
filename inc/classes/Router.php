@@ -28,7 +28,7 @@ class Router {
         break;
       default:
         $pages = Config::getCfg('pages');
-        $boards = Model::get()->getBoards();
+        $boards = Model::get()->getBoards(true);
         if (array_key_exists($base, $boards)) {
           $board = $boards[$base];
           if (isset($exploded[2])) {

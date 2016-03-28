@@ -42,10 +42,15 @@ class BoardIndexPage extends BoardPage {
       $main->append($thread->displayThread());
       $main->append("\n<hr>\n");
     }
+    $main->append($this->renderPageNumbers($page));
+    $this->appendToBody($main);
+  }
+  
+  private function renderPageNumbers(int $page):string {
     if($page == 1){
       $linkList = Site::parseHtmlFragment("pagelist/pagelist_first.html");
     }
-    elseif(1 < $page && $page < $this->board->getPages() - 1){
+    elseif(1 < $page && $page < $this->board->getArchivePages() - 1){
       $linkList = Site::parseHtmlFragment("pagelist/pagelist_middle.html");
     }
     else{
@@ -59,8 +64,24 @@ class BoardIndexPage extends BoardPage {
         $pages .= "[<a href='$p'>$p</a>] ";
       }
     }
-    $main->append(str_replace(["_prev_","_next_","_pages_"],[$page - 1, $page + 1, $pages],$linkList));
-    $this->appendToBody($main);
+    $start = max([$page - 7, $this->board->getPages() + 1]);
+    $end = min([$page + 8, $this->board->getArchivePages() + 1]);
+    if($end > $this->board->getPages()) {
+      if ($start > $this->board->getPages() + 1) {
+        $pages .= "[...] ";
+      }
+      for($i = $start; $i < $end; $i++) {
+        if ($i == $page) {
+          $pages .= "[<strong><a href='$i'>$i</a></strong>] ";
+        } else {
+          $pages .= "[<a href='$i'>$i</a>] ";
+        }
+      }
+      if($end < $this->board->getArchivePages()) {
+        $pages .= "[...] ";
+      }
+    }
+    return str_replace(["_prev_","_next_","_pages_"],[$page - 1, $page + 1, $pages],$linkList);
   }
   
   private function renderSwfBoard() {

@@ -38,6 +38,10 @@ class Board implements ArrayAccess, JsonSerializable {
   public function getPages():int {
     return $this->pages;
   }
+  
+  public function getArchivePages():int {
+    return ceil($this->getNoThreads() / $this->perpage);
+  }
 
   public function getThreadsPerPage():int {
     return $this->perpage;

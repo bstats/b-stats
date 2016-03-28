@@ -114,7 +114,7 @@ function loadExtern(postID,board){
             dataType: "html",
             headers: {"X-Requested-With":"Ajax"},
             url: protocol+'//'+host+'/api.php',
-            type: "POST",
+            type: "GET",
             data: "a=post&id="+postID+"&b="+board
         }).success(function(data){
             apiPosts[postID] = data;

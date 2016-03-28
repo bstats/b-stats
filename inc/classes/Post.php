@@ -1,4 +1,6 @@
 <?php
+
+class_exists('HtmlElement');
 /**
  * The Post class for rendering posts in html or json.
  * 
@@ -282,9 +284,12 @@ END;
         <a class="imageLink" rel="noreferrer" href="$chanMedia" target="_blank" title="{$this->filename}{$this->ext}">{$this->filename}{$this->ext}</a>
             ($humanFilesize{$this->w}x{$this->h}, 
 END;
-      $ret .= $this->board == 'f' ? $this->tag.")" : "<span title='{$this->filename}{$this->ext}'>{$this->tim}{$this->ext}</span>)";
+      $ret .= $this->board == 'f' ? $this->tag.")" : "<span title='{$this->filename}{$this->ext}'>{$this->tim}{$this->ext}</span>) ";
+      $ret .= a('iqdb',"http://iqdb.org/?url=http://thumbs.b-stats.org/{$md5code}.jpg")->set("target","_blank").'&nbsp;'
+              .a('google',"http://www.google.com/searchbyimage?image_url=http://thumbs.b-stats.org/{$doublecode}.jpg")->set("target","_blank").'&nbsp;'
+              .a('others',"/{$this->board}/search/md5/{$this->md5}")->set("target","_blank").'&nbsp;'
+              .a('full',$fullImgLink)->set("target",'_blank');
       $ret .= <<<END
-            <a target='_blank' title='iqdb image search' href='http://iqdb.org/?url=http://thumbs.b-stats.org/{$md5code}.jpg'>iqdb</a>&nbsp;<a target='_blank' title='Reverse Google Image Search' href='http://www.google.com/searchbyimage?image_url=http://thumbs.b-stats.org/{$doublecode}.jpg'>google</a>&nbsp;<a target='_blank' title='Other posts with this image' href='/{$this->board}/search/md5/{$this->md5}'>others</a>&nbsp;<a target='_blank' title='Full image (archive)' href='$fullImgLink'>full</a>
     </span>&nbsp;
 </div>
 $thumb

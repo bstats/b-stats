@@ -4,7 +4,7 @@ class Catalog extends BoardPage {
   public function __construct(\Board $board) {
     parent::__construct($board);
     if($board->isSwfBoard()) {
-      throw Exception("Catalogs don't work on upload boards");
+      throw new Exception("Catalogs don't work on upload boards");
     }
     $this->addToHead("<link rel='stylesheet' href='/css/bstats-catalog.css' type='text/css'>");
     $catalog = OldModel::getCatalog($board,false);

@@ -1,12 +1,12 @@
 <?php
 include 'inc/config.php';
 require_once 'inc/globals.php';
-switch($_REQUEST['a']){
+switch(get('a')){
     case 'post':
-        $board = isset($_REQUEST['b']) ? $_REQUEST['b'] : 'b';
-        $no = $_REQUEST['id'];
+        $board = get('b');
+        $no = get('id');
         try{
-            $post = new Post(OldModel::getPostQuery($board, $no)->fetch_assoc(),$board);
+            $post = Model::get()->getPost(Model::get()->getBoard($board), $no);
             echo str_replace('data-original','src',$post->display());
         }
         catch(Exception $e){

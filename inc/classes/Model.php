@@ -129,10 +129,11 @@ class Model implements \IModel {
   /**
    * Gets a page worth of threads for the given board.
    * @param Board $board
-   * @param int $pageNo
+   * @param int $pageNo 
+   * @param bool $onlyActive only show active threads
    * @return Thread[] array of threads.
    */
-  function getPageOfThreads(Board $board, int $pageNo): array {
+  function getPageOfThreads(Board $board, int $pageNo, bool $onlyActive = false): array {
     if ($pageNo < 1) {
       throw new InvalidArgumentException("Invalid page number given");
     }
@@ -142,7 +143,7 @@ class Model implements \IModel {
     $tTable = $prefix . "thread";
     $number = $pageNo * $perpage;
     $pageQuery = "SELECT $tTable.*  FROM $tTable "
-            . "WHERE $tTable.active = 1 "
+            . ($onlyActive ?  "WHERE $tTable.active = 1 " : "")
             . "ORDER BY ($tTable.sticky * $tTable.active) DESC, $tTable.lastreply DESC "
             . "LIMIT $number,$perpage";
     $q = $this->conn_ro->query($pageQuery);
@@ -174,7 +175,7 @@ class Model implements \IModel {
     if ($stmt->execute([':no' => $id]) == false || $stmt->rowCount() === 0) {
       throw new NotFoundException("No such post $id exists on board {$board->getName()} in this archive");
     }
-    return new Post($stmt->fetch(PDO::FETCH_ASSOC));
+    return new Post($stmt->fetch(PDO::FETCH_ASSOC), $board->getName());
   }
 
   /**
@@ -192,8 +193,8 @@ class Model implements \IModel {
     if (!$stmt->execute([':thread'=>$t->getThreadId()]) || $stmt->rowCount() === 0) {
       throw new NotFoundException("Thread #$threadid exists, but contains no posts.");
     }
-    return array_map(function($row) use($t) {
-      return new Post($row, $t->getBoard());
+    return array_map(function($row) use($board) {
+      return new Post($row, $board);
     }, $stmt->fetchAll(PDO::FETCH_ASSOC));
   }
   
@@ -211,7 +212,7 @@ class Model implements \IModel {
     $query = "SELECT * FROM $pTable WHERE resto='$threadId' AND `resto` <> `no` ORDER BY `no` DESC LIMIT 0,$n";
     $result = $this->conn_ro->query($query);
     if ($result->rowCount() > 0) {
-      return array_reverse(array_map(function($el){ return new Post($el); }, $result->fetchAll(PDO::FETCH_ASSOC)));
+      return array_reverse(array_map(function($el)use($board){ return new Post($el,$board); }, $result->fetchAll(PDO::FETCH_ASSOC)));
     }
     throw new Exception("Thread $threadId contains no replies!");
   }

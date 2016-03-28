@@ -7,12 +7,13 @@ class ThreadView extends BoardPage {
 
   function __construct(Thread $thread) {
     parent::__construct($thread->getBoard());
-    $this->appendToBody(
-            div('', 'topLinks')
+    $topLinks = div('', 'topLinks')
                     ->append('[' . a('Home', '/index') . ']')
-                    ->append(' ['. a('Return', '/'.$this->board->getName().'/').']')
-                    ->append(' [' . a('Catalog', '/' . $this->board->getName() . '/catalog') . ']')
-            . '<br/><br/>');
+                    ->append(' ['. a('Return', '/'.$this->board->getName().'/').']');
+    if (!$thread->getBoard()->isSwfBoard()) {
+      $topLinks->append(' [' . a('Catalog', '/' . $this->board->getName() . '/catalog') . ']');
+    }
+    $this->appendToBody($topLinks . '<br/><br/>');
     $thread->loadAll();
     $dur = secsToDHMS($thread->getPost($thread->getPosts()-1)->getTime() - $thread->getPost(0)->getTime());
     $board = div(Site::parseHtmlFragment("threadStats.html", ["__threadid__", "__posts__", "__posts_actual__", "__images__", "__images_actual__", "__lifetime__", "__deleted__", "<!--4chanLink-->", "<!--tag-->"], 

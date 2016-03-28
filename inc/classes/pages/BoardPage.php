@@ -6,6 +6,9 @@
  *  - thread view
  */
 class BoardPage extends FancyPage {
+  /** 
+   * @var Board
+   */
   protected $board;
   
   public function __construct(Board $board) {
