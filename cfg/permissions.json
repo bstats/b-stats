@@ -2,5 +2,6 @@
   "search" : 2,
   "delete" : 3,
   "admin" : 3,
+  "news" : 9,
   "owner" : 9
 }

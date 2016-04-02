@@ -79,18 +79,19 @@ function fourChanFormat($data){
 }
  
 function tn_Size($w,$h){
-    if($w < 125 && $h < 125){
-        return array($w,$h);
-    }
-    if($w > $h){
-        $newWidth = 125;
-        $newHeight = $h / ($w / 125);
-    }
-    else{
-        $newHeight = 125;
-        $newWidth = $w / ($h / 125);
-    }
-    return array((int)$newWidth,(int)$newHeight);
+  if($w == 0 || $h == 0) {
+    return [0,0];
+  } else if($w < 125 && $h < 125){
+      return array($w,$h);
+  }
+  if($w > $h){
+      $newWidth = 125;
+      $newHeight = $h / ($w / 125);
+  } else{
+      $newHeight = 125;
+      $newWidth = $w / ($h / 125);
+  }
+  return array((int)$newWidth,(int)$newHeight);
 }
 
 function human_filesize($bytes, $decimals = 0) {

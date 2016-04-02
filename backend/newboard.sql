@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS `%BOARD%_post` (
   `spoiler` tinyint(1) DEFAULT NULL,
   `tag` varchar(6) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `deleted` tinyint(1) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`doc_id`), INDEX (`resto`), UNIQUE (`no`)
+  PRIMARY KEY (`doc_id`), INDEX (`resto`), UNIQUE (`no`), INDEX(`md5`), INDEX(`id`)
 ) ENGINE=Aria DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `%BOARD%_deleted` (

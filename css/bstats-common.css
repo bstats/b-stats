@@ -19,6 +19,7 @@ h1,h2,h3,h4,h5,h6{
 	vertical-align:middle;
 	cursor:default;
 	display:inline-block;
+    line-height: 18px;
 }
 
 .threadbox{
@@ -36,8 +37,7 @@ h1,h2,h3,h4,h5,h6{
 	height:18px;
 	display:inline-block;
 	width:auto;
-	margin: 0px 3px;
-	padding: 2px 0px;
+	padding: 2px 3px;
 	vertical-align:middle;
 	/*cursor:pointer;*/
 	text-decoration:none;
@@ -121,11 +121,14 @@ a.button:hover, input.button:hover{
 
 
 #hover {
-    border: 1px solid rgba(128, 128, 128, 0.25);
-    padding: 1px;
     position: fixed;
-    box-shadow: rgba(0, 0, 0, 0.15) 0px 1px 2px;
-    margin-right: 5px;
+}
+
+#hover .postContainer .post {
+  border: 1px solid rgba(128, 128, 128, 0.25);
+  padding: 1px;
+  box-shadow: rgba(0, 0, 0, 0.15) 0px 1px 2px;
+  margin-right: 5px;
 }
 
 .inline {
@@ -245,7 +248,6 @@ a.clicked, a.clicked:hover {
 }
 
 .boardlist_big {
-    width: 40em;
     margin: 0 auto;
     text-align:center;
     padding: 2em;
@@ -280,10 +282,10 @@ ul.stylemenu {
     width:100%;
     margin-left: 8px;
     display:inline;
+    margin-right:2px;
 }
 ul.stylemenu li {
     float:right;
-    margin-right:2px;
     position:relative;
 }
 ul.stylemenu a {
@@ -293,13 +295,15 @@ ul.stylemenu ul{
     background:rgba(255,255,255,0); /* But! Let's make the background fully transparent where we can, we don't actually want to see it if we can help it... */
     list-style:none;
     position:absolute;
-    z-index: 101;
+    z-index: 99;
     width: 8em;
-    margin-top: 5px;
+    box-shadow: 0px 3px 3px rgba(0,0,0,0.3);
+    padding: 0;
     right:9999em; /* Hide off-screen when not needed (this is more accessible than display:none;) */
 }
 ul.stylemenu ul li{
     float:none;
+    text-align:right;
 }
 ul.stylemenu li:hover ul{ /* Display the dropdown on hover */
     right:0px; /* Bring back on-screen when needed */

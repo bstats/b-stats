@@ -50,6 +50,9 @@ class Router {
                 header("Location: /{$board->getName()}/thread/{$post->getThreadId()}#{$post->getNo()}");
                 exit;
                 break;
+              case "search":
+                $page = new Search($board, $exploded);
+                break;
               case "":
                 $page = new BoardIndexPage($boards[$base], 1);
                 break;

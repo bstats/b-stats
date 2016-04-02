@@ -24,14 +24,10 @@ switch(get('a')){
             echo json_encode(array("error"=>"Could not load board info"));
         }
         break;
-    case 'allBoardsInfo':
-        header("Content-type: application/json");
-        echo json_encode(Model::get()->getBoards());
-        break;
     case 'postLinks':
         if(!isset($_REQUEST['b'])) exit;
         $board = $_REQUEST['b'];
         $post = (int)$_REQUEST['p'];
         header("Content-type: application/json");
-        echo json_encode(["posts"=>OldModel::getPostsWithLinkToPost($board, $post),"time"=>microtime(true)-CONFIG_INC_TIME]);
+        echo json_encode(["posts"=>OldModel::getPostsWithLinkToPost($board, $post)]);
 }

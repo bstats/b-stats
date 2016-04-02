@@ -16,6 +16,7 @@ var Archivers = {
           action = "<a href='javascript:Archivers.stop(&quot;"+data[i].board+"&quot;);'>Stop</a>"
           +"&nbsp;<a href='javascript:Archivers.loadBuffer(&quot;"+data[i].board+"&quot;);'>Get Output</a>";
         }
+        action += "&nbsp;<a href='javascript:Archivers.loadError(&quot;"+data[i].board+"&quot;);'>Get Error</a>";
         str += "<tr><td>"+data[i].board+"</td><td>"+data[i].status+"</td><td>"+action+"</td></tr>";
       }
       tbody.innerHTML = str;
@@ -25,13 +26,16 @@ var Archivers = {
     alert("Couldn't load ")
   },
   start : function(board) {
-    adminApi_get("/archiver/"+board+"/start", Archivers.load, null);
+    adminApi_post("/archiver/"+board+"/start", '', Archivers.load, null);
   },
   stop : function(board) {
-    adminApi_get("/archiver/"+board+"/stop", Archivers.load, null);
+    adminApi_post("/archiver/"+board+"/stop", '', Archivers.load, null);
   },
   loadBuffer : function(board) {
     adminApi_get("/archiver/"+board+"/output", Archivers.bufferCallback, null);
+  },
+  loadError : function(board) {
+    adminApi_get("/archiver/"+board+"/error", Archivers.bufferCallback, null); 
   },
   bufferCallback : function(data) {
     if(typeof(data.output) !== 'undefined') {

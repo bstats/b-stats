@@ -7,7 +7,7 @@ class ThreadView extends BoardPage {
 
   function __construct(Thread $thread) {
     parent::__construct($thread->getBoard());
-    $topLinks = div('', 'topLinks')
+    $topLinks = div('', 'topLinks navLinks')
                     ->append('[' . a('Home', '/index') . ']')
                     ->append(' ['. a('Return', '/'.$this->board->getName().'/').']');
     if (!$thread->getBoard()->isSwfBoard()) {
@@ -27,6 +27,8 @@ class ThreadView extends BoardPage {
               $thread->isActive() ? "<a target='_blank' href='//boards.4chan.org/{$this->board->getName()}/thread/{$thread->getThreadId()}'>View on 4chan</a>" : "Thread is dead.",
               $thread->getTag() != null ? "<br>Tagged as: " . $thread->getTag() : ""]), 'board');
     $this->appendToBody($board->append(div($thread->displayThread(), 'thread')));
+    $bottomLinks = $topLinks->set('class','');
+    $this->appendToBody("<hr>".$bottomLinks);
   }
 
 }

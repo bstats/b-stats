@@ -49,10 +49,10 @@ class Page implements IPage {
               a(span("&nbsp;$name&nbsp;", 'navelement'), $link));
     }
     $stylelist = el('ul');
-    foreach (Config::getCfg("styles") as $name => $code) {
+    foreach (Config::getCfg("styles") as $name => $css) {
       $stylelist->append(
               el('li', a("&nbsp;$name&nbsp;","javascript:")
-                      ->set("onclick","StyleSwitcher.switchTo('$code')")
+                      ->set("onclick","StyleSwitcher.switchTo('$name')")
                       ->set("class",'navelement')->set("title",$name)));
     }
     $this->navbar->append(
@@ -149,10 +149,15 @@ class Page implements IPage {
   }
 
   protected function renderHeader() {
+    $styles = "";
+    foreach(Config::getCfg('styles')[$this->user->getTheme()] as $css) {
+      $styles .= "<link rel='stylesheet' type='text/css' href='$css'>";
+    }
+    $ga = Config::getCfg('site')['ga_id'];
     $this->header = Site::parseHtmlFragment('pagehead.html', [
-              '_stylename_', '<!-- pageTitle -->',
-              '<!-- additionalHeaders -->', '<!-- navbar -->'], [$this->user->getTheme(), $this->title,
-              $this->addToHead, $this->renderNavBar()]);
+              '<!-- styles -->', '<!-- pageTitle -->',
+              '<!-- additionalHeaders -->', '<!-- navbar -->','<!-- ga -->'], [$styles, $this->title,
+              $this->addToHead, $this->renderNavBar(), Site::parseHtmlFragment("ga.html",['__ID__'],[$ga])]);
     return $this->header;
   }
 

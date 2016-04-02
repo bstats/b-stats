@@ -7,13 +7,13 @@ class BoardIndexPage extends BoardPage {
     parent::__construct($board);
     if($board->isSwfBoard()) {
       $this->appendToBody(
-              div('','topLinks')
+              div('','topLinks navLinks')
               ->append('['.a('Home','/index').']')
               .'<br/><br/>');
       $this->renderSwfBoard();
     } else {
       $this->appendToBody(
-              div('','topLinks')
+              div('','topLinks navLinks')
               ->append('['.a('Home','/index').']')
               ->append(' ['.a('Catalog','/'.$board->getName().'/catalog').']')
               .'<br/><br/>');
@@ -77,9 +77,10 @@ class BoardIndexPage extends BoardPage {
           $pages .= "[<a href='$i'>$i</a>] ";
         }
       }
-      if($end < $this->board->getArchivePages()) {
-        $pages .= "[...] ";
-      }
+    }
+    if($end < $this->board->getArchivePages()) {
+      $pages .= "[...] ";
+      $pages .= "[<a href='{$this->board->getArchivePages()}'>{$this->board->getArchivePages()}</a>] ";
     }
     return str_replace(["_prev_","_next_","_pages_"],[$page - 1, $page + 1, $pages],$linkList);
   }

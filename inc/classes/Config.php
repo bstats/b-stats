@@ -45,6 +45,10 @@ class Config {
     return self::$pdo_rw;
   }
   
+  static function closePDOConnectionRW() {
+    self::$pdo_rw = null;
+  }
+  
   /** 
    * Gets an instance of mysqli with read-only permissions.
    * @return mysqli 

@@ -32,7 +32,7 @@ class User {
   }
 
   function setTheme($theme) {
-    if (in_array($theme, ['yotsuba', 'tomorrow', 'yotsuba-pink', 'yotsuba-blue'])) {
+    if (in_array($theme, array_keys(Config::getCfg('styles')))) {
       if ($this->uid != 0) {
         OldModel::updateUserTheme($this->uid, $theme);
       }

@@ -31,11 +31,11 @@ var hoverOn = function(e){
     var postId = $(this).attr("data-post");
     if(!postId) postId = $(this).children("span.linkpart").text();
     if(!postId) return;
-    $("body").append("<div id='hover' class='reply'></div>");
+    $("body").append("<div id='hover'></div>");
     $("#hover").css("top",(e.clientY - offsetY) + "px").css("left",(e.clientX + offsetX) + "px").fadeIn("slow");
     if($("#pc"+postId).length){
         $("#hover").append($("#pc"+postId).clone());
-        $("#hover .post").css("margin","0px").css("border","0px");
+        $("#hover .post").addClass("reply").removeClass("op");
         loadThumb("#hover");
         hoverLoaded = true;
     }
@@ -119,7 +119,7 @@ function loadExtern(postID,board){
         }).success(function(data){
             apiPosts[postID] = data;
             $("#hover").html(data);
-            $("#hover .post").css("margin","0px").css("border","0px");
+            $("#hover .post");
             preview("#hover");
             fixAllCrossLinks("#hover");
             loadThumb("#hover");
@@ -211,7 +211,7 @@ var ExpandImage = {
         var width = $(thumb).attr("data-width");
         var height = $(thumb).attr("data-height");
         if(ext != ".webm"){
-            var newImg = $("<img class='expanded' style='display:none' alt='image'/>");
+            var newImg = $("<img class='expanded expanded-thumb' style='display:none' alt='image'/>");
             newImg.attr("data-width",width).attr("data-height",height);
             newImg.load(function(){ExpandImage.loaded(this);});
             $(thumb).after(newImg);             
@@ -347,8 +347,8 @@ var StyleSwitcher = {
         
     },
     switchTo : function(style){
-        document.getElementById('chanCSS').href = "/css/"+style+".css";
-        document.getElementById('statsCSS').href = "/css/bstats-"+style+".css";
+        //document.getElementById('chanCSS').href = "/css/"+style+".css";
+        //document.getElementById('statsCSS').href = "/css/bstats-"+style+".css";
         $.ajax({
             dataType: "html",
             headers: {"X-Requested-With":"Ajax"},

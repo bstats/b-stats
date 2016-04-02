@@ -68,6 +68,20 @@ class Archivers {
   }
   
   /**
+   * Gets the error history of the archiver.
+   * 
+   * @param type $board
+   * @return string output history
+   */
+  static function getError(string $board):string {
+    $path = Site::getPath()."/backend/$board.error";
+    if(file_exists($path)) {
+      return file_get_contents($path);
+    }
+    return "";
+  }
+  
+  /**
    * 
    * @param type $board
    */

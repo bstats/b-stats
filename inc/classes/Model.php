@@ -216,6 +216,26 @@ class Model implements \IModel {
     }
     throw new Exception("Thread $threadId contains no replies!");
   }
+  
+  function getPostsByMD5(\Board $b, string $md5_hex, int $num = 500, int $offset = 0) {
+    $pTable = $b->getName().'_post';
+    $q = $this->conn_ro->prepare("SELECT * FROM `$pTable` WHERE `md5`=UNHEX(?) LIMIT $offset, $num");
+    if($q->execute([$md5_hex]) !== FALSE) {
+      return array_map(function($row) use($b) {
+        return new Post($row, $b);
+      }, $q->fetchAll(PDO::FETCH_ASSOC));
+    }
+  }
+  
+  function getPostsByID(\Board $b, string $id, int $num = 500, int $offset = 0) {
+    $pTable = $b->getName().'_post';
+    $q = $this->conn_ro->prepare("SELECT * FROM `$pTable` WHERE `id`=? LIMIT $offset, $num");
+    if($q->execute([$id]) !== FALSE) {
+      return array_map(function($row) use($b) {
+        return new Post($row, $b);
+      }, $q->fetchAll(PDO::FETCH_ASSOC));
+    }
+  }
 
   /**
    * Gets a user given their ID.
@@ -246,6 +266,26 @@ class Model implements \IModel {
       throw new Exception("Username/password pair not found.");
     }
   }
+  
+  /**
+   * Get all requests from the db. By default only shows outstanding requests.
+   * 
+   * @param bool $acceptedOnly Set to false to include accepted requests.
+   * @return array Request info
+   */
+  function getRequests(bool $acceptedOnly = true):array {
+    $query = "SELECT * FROM `request`".($acceptedOnly?" WHERE `accepted`=0":"");
+    $q = $this->conn_ro->query($query);
+    if ($q !== false) {
+      return array_map(function($key){ 
+        $key['password'] = bin2hex($key['password']); 
+        return $key;
+      },$q->fetchAll(PDO::FETCH_ASSOC));
+    } else {
+      return ["Error"];
+    }
+  }
+  
 
   /**
    * Gets a list of active media.

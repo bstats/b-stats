@@ -9,7 +9,7 @@ class Catalog extends BoardPage {
     $this->addToHead("<link rel='stylesheet' href='/css/bstats-catalog.css' type='text/css'>");
     $catalog = OldModel::getCatalog($board,false);
     $this->appendToBody(
-              div('','topLinks')
+              div('','topLinks navLinks')
               ->append('['.a('Home','/index').']')
               ->append(' ['.a('Return','/'.$board->getName().'/').']')
               .'<br/><br/>');

@@ -323,13 +323,6 @@ class OldModel {
         $q = $db->query($query);
         return $q->fetch_all(MYSQLI_ASSOC);
     }
-    
-    public static function getRequests($acceptedOnly = true){
-        $db = Config::getMysqliConnection();
-        $query = "SELECT * FROM `request`".$acceptedOnly?" WHERE `accepted`=0":"";
-        $q = $db->query($query);
-        return $q->fetch_all(MYSQLI_ASSOC);
-    }
     public static function updateUserTheme($uid, $theme) {
       try {
         $db = Config::getMysqliConnectionRW();
@@ -339,12 +332,6 @@ class OldModel {
       } catch (Exception $ex) {
 
       }
-    }
-    public static function confirmRequest($ip){
-        
-    }
-    public static function denyRequest($ip){
-        
     }
     public static function setUpTables(){
         $db = Config::getMysqliConnectionRW();

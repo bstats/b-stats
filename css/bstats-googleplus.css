@@ -1,0 +1,38 @@
+.navbar {
+	background-color:#B3B9DB;
+	box-shadow: 0 0 3px 3px rgba(0,0,0,0.35);
+}
+.navelement {
+    background-color:#B3B9DB;
+}
+.navelement:hover{
+	background-color:#9AC;
+	color:#00C;
+}
+.threadbox a img{
+	box-shadow: 0 0 2px 2px #BBC;
+}
+.threadbox a img:hover{
+	box-shadow: 0 0 3px 3px #99A;
+}
+.dashTable th, .reportTable th {
+    background-color: #8CE;
+}
+
+.newsArticleHead{
+    background-color: #ADF;
+}
+
+.newsArticleBody {
+    background-color: #fff;
+    color: black;
+}
+
+table.flashListing {
+    border-collapse: separate;
+    border-spacing: 1px;
+}
+
+.topLinks {
+  color: transparent;
+}

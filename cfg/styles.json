@@ -1,6 +1,7 @@
 {
-  "yotsuba":"yotsuba",
-  "yotsuba-blue":"yotsuba-blue",
-  "tomorrow":"tomorrow",
-  "yotsuba-pink":"yotsuba-pink"
+  "yotsuba":["/css/yotsuba.css","/css/bstats-yotsuba.css"],
+  "yotsuba-blue":["/css/yotsuba-blue.css","/css/bstats-yotsuba-blue.css"],
+  "tomorrow":["/css/tomorrow.css","/css/bstats-tomorrow.css"],
+  "yotsuba-pink":["/css/yotsuba-pink.css","/css/bstats-yotsuba-pink.css"],
+  "googleplus":["/css/yotsuba-blue.css","https://fonts.googleapis.com/css?family=Roboto","/css/googleplus.css","/css/bstats-googleplus.css"]
 }

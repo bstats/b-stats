@@ -84,6 +84,7 @@ $lastTime = $boardObj->getLastCrawl();
  * Begin Main loop
  */
 while (!file_exists("$board.kill")) {
+  try {
   $startTime = time();
 
   //Establish variables.
@@ -153,7 +154,7 @@ while (!file_exists("$board.kill")) {
   $i = 0;
   $threadInsertQuery = "INSERT INTO `{$board}_thread` "
           . "(`threadid`,`active`,`sticky`,`closed`,`archived`,`custom_spoiler`,"
-          . "`replies`,`images`,`last_crawl`) VALUES ";
+          . "`replies`,`images`,`lastreply`,`last_crawl`) VALUES ";
           
   
   $postInsertQuery = "INSERT INTO `{$board}_post` "
@@ -167,11 +168,11 @@ while (!file_exists("$board.kill")) {
   $first = true;
   foreach ($postInsertArr as $thread) {
     if(!$first) {
-      $threadInsertQuery .= ",(?,?,?,?,?,?,?,?,?)";
+      $threadInsertQuery .= ",(?,?,?,?,?,?,?,?,?,?)";
       $postInsertQuery .= ",(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
     } else {
       $first = false;
-      $threadInsertQuery .= "(?,?,?,?,?,?,?,?,?)";
+      $threadInsertQuery .= "(?,?,?,?,?,?,?,?,?,?)";
       $postInsertQuery .= "(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
     }
     array_push($threadFields, 
@@ -183,6 +184,7 @@ while (!file_exists("$board.kill")) {
             $thread['custom_spoiler'] ?? null,
             $thread['replies'],
             $thread['images'],
+            $thread['time'],
             $curTime);
     array_push($postFields,
             $thread['no'],
@@ -335,7 +337,21 @@ while (!file_exists("$board.kill")) {
   o("Updating last update time: " . date("Y-m-d H:i:s"));
   $pdo->query("UPDATE `boards` SET `last_crawl`='" . time() . "' WHERE `shortname`='$board'");
   o("-Done.");
-
+  
+  } catch (Throwable $e) {
+    o("***********************************");
+    o("************   ERROR   ************");
+    o("***********************************");
+    o(" There has been an error reported:");
+    o($e->getMessage(). " at line ".$e->getLine());
+    o($e->getTraceAsString());
+    o("Resetting database connection.");
+    file_put_contents($board.".error", 
+            date("c").PHP_EOL.$e->getMessage(). " at line ".$e->getLine().PHP_EOL.$e->getTraceAsString().PHP_EOL, FILE_APPEND);
+    $pdo = null;
+    Config::closePDOConnectionRW();
+    $pdo = Config::getPDOConnectionRW();
+  }
   if ((time() - $startTime) < EXEC_TIME) {
     wait:
     o("Waiting " . (EXEC_TIME - (time() - $startTime)) . " seconds...");

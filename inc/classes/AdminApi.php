@@ -18,15 +18,22 @@
  *  - string password
  *  - int privilege
  *  - string theme
- * /admin/deletePost/[board]/[no]
- * /admin/banImage/[hash]
- * /admin/deleteReport/[board]/[no]
- * /admin/banReporter/[board]/[no]
- * /admin/restorePost/[board]/[no]
- * /admin/fixDeleted
  * 
- * /admin/archiver/[board]/start
- * /admin/archiver/[board]/stop
+ * GET  /admin/requests
+ * 
+ * POST /admin/deletePost/[board]/[no]
+ * POST /admin/deleteReport/[board]/[no]
+ * POST /admin/banImage/[hash]
+ * POST /admin/banReporter/[board]/[no]
+ * POST /admin/restorePost/[board]/[no]
+ * 
+ * GET  /admin/boards4chan
+ * GET  /admin/boards
+ * 
+ * GET  /admin/archivers
+ * GET  /admin/archiver/[board]/output
+ * POST /admin/archiver/[board]/start
+ * POST /admin/archiver/[board]/stop
  */
 class AdminApi {
   public static function run(array $breadcrumbs):IPage {
@@ -46,10 +53,12 @@ class AdminApi {
   }
   
   public static function boards4chan(array $path):array {
+    self::ensureGET();
     return json_decode(file_get_contents("https://a.4cdn.org/boards.json"), true);
   }
   
   public static function addBoard(array $path):array {
+    self::ensurePOST();
     Site::requirePrivilege(Config::getCfg('permissions')['owner']);
     try {
       Model::get()->getBoard(post('shortname'));
@@ -71,6 +80,7 @@ class AdminApi {
   }
   
   public static function addUser(array $path = []):array {
+    self::ensurePOST();
     Site::requirePrivilege(Config::getCfg('permissions')['owner']);
     if(OldModel::addUser(post('username'), post('password'), post('privilege'), post('theme'))) {
       return ['result'=>"User Added"];
@@ -79,6 +89,7 @@ class AdminApi {
   }
   
   public static function archivers(array $path):array {
+    self::ensureGET();
     Site::requirePrivilege(Config::getCfg('permissions')['owner']);
     $archivers = [];
     $boards = Model::get()->getBoards(true);
@@ -98,37 +109,49 @@ class AdminApi {
     $board = Model::get()->getBoard(strtolower(alphanum($path[3])));
     switch(strtolower($path[4])) {
       case "start":
+        self::ensurePOST();
         Archivers::run($board->getName());
         sleep(1);
         return ['result'=>"Started"];
       case "stop":
+        self::ensurePOST();
         Archivers::stop($board->getName());
         return ['result'=>"Stopping"];
       case "output":
+        self::ensureGET();
         return ['output'=>Archivers::getOutput($board->getName())];
+      case "error":
+        self::ensureGET();
+        return ['output'=>Archivers::getError($board->getName())];
       default:
         throw new Exception("Invalid command");
     }
   }
   
   public static function boards(array $path):array {
+    self::ensureGET();
     return Model::get()->getBoards(true);
   }
   
   public static function banImage(array $path):array {
+    self::ensurePOST();
   }
   
   public static function banReporter(array $path):array {
+    self::ensurePOST();
     Site::requirePrivilege(Config::getCfg('permissions')['owner']);
   }
   
   public static function deletePost(array $path):array {
+    self::ensurePOST();
   }
   
   public static function deleteReport(array $path):array {
+    self::ensurePOST();
   }
   
   public static function restorePost(array $path):array {
+    self::ensurePOST();
     Site::requirePrivilege(Config::getCfg('permissions')['owner']);
   }
   
@@ -136,4 +159,23 @@ class AdminApi {
     Site::requirePrivilege(Config::getCfg('permissions')['owner']);
   }
   
+  public static function requests(array $path):array {
+    self::ensureGET();
+    Site::requirePrivilege(Config::getCfg('permissions')['owner']);
+    return Model::get()->getRequests();
+  }
+  
+  public static function ensurePOST(){
+    if($_SERVER['REQUEST_METHOD'] !== 'POST') {
+      http_response_code(405); // method not allowed
+      throw new Exception("Method not allowed");
+    }
+  }
+  
+  public static function ensureGET(){
+    if($_SERVER['REQUEST_METHOD'] !== 'GET') {
+      http_response_code(405); // method not allowed
+      throw new Exception("Method not allowed");
+    }
+  }
 }

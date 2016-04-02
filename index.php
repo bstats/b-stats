@@ -19,10 +19,10 @@ try {
 } catch (NotFoundException $ex) {
   echo (new FourOhFour($ex->getMessage()))->display();
 } catch (PermissionException $ex) {
-  die((new Page("/b/ stats: ACCESS DENIED", 
+  die((new FancyPage("/b/ stats: ACCESS DENIED", 
           Site::parseHtmlFragment('accessDenied.html', 
                   ['__privilege__', '__required__'], 
-                  [$ex->has, $ex->required])))
+                  [$ex->has, $ex->required]), 0))
           ->display());
 } catch (PDOException $ex) {
   $page = new Page("Database Error","");

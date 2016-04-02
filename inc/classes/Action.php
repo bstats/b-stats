@@ -32,7 +32,7 @@ class Action {
   
   static function setStyle():string {
     $styles = Config::getCfg("styles");
-    if(in_array(post('style'), $styles)) {
+    if(in_array(post('style'), array_keys($styles))) {
       Site::getUser()->setTheme(post('style'));
     }
     return '';
