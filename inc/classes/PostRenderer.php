@@ -139,7 +139,7 @@ class PostRenderer {
         case "mod":
             $nameBlockExtra = " capcodeMod";
             $cap = " <strong class='capcode'>## Mod</strong>".PHP_EOL;
-            $cap .= '<img src="//s.4cdn.org/image/modicon.gif" alt="This user is a 4chan Moderator." title="This user is a 4chan Moderator." class="identityIcon">';
+            $cap .= '<img src="/image/modicon.gif" alt="This user is a 4chan Moderator." title="This user is a 4chan Moderator." class="identityIcon">';
             break;
         case "admin":
         case "admin_highlight":
