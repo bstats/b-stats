@@ -18,4 +18,4 @@ setInterval(function(){
           $(el).text(data[$(el).attr("data-board")]['posts']);
         });
     });
-},10000);
+},20000);
