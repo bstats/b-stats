@@ -303,7 +303,7 @@ class Model implements \IModel {
       return [];
     }
     $q = "SELECT "
-            . "$pt.`md5`,$pt.`fsize`,$pt.`w`,$pt.`h`,$pt.`ext`,$pt.`tim`,$pt.`filename` "
+            . "$pt.`md5`,$pt.`fsize`,$pt.`w`,$pt.`h`,$pt.`ext`,$pt.`tim`,$pt.`filename`, IF($pt.`no`=$pt.`resto`,1,0) as op "
             . "FROM $pt WHERE $pt.`resto` IN ($threads) AND "
             . "$pt.`md5` != '' AND $pt.`deleted` = '0'";
     $query = $this->conn_ro->query($q);
@@ -315,7 +315,8 @@ class Model implements \IModel {
         "ext" => $reply['ext'],
         "fsize" => (int) $reply['fsize'],
         "w" => (int) $reply['w'],
-        "h" => (int) $reply['h']];
+        "h" => (int) $reply['h'],
+        "op"=> (int) $reply['op']];
     }
     return $pics;
   }
