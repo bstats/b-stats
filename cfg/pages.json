@@ -6,5 +6,6 @@
   "faq": "Faq",
   "news": "News",
   "reports": "Reports",
-  "scp": "ServerControlPanel"
+  "scp": "ServerControlPanel",
+  "captcha": "Captcha"
 }
