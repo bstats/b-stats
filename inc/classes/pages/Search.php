@@ -16,13 +16,18 @@ class Search extends BoardPage {
       if(method_exists(self::class, $path[3])) {
         $this->{$path[3]}($path[4] ?? NULL);
       } else {
-        $this->appendToBody("<h3>No such search parameter found</h3>");
+        $this->appendToBody("<h3>No such search parameter '{$path[3]}' found or currently supported</h3>");
       }
     } catch (Exception $e) {
       $this->appendToBody("<h3>Error: {$e->getMessage()}</h3>");
     }
     
     $this->appendToBody('<hr>'.$topLinks);
+  }
+  
+  // fuuka support  
+  private function image($md5) {
+    return self::md5(bin2hex(base64_decode(str_replace(['-','_'],['+','/'],$md5).'==')));
   }
   
   private function md5($md5) {
