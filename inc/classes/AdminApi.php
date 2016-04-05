@@ -31,9 +31,11 @@
  * GET  /admin/boards
  * 
  * GET  /admin/archivers
+ * GET  /admin/archiver/[board]/error
  * GET  /admin/archiver/[board]/output
  * POST /admin/archiver/[board]/start
  * POST /admin/archiver/[board]/stop
+ * POST /admin/archiver/[board]/clearError
  */
 class AdminApi {
   public static function run(array $breadcrumbs):IPage {
@@ -123,6 +125,10 @@ class AdminApi {
       case "error":
         self::ensureGET();
         return ['output'=>Archivers::getError($board->getName())];
+      case "clearerror":
+        self::ensurePOST();
+        Archivers::clearError($board->getName());
+        return ['result'=>'success'];
       default:
         throw new Exception("Invalid command");
     }
@@ -135,6 +141,8 @@ class AdminApi {
   
   public static function banImage(array $path):array {
     self::ensurePOST();
+    OldModel::banHash($path[3]);
+    return ['result'=>'Success'];
   }
   
   public static function banReporter(array $path):array {

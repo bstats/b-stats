@@ -82,6 +82,18 @@ class Archivers {
   }
   
   /**
+   * Delete the error log for the given board
+   * 
+   * @param string $board board shortname
+   */
+  static function clearError(string $board) {
+    $path = Site::getPath()."/backend/$board.error";
+    if(file_exists($path)) {
+      unlink($path);
+    }
+  }
+  
+  /**
    * 
    * @param type $board
    */
