@@ -116,12 +116,16 @@ function loadExtern(postID,board){
             url: protocol+'//'+host+'/api/post/'+board+'/'+postID+'/html',
             type: "GET"
         }).success(function(data){
-            apiPosts[postID] = data.html;
-            $("#hover").html(data.html);
-            $("#hover .post");
-            preview("#hover");
-            fixAllCrossLinks("#hover");
-            loadThumb("#hover");
+            if(typeof(data.error) === 'undefined') {
+              apiPosts[postID] = data.html;
+              $("#hover").html(data.html);
+              $("#hover .post");
+              preview("#hover");
+              fixAllCrossLinks("#hover");
+              loadThumb("#hover");
+            } else {
+              $("#hover").html(data.error);
+            }
             hoverLoaded = true;
         });
     }
