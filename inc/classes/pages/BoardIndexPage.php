@@ -8,15 +8,13 @@ class BoardIndexPage extends BoardPage {
     if($board->isSwfBoard()) {
       $this->appendToBody(
               div('','topLinks navLinks')
-              ->append('['.a('Home','/index').']')
-              .'<br/><br/>');
-      $this->renderSwfBoard();
+              ->append('['.a('Home','/index').']'));
+      $this->renderSwfBoard($page);
     } else {
       $this->appendToBody(
               div('','topLinks navLinks')
               ->append('['.a('Home','/index').']')
-              ->append(' ['.a('Catalog','/'.$board->getName().'/catalog').']')
-              .'<br/><br/>');
+              ->append(' ['.a('Catalog','/'.$board->getName().'/catalog').']'));
       $this->renderPage($page);
     }
   }
@@ -85,8 +83,8 @@ class BoardIndexPage extends BoardPage {
     return str_replace(["_prev_","_next_","_pages_"],[$page - 1, $page + 1, $pages],$linkList);
   }
   
-  private function renderSwfBoard() {
-    $threads = $this->board->getPage(1);
+  private function renderSwfBoard(int $page) {
+    $threads = $this->board->getPage($page);
     
     $main = div('','board');
     $main->append("<table class='flashListing' style='border:none;'>".

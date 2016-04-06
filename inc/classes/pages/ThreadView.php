@@ -13,7 +13,7 @@ class ThreadView extends BoardPage {
     if (!$thread->getBoard()->isSwfBoard()) {
       $topLinks->append(' [' . a('Catalog', '/' . $this->board->getName() . '/catalog') . ']');
     }
-    $this->appendToBody($topLinks . '<br/><br/>');
+    $this->appendToBody($topLinks);
     $thread->loadAll();
     $dur = secsToDHMS($thread->getPost($thread->getPosts()-1)->getTime() - $thread->getPost(0)->getTime());
     $board = div(Site::parseHtmlFragment("threadStats.html", ["__threadid__", "__posts__", "__posts_actual__", "__images__", "__images_actual__", "__lifetime__", "__deleted__", "<!--4chanLink-->", "<!--tag-->"], 
@@ -27,7 +27,7 @@ class ThreadView extends BoardPage {
               $thread->isActive() ? "<a target='_blank' href='//boards.4chan.org/{$this->board->getName()}/thread/{$thread->getThreadId()}'>View on 4chan</a>" : "Thread is dead.",
               $thread->getTag() != null ? "<br>Tagged as: " . $thread->getTag() : ""]), 'board');
     $this->appendToBody($board->append(div($thread->displayThread(), 'thread')));
-    $bottomLinks = $topLinks->set('class','');
+    $bottomLinks = $topLinks;
     $this->appendToBody("<hr>".$bottomLinks);
   }
 

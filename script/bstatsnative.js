@@ -111,14 +111,13 @@ function loadExtern(postID,board){
     if(typeof apiPosts[postID] === 'undefined'){
         board = board ? board : 'b';
         $.ajax({
-            dataType: "html",
+            dataType: "json",
             headers: {"X-Requested-With":"Ajax"},
-            url: protocol+'//'+host+'/api.php',
-            type: "GET",
-            data: "a=post&id="+postID+"&b="+board
+            url: protocol+'//'+host+'/api/post/'+board+'/'+postID+'/html',
+            type: "GET"
         }).success(function(data){
-            apiPosts[postID] = data;
-            $("#hover").html(data);
+            apiPosts[postID] = data.html;
+            $("#hover").html(data.html);
             $("#hover .post");
             preview("#hover");
             fixAllCrossLinks("#hover");

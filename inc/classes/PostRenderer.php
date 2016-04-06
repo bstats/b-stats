@@ -8,7 +8,7 @@ class PostRenderer {
   const DISPLAY_REPLY = "reply";
   const DISPLAY_CATALOG = "catalog";
   
-  static function renderPost(Post $post, $display = PostRenderer::DISPLAY_REPLY, bool $sticky = false, bool $closed = false) {
+  static function renderPost(Post $post, $display = PostRenderer::DISPLAY_REPLY, bool $sticky = false, bool $closed = false):string {
     if ($display == self::DISPLAY_CATALOG) {
       list($tnW,$tnH) = tn_Size($post->w, $post->h);
       return "<div id='thread-{$post->no}' class='thread'>".

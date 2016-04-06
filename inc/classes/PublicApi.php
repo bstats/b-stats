@@ -100,14 +100,17 @@ class PublicApi {
   }
   
   public static function post(array $path):array {
-    if(count($path) !== 5) {
+    if(count($path) < 5) {
       throw new InvalidRequestURIException();
     }
     $board = strtolower(alphanum($path[3]));
     $id = $path[4];
     $model = Model::get();
     $post = $model->getPost($model->getBoard($board), $id);
-    
+    if (count($path) === 6 && $path[5] == 'html') {
+      $content = PostRenderer::renderPost($post);
+      return ["html"=>$content];
+    }
     return $post->asArray();
   }
 }
