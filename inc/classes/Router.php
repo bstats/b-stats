@@ -47,8 +47,13 @@ class Router {
                 break;
               case "post":
                 $post = Model::get()->getPost($board, $exploded[3] ?? 0);
-                header("Location: /{$board->getName()}/thread/{$post->getThreadId()}#{$post->getNo()}");
-                exit;
+                try {
+                  $thread = Model::get()->getThread($board, $post->threadid);
+                  header("Location: /{$board->getName()}/thread/{$post->getThreadId()}#{$post->getNo()}");
+                  exit;
+                } catch (NotFoundException $ex) {
+                  $page = new OrphanPost($post);
+                }
                 break;
               case "search":
                 $page = new Search($board, $exploded);

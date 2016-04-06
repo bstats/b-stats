@@ -34,12 +34,13 @@ class Post implements JsonSerializable {
   public $dnt;
   public $backlinks;
   private $capcode;
+  /** @var Board */
   private $board;
   private $deleted;
   private $filedeleted;
   private $imgbanned;
   
-  function __construct($no,$board='b'){
+  function __construct($no, Board $board){
     if(is_array($no)){
       $arr = $no;
       $this->doc_id = $arr['doc_id'] ?? 0;
@@ -78,11 +79,11 @@ class Post implements JsonSerializable {
     }
     $this->owner = null;
     $this->backlinks = array();
-    $this->board = (string)$board;
+    $this->board = $board;
   }
 
-  function setBoard($board){
-    $this->board = (string)$board;
+  function setBoard(Board $board){
+    $this->board = $board;
   }
 
   function hasImage(){

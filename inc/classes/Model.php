@@ -175,7 +175,7 @@ class Model implements \IModel {
     if ($stmt->execute([':no' => $id]) == false || $stmt->rowCount() === 0) {
       throw new NotFoundException("No such post $id exists on board {$board->getName()} in this archive");
     }
-    return new Post($stmt->fetch(PDO::FETCH_ASSOC), $board->getName());
+    return new Post($stmt->fetch(PDO::FETCH_ASSOC), $board);
   }
 
   /**
@@ -193,8 +193,8 @@ class Model implements \IModel {
     if (!$stmt->execute([':thread'=>$t->getThreadId()]) || $stmt->rowCount() === 0) {
       throw new NotFoundException("Thread #$threadid exists, but contains no posts.");
     }
-    return array_map(function($row) use($board) {
-      return new Post($row, $board);
+    return array_map(function($row) use($t) {
+      return new Post($row, $t->getBoard());
     }, $stmt->fetchAll(PDO::FETCH_ASSOC));
   }
   
