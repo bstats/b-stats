@@ -69,14 +69,12 @@ function dlUrl($url) {
   return $data;
 }
 
-o("Connecting...");
+o("Connecting to DB...");
 /** @var PDO */
 $pdo = Config::getPDOConnectionRW();
-o("-Done.");
 
-o("Setting up DB");
+o("Setting up DB...");
 $pdo->exec(str_replace(['%BOARD%'], [$board], file_get_contents("newboard.sql")));
-o("-Done.");
 
 $lastTime = $boardObj->getLastCrawl();
 
@@ -88,7 +86,6 @@ while (!file_exists("$board.kill")) {
   $startTime = time();
 
   //Establish variables.
-  $picsToDL = array();
   $threadsToDownload = array();
   $everyThread = array();
   $postInsertArr = array();
@@ -97,7 +94,6 @@ while (!file_exists("$board.kill")) {
   //Getting important API stuffs.
   o("Downloading threads.json...");
   $threadsjson = json_decode(dlUrl("http://a.4cdn.org/{$board}/threads.json"), true);
-  o("-Done.");
 
   //Parse threads.json
   o("Parsing threads.json...");
@@ -118,14 +114,12 @@ while (!file_exists("$board.kill")) {
 
   o("Downloading catalog.json...");
   $catalog = json_decode(dlUrl("http://a.4cdn.org/{$board}/catalog.json"), true);
-  o("Done!");
 
   //Reset active threads.
-  o("Updating active threads...");
+  o("Marking found threads as active...");
   $pdo->query("UPDATE `{$board}_thread` SET `active`='0' WHERE 1; ");
   $activethreadindic = "(" . implode(",", $everyThread) . ")";
   $pdo->query("UPDATE `{$board}_thread` SET `active`='1' WHERE `threadid` IN $activethreadindic");
-  o("-Done.");
 
 
 
@@ -216,13 +210,10 @@ while (!file_exists("$board.kill")) {
           . "`last_crawl`=UNIX_TIMESTAMP()";
   $postInsertQuery .= " ON DUPLICATE KEY UPDATE "
           . "`com`=VALUES(com),`deleted`=0,`filedeleted`=VALUES(filedeleted)";
-  o("-Done.");
   o("Inserting thread infos...");
   $pdo->prepare($threadInsertQuery)->execute($threadFields);
-  o("-Done.");
   o("Inserting post infos...");
   $pdo->prepare($postInsertQuery)->execute($postFields);
-  o("-Done.");
   
   /*
    * Individual thread post loading
@@ -281,31 +272,19 @@ while (!file_exists("$board.kill")) {
             $reply['filedeleted'] ?? null,
             $reply['spoiler'] ?? null,
             $reply['tag'] ?? null);
-      if (isset($reply['md5'])) {
-        $picsToDL[] = [ "md5" => $reply['md5'],
-          "tim" => $reply['tim'],
-          "filename" => $reply['filename'],
-          "ext" => $reply['ext'],
-          "fsize" => $reply['fsize'],
-          "w" => $reply['w'],
-          "h" => $reply['h']];
-      }
     }
     $downloadedThreads[] = $thread;
     echo ".";
   }
   echo PHP_EOL;
-  o("-Done. $i / ".count($postFields));
 
   o("Marking deleted posts... ");
   foreach ($downloadedThreads as $key => $thread) {
     $downloadedThreadsTemp[$key] = "'$thread'";
   }
   $tempThreads = implode(",", $downloadedThreadsTemp);
-  o("Sending query...");
   $pdo->query("UPDATE `{$board}_post` SET `deleted` = 1 WHERE `resto` IN ($tempThreads)");
-  o("-Done.");
-  o("Inserting threads...");
+  o("Inserting threads (and unmarking non-deleted)...");
   foreach($postFields as $key=>$value) {
     $postInsertQuery = "INSERT INTO `{$board}_post` "
           . "(`no`,`resto`,`time`,"
@@ -317,7 +296,6 @@ while (!file_exists("$board.kill")) {
     $pdo->prepare($postInsertQuery)->execute($postFields[$key]);
     o("Sent query $key");
   }
-  o("-Done.");
   o("Updating thread lastreply...");
   foreach($downloadedThreads as $key=>$thread){
     $last = $pdo->query("SELECT MAX(`time`) AS `last`
@@ -326,17 +304,12 @@ while (!file_exists("$board.kill")) {
      GROUP BY resto")->fetchColumn(0);
     $pdo->query("UPDATE {$board}_thread SET `lastreply`='$last' WHERE `threadid`='$thread'");
   }
-  o("-Done.");
-  o("Writing imagelist...");
-  file_put_contents("{$board}_media.json", json_encode($picsToDL));
-  o("-Done.");
 
   /*
    * Update "Last updated" server var
    */
   o("Updating last update time: " . date("Y-m-d H:i:s"));
   $pdo->query("UPDATE `boards` SET `last_crawl`='" . time() . "' WHERE `shortname`='$board'");
-  o("-Done.");
   
   } catch (Throwable $e) {
     o("***********************************");

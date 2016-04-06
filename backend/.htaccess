@@ -3,6 +3,3 @@ ErrorDocument 403 /index.php
 ErrorDocument 404 /index.php
 Order Deny,Allow
 Deny from all
-<Files ~ "_media\.json$">
-    Allow from all
-</Files>
