@@ -13,21 +13,4 @@ switch(get('a')){
             echo 'Error: '.$e->getMessage();
         }
         break;
-    case 'boardInfo':
-        if(!isset($_REQUEST['b'])) exit;
-        header("Content-type: application/json");
-        try{
-            $board = Model::get()->getBoard($_REQUEST['b']);
-            echo json_encode($board->getBoardInfo());
-        }
-        catch(Exception $ex){
-            echo json_encode(array("error"=>"Could not load board info"));
-        }
-        break;
-    case 'postLinks':
-        if(!isset($_REQUEST['b'])) exit;
-        $board = $_REQUEST['b'];
-        $post = (int)$_REQUEST['p'];
-        header("Content-type: application/json");
-        echo json_encode(["posts"=>OldModel::getPostsWithLinkToPost($board, $post)]);
 }
