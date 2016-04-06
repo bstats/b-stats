@@ -263,10 +263,14 @@ a.clicked, a.clicked:hover {
     text-decoration: underline;
 }
 
-.boardLinkBig:hover .miniBoardInfo
+.boardLinkBig .miniBoardInfo
 {
-  opacity: 1;
+    font-size: 0.8em;
+    position: relative;
+    top: -1em;
+    opacity: 0.5;
 }
+
 .name-col
 {
     max-width: 250px;
@@ -324,3 +328,4 @@ strike strike:after{
     border-top: 1px solid #000;
     border-bottom: 1px solid #000;
 }
+
