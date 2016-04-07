@@ -7,7 +7,9 @@
  * 
  * This thing is okay. It works sometimes. I run it using GNU screen.
  * 
- * Usage: php archiver.php -b board
+ * Usage: php archiver.php -b board [-f]
+ * 
+ * -f : Log to file instead of to console
  * 
  * It will archive an entire standard imageboard.
  * I use a different script for /b/ because /b/ needs namesync.
@@ -19,13 +21,17 @@ if (php_sapi_name() != "cli") {
 } else {
   if ($argc < 3) {
     failure:
-    die("Usage: php archiver.php -b board" . PHP_EOL);
+    die("Usage: php archiver.php -b board [-f]" . PHP_EOL);
   }
   $board = "";
+  $logToFile = false;
   for ($i = 1; $i < $argc; $i++) {
     switch ($argv[$i]) {
       case "-b":
         $board = $argv[++$i];
+        break;
+      case "-f":
+        $logToFile = true;
         break;
     }
   }
@@ -54,8 +60,14 @@ if (file_exists("$board.kill")) {
 $startTime = time();
 
 function o($msg, $newline = true) {
-  global $startTime;
-  echo (time() - $startTime) . " : " . $msg . ($newline ? "\n" : "");
+  global $startTime, $logToFile, $board;
+  $line = (time() - $startTime) . ' : ' . $msg . ($newline ? PHP_EOL : '');
+  if($logToFile) {
+    file_put_contents($board.'.log', $line, FILE_APPEND);
+  } else {
+    echo $line;
+  }
+  
   flush();
 }
 
@@ -77,7 +89,6 @@ o("Setting up DB...");
 $pdo->exec(str_replace(['%BOARD%'], [$board], file_get_contents("newboard.sql")));
 
 $lastTime = $boardObj->getLastCrawl();
-
 /*
  * Begin Main loop
  */
@@ -97,11 +108,15 @@ while (!file_exists("$board.kill")) {
 
   //Parse threads.json
   o("Parsing threads.json...");
+  $highestTime = 0;
   foreach ($threadsjson as $page) {
     foreach ($page['threads'] as $thread) {
       $everyThread[] = $thread['no'];
       if ($thread['last_modified'] > $lastTime) {
         $threadsToDownload[] = $thread['no'];
+      }
+      if($thread['last_modified'] > $highestTime) {
+        $highestTime = (int)$thread['last_modified'];
       }
     }
   }
@@ -274,9 +289,7 @@ while (!file_exists("$board.kill")) {
             $reply['tag'] ?? null);
     }
     $downloadedThreads[] = $thread;
-    echo ".";
   }
-  echo PHP_EOL;
 
   o("Marking deleted posts... ");
   foreach ($downloadedThreads as $key => $thread) {
@@ -309,7 +322,7 @@ while (!file_exists("$board.kill")) {
    * Update "Last updated" server var
    */
   o("Updating last update time: " . date("Y-m-d H:i:s"));
-  $pdo->query("UPDATE `boards` SET `last_crawl`='" . time() . "' WHERE `shortname`='$board'");
+  $pdo->query("UPDATE `boards` SET `last_crawl`='" . $highestTime . "' WHERE `shortname`='$board'");
   
   } catch (Throwable $e) {
     o("***********************************");
@@ -327,11 +340,11 @@ while (!file_exists("$board.kill")) {
   }
   if ((time() - $startTime) < EXEC_TIME) {
     wait:
-    o("Waiting " . (EXEC_TIME - (time() - $startTime)) . " seconds...");
-    echo "---------------------\n\n";
+    o("Waiting " . (EXEC_TIME - (time() - $startTime)) . " seconds..."
+        .PHP_EOL."---------------------".PHP_EOL.PHP_EOL);
     sleep(EXEC_TIME - (time() - $startTime));
   }
-  $lastTime = $startTime;
+  $lastTime = $highestTime;
 }
 
 o("Received kill request. Stopping.");
