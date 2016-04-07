@@ -30,6 +30,8 @@ class BoardIndexPage extends BoardPage {
     }
     $main = div('','board');
     $threads = $this->board->getPage($page);
+    $pages = $this->renderPageNumbers($page);
+    $main->append($pages);
     foreach($threads as $thread){
       $thread->loadOP();
       if($this->board->getName() == "b"){
@@ -40,19 +42,23 @@ class BoardIndexPage extends BoardPage {
       $main->append($thread->displayThread());
       $main->append("\n<hr>\n");
     }
-    $main->append($this->renderPageNumbers($page));
+    $main->append($pages);
     $this->appendToBody($main);
   }
   
-  private function renderPageNumbers(int $page):string {
+  private function renderPageNumbers(int $page, bool $catalog = true):string {
+    $catalogLink = $catalog ? '<div class="pages cataloglink"><a href="./catalog">Catalog</a></div>' : '';
     if($page == 1){
-      $linkList = Site::parseHtmlFragment("pagelist/pagelist_first.html");
+      $linkList = Site::parseHtmlFragment("pagelist/pagelist_first.html",
+              '<!-- catalog -->',$catalogLink);
     }
     elseif(1 < $page && $page < $this->board->getArchivePages() - 1){
-      $linkList = Site::parseHtmlFragment("pagelist/pagelist_middle.html");
+      $linkList = Site::parseHtmlFragment("pagelist/pagelist_middle.html",
+              '<!-- catalog -->',$catalogLink);
     }
     else{
-      $linkList = Site::parseHtmlFragment("pagelist/pagelist_last.html");
+      $linkList = Site::parseHtmlFragment("pagelist/pagelist_last.html",
+              '<!-- catalog -->',$catalogLink);
     }
     $pages = "";
     for($p = 2; $p <= $this->board->getPages(); $p++){
@@ -85,8 +91,9 @@ class BoardIndexPage extends BoardPage {
   
   private function renderSwfBoard(int $page) {
     $threads = $this->board->getPage($page);
-    
+    $pages = $this->renderPageNumbers($page, false);
     $main = div('','board');
+    $main->append($pages);
     $main->append("<table class='flashListing' style='border:none;'>".
                         "<tbody>".
                         "<tr>".
@@ -113,6 +120,7 @@ class BoardIndexPage extends BoardPage {
         $main->append($tr);
     }
     $main->append("</tbody></table><br>");
+    $main->append($pages);
     $this->appendToBody($main);
   }
 }

@@ -357,5 +357,26 @@ class Model implements \IModel {
             ->query("INSERT INTO `reports` (`uid`,`board`,`time`,`ip`,`no`,`threadid`) "
                     . "VALUES ('$uid','{$board->getName()}',$time,'$ip',$post,$thread)");
   }
+  
+  public function getUsers():array {
+    $query = Config::getPDOConnection()->query("SELECT * FROM `users`");
+    if($query === FALSE) {
+      return [];
+    }
+    return $query->fetchAll(PDO::FETCH_ASSOC);
+  }
+  
+  public function changePassword(int $uid, string $old, string $new):bool {
+    $dbl = Config::getMysqliConnectionRW();
+    $user = $dbl->query("SELECT * FROM `users` WHERE `uid`=$uid")->fetch_assoc();
+    if($user['password_hash']==md5($old,true)){
+      $new = md5($new);
+      $dbl->query("UPDATE `users` SET `password_hash`=UNHEX('$new') WHERE `uid`=$uid");
+      if (!$dbl->errno) {
+        return true;
+      }
+    }
+    return false;
+  }
 
 }

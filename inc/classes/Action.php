@@ -24,7 +24,7 @@ class Action {
   }
   
   static function changePassword():string {
-    if(OldModel::changePassword(Site::getUser()->getUID(), post('old'), post('new'))){
+    if(Model::get()->changePassword(Site::getUser()->getUID(), post('old'), post('new'))){
       return '/dash?success';
     }
     return '/dash?failure';
