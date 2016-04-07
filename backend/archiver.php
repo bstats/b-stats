@@ -168,7 +168,7 @@ while (!file_exists("$board.kill")) {
   
   $postInsertQuery = "INSERT INTO `{$board}_post` "
           . "(`no`,`resto`,`time`,"
-          . "`name`,`trip`,`email`,`sub`,`capcode`,`country`,`country_name`,`com`,"
+          . "`name`,`trip`,`email`,`sub`,`id`,`capcode`,`country`,`country_name`,`com`,"
           . "`tim`,`filename`,`ext`,`fsize`,`md5`,`w`,`h`,`filedeleted`,`spoiler`,`tag`) VALUES ";
 
   $threadFields = [];
@@ -178,11 +178,11 @@ while (!file_exists("$board.kill")) {
   foreach ($postInsertArr as $thread) {
     if(!$first) {
       $threadInsertQuery .= ",(?,?,?,?,?,?,?,?,?,?)";
-      $postInsertQuery .= ",(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+      $postInsertQuery .= ",(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
     } else {
       $first = false;
       $threadInsertQuery .= "(?,?,?,?,?,?,?,?,?,?)";
-      $postInsertQuery .= "(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+      $postInsertQuery .= "(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
     }
     array_push($threadFields, 
             $thread['no'],
@@ -203,6 +203,7 @@ while (!file_exists("$board.kill")) {
             $thread['trip'] ?? null,
             $thread['email'] ?? null,
             $thread['sub'] ?? null,
+            $thread['id'] ?? null,
             $thread['capcode'] ?? null,
             $thread['country'] ?? null,
             $thread['country_name'] ?? null,
@@ -260,10 +261,10 @@ while (!file_exists("$board.kill")) {
         $first = true;
       }
       if(!$first) {
-        $placeholders[$queryNum] .= ",(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+        $placeholders[$queryNum] .= ",(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
       } else {
         $first = false;
-        $placeholders[$queryNum] .= "(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+        $placeholders[$queryNum] .= "(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
       }
       array_push($postFields[$queryNum],
             $reply['no'],
@@ -273,6 +274,7 @@ while (!file_exists("$board.kill")) {
             $reply['trip'] ?? null,
             $reply['email'] ?? null,
             $reply['sub'] ?? null,
+            $reply['id'] ?? null,
             $reply['capcode'] ?? null,
             $reply['country'] ?? null,
             $reply['country_name'] ?? null,
@@ -301,7 +303,7 @@ while (!file_exists("$board.kill")) {
   foreach($postFields as $key=>$value) {
     $postInsertQuery = "INSERT INTO `{$board}_post` "
           . "(`no`,`resto`,`time`,"
-          . "`name`,`trip`,`email`,`sub`,`capcode`,`country`,`country_name`,`com`,"
+          . "`name`,`trip`,`email`,`sub`,`id`,`capcode`,`country`,`country_name`,`com`,"
           . "`tim`,`filename`,`ext`,`fsize`,`md5`,`w`,`h`,`filedeleted`,`spoiler`,`tag`) VALUES "
           . $placeholders[$key]
           . " ON DUPLICATE KEY UPDATE "
