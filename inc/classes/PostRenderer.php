@@ -59,7 +59,7 @@ class PostRenderer {
             ->append(span($time->format(self::TIME_FORMAT),'dateTime')->set('data-utc',$post->getTime()).' ')
             ->append(span('','postNum desktop')
                     ->append(a('No.',"#p{$post->getNo()}")->set('title','Highlight this post'))
-                    ->append(a($post->getNo(),"/{$post->board}/thread/{$post->getThreadid()}")->set('title','Link to this post'))
+                    ->append(a($post->getNo(),"/{$post->board}/thread/{$post->getThreadid()}#p{$post->getNo()}")->set('title','Link to this post'))
                     ->append($icons.' ')
                     ->append(a('Report','javascript:')->set('class','miniButton')->set('onclick',"reportPost(this,'$post->board','$post->no','$post->threadid');")))
             ->append(' '.self::makeBackLinks($post));
@@ -84,7 +84,7 @@ class PostRenderer {
       }
       else {
           $thumb = "<a class='fileThumb' href='{$post->getImgUrl()}' target='_blank'>".
-                   "<img class='lazyload' data-original='{$post->getThumbUrl()}' alt='' data-md5='{$post->md5}' data-md5-filename='$md5Filename' data-ext='{$post->ext}' data-full-img='{$post->getImgUrl()}' width='$thumbW' height='$thumbH' data-width='{$post->w}' data-height='{$post->h}' />".
+                   "<img src='{$post->getThumbUrl()}' alt='' data-md5='{$post->md5}' data-md5-filename='$md5Filename' data-ext='{$post->ext}' data-full-img='{$post->getImgUrl()}' width='$thumbW' height='$thumbH' data-width='{$post->w}' data-height='{$post->h}' />".
                    "</a>";
       }
       $chanMedia = $post->board == 'f' ? '//i.4cdn.org/f/src/'.$post->filename.$post->ext : '//i.4cdn.org/'.$post->board.'/src/'.$post->tim.$post->ext;
