@@ -254,7 +254,7 @@ class Thread implements Iterator {
   function displayThread() {
     $ret = "<div class='thread' id='t" . $this->threadId . "'>";
     $op = array_shift($this->posts);
-    $ret .= $op->display('op', $this->sticky, $this->closed);
+    $ret .= PostRenderer::renderPost($op, PostRenderer::DISPLAY_OP, $this->sticky, $this->closed);
     foreach ($this->posts as $p) {
       $ret .= "<div class='sideArrows'>&gt;&gt;</div>" . $p->display();
     }

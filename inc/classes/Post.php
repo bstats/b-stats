@@ -170,17 +170,7 @@ class Post implements JsonSerializable {
   function isFileDeleted():bool {
     return $this->filedeleted == 1;
   }
-  /**
-   * Function for rendering the post.
-   * 
-   * @param string $t Either 'op', 'reply', or 'catalog' (default is reply)
-   * @param boolean $sticky is the thread a sticky? default false (not sticky)
-   * @param boolean $closed is the thread closed? default false (not closed)
-   * @return string Post in HTML form
-   */
-  function display($t='reply',$sticky=false,$closed=false){
-    return PostRenderer::renderPost($this,$t,$sticky,$closed);
-  }
+  
   function getChanTime():string {
     return date("m/d/y(D)H:i:s",$this->time);
   }
