@@ -55,15 +55,15 @@ class Model implements \IModel {
    * @param bool $hidden
    */
   function addBoard(string $shortname, string $longname, bool $worksafe,
-          int $pages, int $per_page, int $privilege, bool $swf_board,
-          int $group, bool $hidden) {
+          int $pages, int $per_page, int $privilege, int $swf_board,
+          int $group, int $hidden, int $archive_time) {
     $stmt = $this->conn_rw->prepare("INSERT INTO `boards` "
             . "(`shortname`, `longname`, `worksafe`, `pages`, `perpage`, `privilege`, `swf_board`,"
-            . " `is_archive`, `first_crawl`, `last_crawl`, `group`, `hidden`) VALUES "
-            . "(:short, :long, :ws, :pages, :per, :priv, :swf, 1, UNIX_TIMESTAMP(), 0, :group, :hidden)");
+            . " `is_archive`, `first_crawl`, `last_crawl`, `group`, `hidden`,`archive_time`) VALUES "
+            . "(:short, :long, :ws, :pages, :per, :priv, :swf, 1, UNIX_TIMESTAMP(), 0, :group, :hidden,:archivetime)");
     $stmt->execute([':short'=>$shortname, ':long'=>$longname, ':ws'=>$worksafe, 
       ':pages'=>$pages, ':per'=>$per_page, ':priv'=>$privilege, ':swf'=>$swf_board,
-      ':group'=>$group, ':hidden'=>$hidden]);
+      ':group'=>$group, ':hidden'=>$hidden,':archivetime'=>$archive_time]);
   }
   
   /**
@@ -144,7 +144,7 @@ class Model implements \IModel {
     $number = $pageNo * $perpage;
     $pageQuery = "SELECT $tTable.*  FROM $tTable "
             . ($onlyActive ?  "WHERE $tTable.active = 1 " : "")
-            . "ORDER BY ($tTable.sticky * $tTable.active) DESC, $tTable.lastreply DESC "
+            . "ORDER BY $tTable.active DESC, $tTable.sticky DESC, $tTable.lastreply DESC "
             . "LIMIT $number,$perpage";
     $q = $this->conn_ro->query($pageQuery);
     return array_map(function($row) use($board) {
@@ -217,34 +217,50 @@ class Model implements \IModel {
     throw new Exception("Thread $threadId contains no replies!");
   }
   
-  function getPostsByMD5(\Board $b, string $md5_hex, int $num = 500, int $offset = 0) {
+  /**
+   * Search functions
+   */
+  
+  function getPostsByMD5(\Board $b, string $md5_hex, int $num = 500, int $offset = 0):\PostSearchResult {
     $pTable = $b->getName().'_post';
+    $md5 = alphanum($md5_hex);
+    $count = $this->conn_ro->query("SELECT COUNT(*) FROM `$pTable` WHERE `md5`=UNHEX('$md5')")->fetchColumn();
     $q = $this->conn_ro->prepare("SELECT * FROM `$pTable` WHERE `md5`=UNHEX(?) LIMIT $offset, $num");
+    $posts = [];
     if($q->execute([$md5_hex]) !== FALSE) {
-      return array_map(function($row) use($b) {
+      $posts = array_map(function($row) use($b) {
         return new Post($row, $b);
       }, $q->fetchAll(PDO::FETCH_ASSOC));
     }
+    return new PostSearchResult($count, $posts);
   }
   
-  function getPostsByID(\Board $b, string $id, int $num = 500, int $offset = 0) {
+  function getPostsByID(\Board $b, string $id, int $num = 500, int $offset = 0):\PostSearchResult {
     $pTable = $b->getName().'_post';
+    $idQ = $this->conn_ro->quote($id);
+    $count = $this->conn_ro->query("SELECT COUNT(*) FROM `$pTable` WHERE `id`=$idQ")->fetchColumn();
     $q = $this->conn_ro->prepare("SELECT * FROM `$pTable` WHERE `id`=? LIMIT $offset, $num");
+    $posts = [];
     if($q->execute([$id]) !== FALSE) {
-      return array_map(function($row) use($b) {
+      $posts = array_map(function($row) use($b) {
         return new Post($row, $b);
       }, $q->fetchAll(PDO::FETCH_ASSOC));
     }
+    return new PostSearchResult($count, $posts);
   }
-
-  /**
-   * Gets a user given their ID.
-   * 
-   * @param int $id
-   * @throws NotFoundException if the user cannot be found.
-   */
-  function getUserById(int $id): User {
-    
+  
+  function getPostsByTrip(\Board $b, string $trip, int $num = 500, int $offset = 0):\PostSearchResult {
+    $pTable = $b->getName().'_post';
+    $tripQ = $this->conn_ro->quote($trip);
+    $count = $this->conn_ro->query("SELECT COUNT(*) FROM `$pTable` WHERE `trip`=$tripQ")->fetchColumn();
+    $q = $this->conn_ro->prepare("SELECT * FROM `$pTable` WHERE `trip`=? LIMIT $offset, $num");
+    $posts = [];
+    if($q->execute([$trip]) !== FALSE) {
+      $posts = array_map(function($row) use($b) {
+        return new Post($row, $b);
+      }, $q->fetchAll(PDO::FETCH_ASSOC));
+    }
+    return new PostSearchResult($count, $posts);
   }
 
   /**
@@ -356,6 +372,25 @@ class Model implements \IModel {
     $this->conn_rw
             ->query("INSERT INTO `reports` (`uid`,`board`,`time`,`ip`,`no`,`threadid`) "
                     . "VALUES ('$uid','{$board->getName()}',$time,'$ip',$post,$thread)");
+  }
+  
+  
+  public function getNumberOfReports(){
+    $data = $this->conn_ro->query("SELECT COUNT(*) as count FROM `reports`");
+    if ($data !== FALSE) {
+      return $data->fetchColumn();
+    }
+    return 0;
+  }
+  
+  public function isBanned(string $ip){
+    try{
+      $dbl = Config::getPDOConnection();
+      $ip = $dbl->quote($ip);
+      return $dbl->query("SELECT `ip` FROM `bans` WHERE `ip`='$ip'")->rowCount() > 0;
+    } catch(Exception $ex) {
+      return false;
+    }
   }
   
   public function getUsers():array {

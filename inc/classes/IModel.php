@@ -16,7 +16,6 @@ interface IModel {
   
   function getThread(Board $board, int $id):Thread;
   
-  
   function getPageOfThreads(Board $board, int $pageNo):array;
   
   function getCatalog(Board $board):array;
@@ -26,8 +25,6 @@ interface IModel {
   function getPost(Board $board, int $id):Post;
   
   function getAllPosts(Thread $t):array;
-  
-  function getUserById(int $id):User;
   
   function getUser(string $username, string $password):User;
   
