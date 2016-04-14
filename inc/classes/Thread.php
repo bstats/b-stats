@@ -256,7 +256,7 @@ class Thread implements Iterator {
     $op = array_shift($this->posts);
     $ret .= PostRenderer::renderPost($op, PostRenderer::DISPLAY_OP, $this->sticky, $this->closed);
     foreach ($this->posts as $p) {
-      $ret .= "<div class='sideArrows'>&gt;&gt;</div>" . $p->display();
+      $ret .= "<div class='sideArrows'>&gt;&gt;</div>" . PostRenderer::renderPost($p);
     }
     $ret .= "</div>";
     return $ret;
