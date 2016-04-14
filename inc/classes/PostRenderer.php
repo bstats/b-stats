@@ -15,7 +15,7 @@ class PostRenderer {
       "<a href='/{$post->board}/thread/{$post->no}'>".
       ($post->imgbanned ? 
               Site::parseHtmlFragment("banned_image.html")
-              : "<img alt='' id='thumb-{$post->no}' class='thumb lazyload' width='$tnW' height='$tnH' data-original='{$post->getThumbUrl()}' data-id='{$post->no}'>").
+              : "<img alt='' id='thumb-{$post->no}' class='thumb' width='$tnW' height='$tnH' src='{$post->getThumbUrl()}' data-id='{$post->no}'>").
       "</a>".
       ($post->replies>1? "<div title='(R)eplies / (I)mages' id='meta-{$post->no}' class='meta'>".
       "R: <b>{$post->replies}</b>".($post->images > 1 ? " / I: <b>{$post->images}</b>" : '').
@@ -79,14 +79,10 @@ class PostRenderer {
           $thumbH *= 2;
       }
 
-      if($post->board == 'f'){ //There are no images on /f/. Only files.
-          $thumb = "";
-      }
-      else {
-          $thumb = "<a class='fileThumb' href='{$post->getImgUrl()}' target='_blank'>".
-                   "<img src='{$post->getThumbUrl()}' alt='' data-md5='{$post->md5}' data-md5-filename='$md5Filename' data-ext='{$post->ext}' data-full-img='{$post->getImgUrl()}' width='$thumbW' height='$thumbH' data-width='{$post->w}' data-height='{$post->h}' />".
-                   "</a>";
-      }
+      $thumb = "<a class='fileThumb' href='{$post->getImgUrl()}' target='_blank'>".
+               "<img src='{$post->getThumbUrl()}' alt='' data-md5='{$post->md5}' data-md5-filename='$md5Filename' data-ext='{$post->ext}' data-full-img='{$post->getImgUrl()}' width='$thumbW' height='$thumbH' data-width='{$post->w}' data-height='{$post->h}' />".
+               "</a>";
+               
       $chanMedia = $post->board == 'f' ? '//i.4cdn.org/f/src/'.$post->filename.$post->ext : '//i.4cdn.org/'.$post->board.'/src/'.$post->tim.$post->ext;
       $fullImgLink = $post->board == 'f' ? $post->getSwfUrl() : $post->getImgUrl();
       $fileDiv = div('','file')->set('id','f'.$post->no);
@@ -218,8 +214,8 @@ class PostRenderer {
     $replace[4] = '<a href="/'.$board.'/$1/$2#p$3" data-board="'.$board.'" data-thread="$2" data-post="$3" class="quotelink">';
 
     //For links to other boards' threads
-    $search[5] = '~<a href="/(\w+)/(res|thread)/(\d+)#p(\d+)" class="quotelink">~';
-    $replace[5] = '<a href="//boards.4chan.org/$1/$2/$3#p$4" class="quotelink">';
+    //$search[5] = '~<a href="/(\w+)/(res|thread)/(\d+)#p(\d+)" class="quotelink">~';
+    //$replace[5] = '<a href="//boards.4chan.org/$1/$2/$3#p$4" class="quotelink">';
 
     $ret = preg_replace($search,$replace,$com);
 

@@ -192,8 +192,9 @@ var ExpandImage = {
     init: function(){
         $("a.fileThumb").on("click",function(e){
             if(e.which === 1){ //If it's a left click
-                e.preventDefault();
                 var thumb = $(this).children("img")[0];
+                if($(thumb).data('ext') === '.swf') return;
+                e.preventDefault();
                 if($(thumb).hasClass("expand-loading")){
                     return;
                 }
@@ -255,7 +256,7 @@ var ExpandImage = {
 var ImageHover = {
     init : function(inline){
         //return; //temp
-        $(inline+" a.fileThumb img:nth-of-type(1)").
+        $(inline+" a.fileThumb img:not([data-ext='.swf']):nth-of-type(1)").
             hover(ImageHover.hover, function(){$("#hoverImg").remove();}).
             mousemove(ImageHover.mouseMove);
     },
@@ -434,7 +435,6 @@ $(document).ready(function(){
     expandImgLinks();
     ExpandImage.init();
     initAdditions();
-    $("img.lazyload").lazyload();
     $.each($(".ago"),function(index,element){
         setInterval(function(){updateAgo($(element))},1000);
     });

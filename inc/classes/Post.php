@@ -247,7 +247,9 @@ class Post implements JsonSerializable {
     if(!$this->hasImage()){
       return "";
     }
-    $thumbcfg = Config::getCfg("servers")["thumbs"];
+    $thumbcfg = $this->ext == '.swf' 
+            ? Config::getCfg("servers")["swfthumbs"]
+            : Config::getCfg("servers")["thumbs"];
     if($thumbcfg['https']){
       $url = 'https://'.$thumbcfg['httpshostname'].
               ($thumbcfg['httpsport'] != 443 ? ":".$thumbcfg['httpsport'] : "");
@@ -256,15 +258,18 @@ class Post implements JsonSerializable {
       $url = 'http://'.$thumbcfg['hostname'].
               ($thumbcfg['port'] != 80 ? ":".$thumbcfg['port'] : "");
     }
-    return $url.str_replace(['%hex%','%ext%'], 
-                           [bin2hex($this->md5bin),$this->ext], 
+    $md5Hex = bin2hex($this->md5bin);
+    return $url.str_replace(['%hex%','%ext%','%1%','%2%'], 
+                           [$md5Hex,$this->ext, $md5Hex[0], $md5Hex[1]], 
                            $thumbcfg['format']);
   }
   function getImgUrl(){
     if(!$this->hasImage()){
       return "";
     }
-    $imgcfg = Config::getCfg("servers")["images"];
+    $imgcfg = $this->ext == '.swf' 
+            ? Config::getCfg("servers")["swf"]
+            : Config::getCfg("servers")["images"];
     if($imgcfg['https']){
       $url = 'https://'.$imgcfg['httpshostname'].
               ($imgcfg['httpsport'] != 443 ? ":".$imgcfg['httpsport'] : "");
@@ -273,27 +278,14 @@ class Post implements JsonSerializable {
       $url = 'http://'.$imgcfg['hostname'].
               ($imgcfg['port'] != 80 ? ":".$imgcfg['port'] : "");
     }
-    return $url.str_replace(['%hex%','%ext%'], 
-                           [bin2hex($this->md5bin),$this->ext], 
+    $md5Hex = bin2hex($this->md5bin);
+    return $url.str_replace(['%hex%','%ext%','%1%','%2%'], 
+                           [$md5Hex,$this->ext, $md5Hex[0], $md5Hex[1]], 
                            $imgcfg['format']);
   }
   
   function getSwfUrl(){
-    if(!$this->hasImage()){
-      return "";
-    }
-    $swfcfg = Config::getCfg("servers")["swf"];
-    if($swfcfg['https']){
-      $url = 'https://'.$swfcfg['httpshostname'].
-              ($swfcfg['httpsport'] != 443 ? ":".$swfcfg['httpsport'] : "");
-    }
-    else {
-      $url = 'http://'.$swfcfg['hostname'].
-              ($swfcfg['port'] != 80 ? ":".$swfcfg['port'] : "");
-    }
-    return $url.str_replace(['%hex%','%ext%'], 
-                           [bin2hex($this->md5bin),$this->ext], 
-                           $swfcfg['format']);
+    return $this->getImgUrl();
   }
   
   public function __get($name) {
