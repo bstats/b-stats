@@ -326,6 +326,7 @@ while (!file_exists("$board.kill")) {
   o("Updating last update time: " . date("Y-m-d H:i:s"));
   $pdo->query("UPDATE `boards` SET `last_crawl`='" . $highestTime . "' WHERE `shortname`='$board'");
   
+  $lastTime = $highestTime;
   } catch (Throwable $e) {
     o("***********************************");
     o("************   ERROR   ************");
@@ -346,7 +347,6 @@ while (!file_exists("$board.kill")) {
         .PHP_EOL."---------------------".PHP_EOL.PHP_EOL);
     sleep(EXEC_TIME - (time() - $startTime));
   }
-  $lastTime = $highestTime;
 }
 
 o("Received kill request. Stopping.");
