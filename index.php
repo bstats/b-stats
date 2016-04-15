@@ -27,7 +27,7 @@ try {
   } catch (PDOException $ex) {
     $page = new Page("Database Error","");
     $page->appendToBody(div('There was an error with the database.<br>'
-            . 'It may be misconfigured.','centertext'));
+            . 'It may be misconfigured.','centertext').div($ex->getMessage().nl2br($ex->getTraceAsString()),'centertext'));
     header("HTTP/1.0 500 Internal Server Error");
     echo $page->display();
   } catch (Exception $ex) {
