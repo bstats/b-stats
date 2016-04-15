@@ -13,8 +13,11 @@ function alphanum(string $str) {
  * Throws an exception if the required post var is not set.
  * @param string $name name of the post var
  */
-function post(string $name) {
+function post(string $name, $default = null) {
   if (!isset($_POST[$name])) {
+    if($default !== null) {
+      return $default;
+    }
     throw new Exception("Required HTTP POST var not set: " . $name);
   }
   return $_POST[$name];
@@ -24,8 +27,11 @@ function post(string $name) {
  * Throws an exception if the required post var is not set.
  * @param string $name name of the post var
  */
-function get(string $name) {
+function get(string $name, $default = null) {
   if (!isset($_GET[$name])) {
+    if($default !== null) {
+      return $default;
+    }
     throw new Exception("Required HTTP GET var not set: " . $name);
   }
   return $_GET[$name];
