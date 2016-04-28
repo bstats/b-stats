@@ -25,6 +25,9 @@
  * /api/post/[board-shortname]/[post-id]
  *  - post object
  * 
+ * /api/styles
+ * - list of styles
+ * 
  * If something went wrong, returns:
  * { "error" : "Error message" }
  */
@@ -113,8 +116,12 @@ class PublicApi {
     }
     return $post->asArray();
   }
-}
 
+  public static function styles(array $path):array {
+    return Config::getCfg("styles");
+  }
+
+}
 class InvalidRequestURIException extends Exception {
   public function __construct() {
     parent::__construct("Invalid request URI");

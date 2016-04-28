@@ -360,6 +360,27 @@ var StyleSwitcher = {
             type: "POST",
             data: "style="+style
         });
+        $.ajax({
+          dataType: "json",
+          headers: {"X-Requested-With":"Ajax"},
+          url: protocol+'//'+host+'/api/styles',
+          type: "GET"
+        }).success(function(data) {
+          StyleSwitcher.replace(data[style]);
+        });
+    },
+    replace : function(list) {
+      var common = document.getElementById('commonStyle');
+      var old = $("link[name=theme]");
+      for(var i = list.length - 1; i >= 0; i--) {
+        var link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.type = 'text/css';
+        link.setAttribute('name', 'theme');
+        link.href = list[i];
+        common.parentNode.insertBefore(link, common.nextSibling);
+      }
+      old.remove();
     }
 };
 
