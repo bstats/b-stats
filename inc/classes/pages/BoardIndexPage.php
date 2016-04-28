@@ -8,7 +8,8 @@ class BoardIndexPage extends BoardPage {
     if($board->isSwfBoard()) {
       $this->appendToBody(
               div('','topLinks navLinks')
-              ->append('['.a('Home','/index').']'));
+              ->append('['.a('Home','/index').']')
+              ->append(' ['.a('Catalog','/'.$board->getName().'/catalog').']'));
       $this->renderSwfBoard($page);
     } else {
       $this->appendToBody(
@@ -61,7 +62,7 @@ class BoardIndexPage extends BoardPage {
               '<!-- catalog -->',$catalogLink);
     }
     $pages = "";
-    for($p = 2; $p <= $this->board->getPages(); $p++){
+    for($p = 2; $p <= min($this->board->getArchivePages(), $this->board->getPages()); $p++){
       if ($p == $page) {
         $pages .= "[<strong><a href='$p'>$p</a></strong>] ";
       } else {
@@ -91,27 +92,35 @@ class BoardIndexPage extends BoardPage {
   
   private function renderSwfBoard(int $page) {
     $threads = $this->board->getPage($page);
-    $pages = $this->renderPageNumbers($page, false);
+    $pages = $this->renderPageNumbers($page);
     $main = div('','board');
     $main->append($pages);
     $main->append("<table class='flashListing' style='border:none;'>".
                         "<tbody>".
                         "<tr>".
                         "<td class='postblock'>No.</td><td class='postblock'>Name</td>".
-                        "<td class='postblock'>File</td><td class='postblock'>Tag</td>".
-                        "<td class='postblock'>Subject</td><td class='postblock'>Size</td>".
-                        "<td class='postblock'>Date</td><td class='postblock'>Replies</td>".
-                        "<td class='postblock'></td>".
+                        "<td class='postblock'>File</td><td class='postblock'></td>" .
+                        "<td class='postblock'>Tag</td><td class='postblock'>Subject</td>".
+                        "<td class='postblock'>Size</td><td class='postblock'>Date</td>".
+                        "<td class='postblock'>Replies</td><td class='postblock'></td>".
                         "</tr>");
+    $nums = array_map(function(Thread $thread){
+      return $thread->getThreadId();
+    }, $threads);
+    sort($nums);
+    $nums = array_slice($nums, 0, 5);
     foreach($threads as $thread){
       $thread->loadOP();
       $op = $thread->getPost(0);
-        $tr = "<tr>".
+      $preview = $op->getSubject() != "" ? $op->getSubject() : $op->com;
+      $highlight = array_search($thread->getThreadId(), $nums) ? " class='highlightPost'" : "";
+        $tr = "<tr$highlight>".
             "<td>{$op->getNo()}</td>".
             "<td class='name-col'><span class='name'>{$op->getName()}</span>".($op->getTripcode() != '' ? " <span class='postertrip'>{$op->getTripcode()}</span>" : "")."</td>".
-            "<td>[<a href='".$op->getSwfUrl()."' title='".str_replace("'","&#39;",$op->getFilename())."' data-width='{$op->getWidth()}' data-height='{$op->getHeight()}' target='_blank'>".(strlen($op->getFilename()) > 33 ? substr($op->getFilename(), 0,30)."(...)" : $op->getFilename())."</a>]</td>".
+            "<td>[<a href='".$op->getSwfUrl()."' title='".str_replace("'","&#39;",$op->getFilename())."' data-width='{$op->getWidth()}' data-height='{$op->getHeight()}' target='_blank'>".(mb_strlen($op->getFilename()) > 30 ? mb_substr($op->getFilename(), 0,25)."(...)" : $op->getFilename())."</a>]</td>".
+            "<td>[<a href=''>Reposts</a>]</td>".
             "<td>[".str_replace("O","?",substr($thread->getTag(),0,1))."]</td>".
-            "<td class='subject'><span title='".str_replace("'","&#39;",$op->getSubject())."'>".(strlen($op->getSubject()) > 33 ? substr($op->getSubject(), 0,30)."(...)" : $op->getSubject())."</span></td>".
+            "<td class='subject'><span title='".str_replace("'","&#39;",$preview)."'>".(mb_strlen($preview) > 30 ? mb_substr($preview, 0,30)."(...)" : $preview)."</span></td>".
             "<td>".human_filesize($op->getFilesize(),2)."</td>".
             "<td>".date("Y-m-d(D)H:i",$op->getTime())."</td>".
             "<td>{$thread->getChanPosts()}</td>".
