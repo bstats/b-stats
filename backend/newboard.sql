@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS `%BOARD%_post` (
   `email` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `sub` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `id` varchar(9) COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
-  `capcode` enum('none','mod','admin','admin_highlight','developer','founder') COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
+  `capcode` enum('none','mod','admin','admin_highlight','developer','founder','manager') COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
   `country` varchar(4) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `country_name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `com` varchar(10000) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
