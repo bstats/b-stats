@@ -118,6 +118,9 @@ class PublicApi {
   }
 
   public static function styles(array $path):array {
+    header('Expires: '.gmdate('D, d M Y H:i:s \G\M\T', time() + 60));
+    header('Cache-Control: max-age=3600, public, must-revalidate');
+    header_remove("Pragma");
     return Config::getCfg("styles");
   }
 
