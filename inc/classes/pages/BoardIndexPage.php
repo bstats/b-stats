@@ -114,11 +114,12 @@ class BoardIndexPage extends BoardPage {
       $op = $thread->getPost(0);
       $preview = $op->getSubject() != "" ? $op->getSubject() : $op->com;
       $highlight = array_search($thread->getThreadId(), $nums) ? " class='highlightPost'" : "";
+      $repostSearch = "/".$this->board->getName()."/search/md5/".$op->getMD5Hex();
         $tr = "<tr$highlight>".
             "<td>{$op->getNo()}</td>".
             "<td class='name-col'><span class='name'>{$op->getName()}</span>".($op->getTripcode() != '' ? " <span class='postertrip'>{$op->getTripcode()}</span>" : "")."</td>".
             "<td>[<a href='".$op->getSwfUrl()."' title='".str_replace("'","&#39;",$op->getFilename())."' data-width='{$op->getWidth()}' data-height='{$op->getHeight()}' target='_blank'>".(mb_strlen($op->getFilename()) > 30 ? mb_substr($op->getFilename(), 0,25)."(...)" : $op->getFilename())."</a>]</td>".
-            "<td>[<a href=''>Reposts</a>]</td>".
+            "<td>[<a href='$repostSearch'>Reposts</a>]</td>".
             "<td>[".str_replace("O","?",substr($thread->getTag(),0,1))."]</td>".
             "<td class='subject'><span title='".str_replace("'","&#39;",$preview)."'>".(mb_strlen($preview) > 30 ? mb_substr($preview, 0,30)."(...)" : $preview)."</span></td>".
             "<td>".human_filesize($op->getFilesize(),2)."</td>".
