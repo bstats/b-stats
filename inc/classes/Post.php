@@ -87,7 +87,7 @@ class Post implements JsonSerializable {
   }
 
   function hasImage(){
-    return ($this->filename != "" && $this->md5 != null);
+    return ($this->filename != "" && $this->md5bin != null);
   }
   function hasComment() {
     return $this->com != null;
