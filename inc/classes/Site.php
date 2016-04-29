@@ -38,7 +38,7 @@ class Site {
   }
 
   static function isBanned(): bool {
-    return OldModel::banned($_SERVER['REMOTE_ADDR']);
+    return Model::get()->isBanned($_SERVER['REMOTE_ADDR']);
   }
 
   static function ip(): string {

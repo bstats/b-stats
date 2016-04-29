@@ -41,27 +41,12 @@ class OldModel {
             $postArr[] = $row;
         return $postArr;
     }
-    public static function getNumberOfReports(){
-        $dbl = Config::getMysqliConnection();
-        $data = $dbl->query("SELECT COUNT(*) as count FROM `reports`")->fetch_assoc();
-        $ret = $data['count'];
-        return $ret;
-    }
     public static function ban($ip,$reason,$expires = 0){
         $dbl = Config::getMysqliConnectionRW();
         $ip = $dbl->real_escape_string($ip);
         $reason = $dbl->real_escape_string($reason);
         $expires = $dbl->real_escape_string($expires);
         $dbl->query("INSERT INTO `bans` (`ip`,`reason`,`expires`) VALUES ('$ip','$reason','$expires')");
-    }
-    public static function banned($ip){
-      try{
-        $dbl = Config::getMysqliConnection();
-        $ip = $dbl->real_escape_string($ip);
-        return $dbl->query("SELECT `ip` FROM `bans` WHERE `ip`='$ip'")->num_rows > 0;
-      } catch(Exception $ex) {
-        return false;
-      }
     }
     public static function getBanInfo($ip){
         $dbl = Config::getMysqliConnection();

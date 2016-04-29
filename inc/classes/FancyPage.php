@@ -104,7 +104,7 @@ class FancyPage extends Page {
   private function renderExtraButtons() {
     $extraButtons = "";
     if ($this->user->getPrivilege() >= Site::LEVEL_ADMIN) {
-      $no = OldModel::getNumberOfReports();
+      $no = Model::get()->getNumberOfReports();
       $reports = $no ? " ($no)" : "";
       $extraButtons .= span('['.a('Reports'.$reports,'/reports').']','navelement').PHP_EOL;
     }
