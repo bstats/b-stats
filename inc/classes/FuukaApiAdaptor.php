@@ -44,7 +44,7 @@ class FuukaApiAdaptor {
       'title' => $post->sub,
       'title_processed' => $post->getSubject()];
     if($post->hasImage()){
-      $fuukadata['media'] = [
+      $fuukaData['media'] = [
         'op' => $post->getThreadId() == $post->getNo() ? 1 : 0,
         'preview_w' => $post->getThumbWidth(),
         'preview_h' => $post->getThumbHeight(),
@@ -62,7 +62,7 @@ class FuukaApiAdaptor {
         'thumb_link' => $post->getThumbUrl()];
     }
     else{
-        $fuukadata['media'] = null;
+        $fuukaData['media'] = null;
     }
     return $fuukaData;
   }
