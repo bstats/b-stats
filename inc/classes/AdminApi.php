@@ -13,6 +13,7 @@
  *  - bool swf_board
  *  - int group
  *  - bool hidden
+ *  - int archive_time
  * POST /admin/addUser
  *  - string username
  *  - string password
@@ -75,7 +76,8 @@ class AdminApi {
               post('privilege'),
               post('swf_board'),
               post('group'),
-              post('hidden'));
+              post('hidden'),
+              post('archive_time'));
       Archivers::run(post('shortname'));
       return ['result'=>'Added'];
     }
