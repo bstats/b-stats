@@ -3,7 +3,7 @@
  * May be made non-static in the future.
  */
 class PostRenderer {
-  const TIME_FORMAT = "Y-m-d (D) H:i:s";
+  const TIME_FORMAT = "m/d/y(D)H:i:s";
   const DISPLAY_OP = "op";
   const DISPLAY_REPLY = "reply";
   const DISPLAY_CATALOG = "catalog";
@@ -108,7 +108,7 @@ class PostRenderer {
       $fileDiv->append($thumb);
       return $fileDiv;
     } else if($post->imgbanned){
-      return Site::parseHtmlFragment("banned_image.html");
+      return Site::parseHtmlFragment("post/banned_image.html");
     } else {
       return "";
     }
@@ -119,7 +119,7 @@ class PostRenderer {
     foreach($post->backlinks as $bl){
         $backlinkblck .= a('&gt;&gt;'.$bl, "/{$post->board}/thread/{$post->threadid}#p$bl")
                           ->set('data-board',$post->board)->set('data-thread',$post->threadid)
-                          ->set('data-post', $bl)->set('class', 'backlink');
+                          ->set('data-post', $bl)->set('class', 'backlink').' ';
     }
     if($backlinkblck != ""){
         $backlinkblck = span($backlinkblck, 'container')->set('id',"blc$post->no");
