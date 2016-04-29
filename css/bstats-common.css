@@ -329,3 +329,10 @@ strike strike:after{
     border-bottom: 1px solid #000;
 }
 
+a.backlink {
+  text-decoration: none;
+}
+
+a.backlink span.linkpart {
+  padding: 0;
+}
