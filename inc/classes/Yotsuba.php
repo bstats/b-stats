@@ -163,6 +163,7 @@ class Yotsuba {
         <xsl:template match="span[contains(@class, 'mu-r')]">[red]<xsl:apply-templates/>[/red]</xsl:template>
         <xsl:template match="span[contains(@class, 'mu-g')]">[green]<xsl:apply-templates/>[/green]</xsl:template>
         <xsl:template match="span[contains(@class, 'mu-b')]">[blue]<xsl:apply-templates/>[/blue]</xsl:template>
+        <xsl:template match="pre[contains(@class, 'prettyprint')]">[code]<xsl:apply-templates/>[/code]</xsl:template>
         <xsl:template match="s">[spoiler]<xsl:apply-templates/>[/spoiler]</xsl:template>
         <xsl:template match="text()"><xsl:value-of select="normalize-space(.)"/></xsl:template>
       </xsl:stylesheet>
