@@ -852,3 +852,19 @@ iframe[src="about:blank"] {
 #postForm textarea {
     width:292px;
 }
+
+.mu-s {
+    font-weight: bold
+}
+.mu-i {
+    font-style: italic
+}
+.mu-r {
+    color: #C41E3A
+}
+.mu-g {
+    color: #00A550
+}
+.mu-b {
+    color: #1d8dc4
+}
