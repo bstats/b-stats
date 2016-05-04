@@ -82,6 +82,28 @@ class Yotsuba {
         $comment = str_replace($srch,$rpl,$comment);
         return $comment;
     }
+
+    /**
+     * Converts an html-formatted comment to a bbcode formatted one.
+     * 
+     * Uses XSLT to do so. See https://stackoverflow.com/questions/4308734/how-to-convert-html-to-bbcode#4462090
+     * 
+     * @param string $html the html-formatted comment
+     * @return the text in BBcode form.
+     */
+    public static function toBBCode(string $html):string {
+      $doc = new DOMDocument();
+      $doc->loadHTML($html);
+      
+      $transform = new DOMDocument();
+      $transform->loadXML(self::$bbcode_transform);
+
+      $proc = new XSLTProcessor();
+      $proc->importStylesheet($transform);
+      $transformed = $proc->transformToXml($doc);
+      
+      return $transformed;
+    }
     
     /**
      * Formats a post with HTML.
@@ -131,4 +153,17 @@ class Yotsuba {
         $finalComment = str_replace("\n","<br>",$formattedComment);
         return $finalComment;
     }
+    
+    static $bbcode_transform = <<<END
+      <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+        <xsl:output method="text"/>
+        <xsl:template match="br"><xsl:text disable-output-escaping="yes">&#10;</xsl:text></xsl:template>
+        <xsl:template match="b|strong|span[contains(@class, 'mu-s')]">[b]<xsl:apply-templates/>[/b]</xsl:template>
+        <xsl:template match="span[contains(@class, 'mu-i')]">[i]<xsl:apply-templates/>[/i]</xsl:template>
+        <xsl:template match="span[contains(@class, 'mu-r')]">[red]<xsl:apply-templates/>[/red]</xsl:template>
+        <xsl:template match="span[contains(@class, 'mu-g')]">[green]<xsl:apply-templates/>[/green]</xsl:template>
+        <xsl:template match="span[contains(@class, 'mu-b')]">[blue]<xsl:apply-templates/>[/blue]</xsl:template>
+        <xsl:template match="text()"><xsl:value-of select="normalize-space(.)"/></xsl:template>
+      </xsl:stylesheet>
+END;
 }

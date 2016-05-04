@@ -38,8 +38,8 @@ class FuukaApiAdaptor {
       'trip_processed' => $post->getTripcode(),
       'poster_hash_processed' => $post->getID(),
       'poster_hash' => $post->id,
-      'comment_sanitized' => Yotsuba::toPlainText($post->getComment()),
-      'comment' => Yotsuba::toPlainText($post->getComment()),
+      'comment_sanitized' => Yotsuba::toBBCode($post->getComment()),
+      'comment' => Yotsuba::toBBCode($post->getComment()),
       'comment_processed' => $post->getComment(),
       'title' => $post->sub,
       'title_processed' => $post->getSubject()];
