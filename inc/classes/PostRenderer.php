@@ -148,6 +148,11 @@ class PostRenderer {
             $cap = " <strong class='capcode'>## Developer</strong>".PHP_EOL;
             $cap .= '<img src="/image/developericon.gif" alt="This user is a 4chan Developer." title="This user is a 4chan Developer." class="identityIcon">';
             break;
+        case "manager":
+            $nameBlockExtra = " capcodeManager";
+            $cap = " <strong class='capcode'>## Manager</strong>".PHP_EOL;
+            $cap .= '<img src="/image/managericon.gif" alt="This user is a 4chan Manager." title="This user is a 4chan Manager." class="identityIcon">';
+            break;
         default:
             $nameBlockExtra = "";
             $cap = "";

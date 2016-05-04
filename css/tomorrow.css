@@ -518,6 +518,13 @@ span.capcodeDeveloper span.name,span.capcodeDeveloper span.name a,span.capcodeDe
   color:#0000F0!important;
 }
 
+.nameBlock.capcodeManager span.name,
+span.capcodeManager a span.name,
+span.capcodeManager span.postertrip,
+span.capcodeManager strong.capcode {
+    color: #FF0080!important;
+}
+
 .omittedposts,.abbr
 {
   color:#707070;
