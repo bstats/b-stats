@@ -151,7 +151,7 @@ class Page implements IPage {
   protected function renderHeader() {
     $styles = "";
     foreach(Config::getCfg('styles')[$this->user->getTheme()] as $css) {
-      $styles .= "<link rel='stylesheet' type='text/css' href='$css' name='theme'>";
+      $styles .= "<link rel='stylesheet' type='text/css' href='$css' data-name='theme'>";
     }
     $ga = Config::getCfg('site')['ga_id'];
     $this->header = Site::parseHtmlFragment('pagehead.html', [
