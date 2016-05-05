@@ -92,6 +92,8 @@ class Yotsuba {
      * @return the text in BBcode form.
      */
     public static function toBBCode(string $html):string {
+      // Remove EXIF table
+      $html = preg_replace("~<br><br><span class=\"abbr\">\[EXIF.+~", "", $html);
       $doc = new DOMDocument();
       $doc->loadHTML($html);
       
@@ -165,6 +167,7 @@ class Yotsuba {
         <xsl:template match="span[contains(@class, 'mu-b')]">[blue]<xsl:apply-templates/>[/blue]</xsl:template>
         <xsl:template match="pre[contains(@class, 'prettyprint')]">[code]<xsl:apply-templates/>[/code]</xsl:template>
         <xsl:template match="span[contains(@class, 'sjis')]">[sjis]<xsl:apply-templates/>[/sjis]</xsl:template>
+        <xsl:template match="strong[contains(@style, 'color: red;')]">[banned]<xsl:apply-templates/>[/banned]</xsl:template>
         <xsl:template match="span[contains(@class, 'fortune')]">[fortune color="<xsl:value-of select="substring-after(./@style, ':')"/>"]<xsl:value-of select="./b"/>[/fortune]</xsl:template>
         <xsl:template match="s">[spoiler]<xsl:apply-templates/>[/spoiler]</xsl:template>
         <xsl:template match="text()"><xsl:value-of select="."/></xsl:template>
