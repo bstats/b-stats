@@ -109,8 +109,8 @@ class Config
     if (isset(self::$json_cache[$name])) {
       return self::$json_cache[$name];
     }
-    if (file_exists(site::getPath() . "/cfg/$name.json")) {
-      self::$json_cache[$name] = json_decode(file_get_contents(site::getPath() . "/cfg/$name.json"), true);
+    if (file_exists(Site::getPath() . "/cfg/$name.json")) {
+      self::$json_cache[$name] = json_decode(file_get_contents(Site::getPath() . "/cfg/$name.json"), true);
       return self::$json_cache[$name];
     }
     throw new NotFoundException("Couldn't find config: $name");

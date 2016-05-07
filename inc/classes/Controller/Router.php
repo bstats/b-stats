@@ -91,7 +91,8 @@ class Router
             header("Location: $path/");
             exit;
           } else {
-            $page = new $pages[$base]();
+            $class = '\View\Pages\\'.$pages[$base];
+            $page = new $class();
           }
         } else {
           if (array_key_exists($base, $pages)) {
