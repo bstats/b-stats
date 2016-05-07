@@ -5,7 +5,6 @@ use ArrayAccess;
 use Exception;
 use JsonSerializable;
 use Model\Model;
-use Stats;
 
 class Board implements ArrayAccess, JsonSerializable
 {
@@ -114,14 +113,6 @@ class Board implements ArrayAccess, JsonSerializable
     $this->archive_time = $boardInfo['archive_time'];
     $this->archive = $boardInfo['is_archive'] == 1;
     $this->hidden = $boardInfo['hidden'] == 1;
-  }
-
-  public function getStats():\Stats
-  {
-    if (!isset($this->stats)) {
-      $this->stats = new Stats($this->name);
-    }
-    return $this->stats;
   }
 
   public function getThread(int $res):array
