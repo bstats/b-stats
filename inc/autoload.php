@@ -4,8 +4,6 @@ function loader($className) {
   $className = str_replace('\\','/', $className);
   if(file_exists(__DIR__."/classes/$className.php")) {
     require_once __DIR__."/classes/$className.php";
-  } elseif (file_exists(__DIR__."/classes/pages/$className.php")) {
-    require_once __DIR__."/classes/pages/$className.php";
   }
   return false;
 }

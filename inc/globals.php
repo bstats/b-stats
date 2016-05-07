@@ -142,3 +142,44 @@ function ago($duration){
         return durationToText($duration)." ago";
     }
 }
+
+/**
+ * Shorthand for making htmlelements.
+ * @param string $tag
+ * @param string $content
+ * @param array $attrs
+ * @return \View\HtmlElement
+ */
+function el($tag, $content="", $attrs=[]) {
+  return new View\HtmlElement($tag,$content,$attrs);
+}
+
+/**
+ * Makes a link
+ * @param string $name
+ * @param string $href
+ * @return \View\HtmlElement
+ */
+function a($name, $href) {
+  return new View\HtmlElement('a',$name,['href'=>$href]);;
+}
+
+/**
+ * Makes a div
+ * @param string $content
+ * @param string $classes
+ * @return \View\HtmlElement
+ */
+function div($content, $classes) {
+  return new View\HtmlElement('div', $content, ['class'=>$classes]);
+}
+
+/**
+ * Makes a span
+ * @param string $content
+ * @param string $classes
+ * @return \View\HtmlElement
+ */
+function span($content, $classes) {
+  return new View\HtmlElement('span', $content, ['class'=>$classes]);
+}

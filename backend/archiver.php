@@ -14,7 +14,12 @@
  * It will archive an entire standard imageboard.
  * I use a different script for /b/ because /b/ needs namesync.
  */
+
 require_once '../inc/config.php';
+
+use Model\Model;
+use Site\Config;
+
 
 if (php_sapi_name() != "cli") {
   die("This script must be run from the command line." . PHP_EOL);

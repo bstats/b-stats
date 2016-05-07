@@ -1,5 +1,13 @@
 <?php
 
+use Controller\Router;
+use Site\PermissionException;
+use Site\Site;
+use View\FancyPage;
+use View\Page;
+use View\Pages\Banned;
+use View\Pages\FourOhFour;
+
 define("START_TIME", microtime(true));
 
 require_once('inc/config.php');
@@ -19,7 +27,7 @@ try {
   } catch (NotFoundException $ex) {
     echo (new FourOhFour($ex->getMessage()))->display();
   } catch (PermissionException $ex) {
-    die((new FancyPage("/b/ stats: ACCESS DENIED", 
+    die((new FancyPage("/b/ stats: ACCESS DENIED",
             Site::parseHtmlFragment('accessDenied.html', 
                     ['__privilege__', '__required__'], 
                     [$ex->has, $ex->required]), 0))

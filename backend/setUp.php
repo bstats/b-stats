@@ -3,6 +3,12 @@
  * Site set-up script.
  * TODO: fix for v2.0
  */
+
+include_once '../inc/config.php';
+
+use Model\OldModel;
+use Site\Site;
+
 system("clear");
 if(!function_exists("readline")){
     function readline( $prompt = '' ){
@@ -184,7 +190,6 @@ file_put_contents("../inc/cfg.json", $json);
 
 echo "Done.".PHP_EOL;
 
-include_once '../inc/config.php';
 
 echo "Setting up required tables...".PHP_EOL;
 $driver->report_mode = MYSQLI_REPORT_ERROR;
