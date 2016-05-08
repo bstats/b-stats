@@ -102,8 +102,8 @@ class Action
         post('resto',0),
         $name,
         $trip,
-        post('email'),
-        post('sub'),
+        htmlspecialchars(post('email')),
+        htmlspecialchars(post('sub')),
         $com);
     // auto-noko
     return "/{$board->getName()}/thread/{$post->getThreadId()}";
