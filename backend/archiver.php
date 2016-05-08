@@ -91,7 +91,7 @@ o("Connecting to DB...");
 $pdo = Config::getPDOConnectionRW();
 
 o("Setting up DB...");
-$pdo->exec(str_replace(['%BOARD%'], [$board], file_get_contents("newboard.sql")));
+$pdo->exec(str_replace(['%BOARD%'], [$board], file_get_contents("../sql/newboard.sql")));
 
 $lastTime = $boardObj->getLastCrawl();
 /*

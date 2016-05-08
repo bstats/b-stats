@@ -74,9 +74,9 @@ class Model implements \Model\IModel
    * @param int $group
    * @param bool $hidden
    */
-  function addBoard(string $shortname, string $longname, bool $worksafe,
+  function addBoard(string $shortname, string $longname, int $worksafe,
                     int $pages, int $per_page, int $privilege, int $swf_board,
-                    int $group, int $hidden, int $archive_time, bool $is_archive)
+                    int $group, int $hidden, int $archive_time, int $is_archive)
   {
     $stmt = $this->conn_rw->prepare("INSERT INTO `boards` "
         . "(`shortname`, `longname`, `worksafe`, `pages`, `perpage`, `privilege`, `swf_board`,"
@@ -85,6 +85,10 @@ class Model implements \Model\IModel
     $stmt->execute([':short' => $shortname, ':long' => $longname, ':ws' => $worksafe,
         ':pages' => $pages, ':per' => $per_page, ':priv' => $privilege, ':swf' => $swf_board,
         ':group' => $group, ':hidden' => $hidden, ':archivetime' => $archive_time, ':is_archive' => $is_archive]);
+    $sn = alphanum($shortname);
+
+    // Set up board tables
+    $this->conn_rw->exec(str_replace(['%BOARD%'], [$sn], file_get_contents(Site::getPath()."/sql/newboard.sql")));
   }
 
   /**
