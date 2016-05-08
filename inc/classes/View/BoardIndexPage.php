@@ -16,9 +16,13 @@ class BoardIndexPage extends BoardPage
   public function __construct(ImageBoard\Board $board, int $page)
   {
     parent::__construct($board);
-    if(!$board->isArchive())
+    if(!$board->isArchive()) {
+      if(!isset($_SESSION['captcha'])) {
+        $_SESSION['captcha'] = rand(100000, 999999);
+      }
       $this->appendToBody(Site::parseHtmlFragment('postForm.html',
-          ['_board_','_resto_', '_password_'],[$board->getName(), 0, 'password']));
+          ['_board_', '_resto_', '_password_'], [$board->getName(), 0, 'password']));
+    }
     if ($board->isSwfBoard()) {
       $this->appendToBody(
           div('', 'topLinks navLinks')

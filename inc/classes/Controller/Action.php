@@ -75,6 +75,10 @@ class Action
    */
   static function post():string
   {
+    if(post('captcha') != $_SESSION['captcha']) {
+      throw new Exception("Invalid Captcha");
+    }
+    $_SESSION['captcha'] = rand(100000, 999999);
     $model = Model::get();
     if(post('mode') != 'regist') {
       throw new Exception("invalid mode");
@@ -98,14 +102,17 @@ class Action
     if($com == '') {
       $com = null;
     }
-    if($_FILES['upfile'])
+    $file = self::checkUploadedFile();
+    if($com == null && $file == null) {
+      throw new Exception("Post must contain image");
+    }
     $post = $model->addPost($board,
         post('resto',0),
         htmlspecialchars($name),
         $trip,
         htmlspecialchars(post('email')),
         htmlspecialchars(post('sub')),
-        $com, self::checkUploadedFile());
+        $com, $file);
     // auto-noko
     return "/{$board->getName()}/thread/{$post->getThreadId()}";
   }
