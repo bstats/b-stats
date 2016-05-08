@@ -25,6 +25,5 @@ class Captcha implements IPage
     header("Content-Disposition:inline ; filename=secure.jpg");
     imagejpeg($img, null, 5);
     exit;
-    return "";
   }
 }

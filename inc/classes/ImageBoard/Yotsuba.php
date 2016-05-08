@@ -1,5 +1,6 @@
 <?php
 namespace ImageBoard;
+use Model\Model;
 use DOMDocument;
 use XSLTProcessor;
 
@@ -117,21 +118,21 @@ class Yotsuba
     }
 
     /**
-     * Formats a post with HTML.
-     *
-     * Essentially, this performs the reverse of the
-     * <code>Yotsuba::sanitize_comment()</code> function.
+     * Formats a plain-text post with HTML.
      *
      * Notes:
      * - cross-board or cross-thread links are not fixed, but instead left as
      *   deadlinks.
      * - <code>&lt;wbr&gt;</code> tags are not replaced.
      *
-     * @param string $comment
+     * @param Post $post
      * @return string HTML-formatted comment
      */
-    public static function toHtml($comment, $posts)
+    public static function toHtml(Post $post)
     {
+        $comment = $post->getComment();
+        $posts = $post->hasThread() ? $post->getThread()->getPostIds() : [];
+
         $search[0] = '~&gt;&gt;([0-9]{1,9})~'; // >>123 type post links
         $search[1] = "~^&gt;(.*)$~m"; // >greentext
         $search[2] = "~&gt;&gt;&gt;/([a-z]{1,4})/~"; // >>>/board/ links
@@ -147,22 +148,37 @@ class Yotsuba
         $htmlSpecialCharComment = str_replace($srch, $rpl, $comment);
         $initialTagComment = preg_replace($search, $replace, $htmlSpecialCharComment);
 
-
-        /**
-         * @todo Search DB to make Cross-Thread links
-         */
         $formattedComment = preg_replace_callback(
             '~<a href="" class="quotelink">&gt;&gt;([0-9]{1,9})</a>~',
-            function ($matches) use ($posts) {
+            function ($matches) use ($posts, $post) {
                 if (in_array($matches[1], $posts)) {
-                    return '<a href="' . $posts[0] . '#p' . $matches[1] . '" class="quotelink">&gt;&gt;' . $matches[1] . '</a>';
-                } else
-                    return '<span class="deadlink">&gt;&gt;' . $matches[1] . '</span>';
+                    return '<a href="#p' . $matches[1] . '" class="quotelink" '.
+                    'data-board="'.$post->getBoard()->getName().'"'.
+                    'data-thread="'.$post->getThreadId().'"'.
+                    'data-post="'.$matches[1].'"'.
+                    '>&gt;&gt;' . $matches[1] . '</a>';
+                } else {
+                    try {
+                        $threadId = Model::get()->getThreadId($post->getBoard(), $matches[1]);
+                        return '<a href="'.$threadId.'#p' . $matches[1] . '" class="quotelink" '.
+                        'data-board="'.$post->getBoard()->getName().'"'.
+                        'data-thread="'.$threadId.'"'.
+                        'data-post="'.$matches[1].'"'.
+                        '>&gt;&gt;' . $matches[1] . '</a>';
+                    } catch(\NotFoundException $ex) {
+                        return '<span class="deadlink">&gt;&gt;' . $matches[1] . '</span>';
+                    }
+                }
             },
             $initialTagComment);
         $formattedComment = str_replace("\r","", $formattedComment);
         $finalComment = str_replace("\n", "<br>", $formattedComment);
         return $finalComment;
+    }
+
+    public static function parseBBCode(Post $p):string
+    {
+        return self::toHtml($p);
     }
 
     static $bbcode_transform = <<<END

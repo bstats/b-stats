@@ -29,6 +29,9 @@ class Thread implements Iterator
    */
   private $posts;
 
+  /** @var  array|int[] array of post IDs */
+  private $postIds;
+
   /**
    * @var Board
    */
@@ -92,6 +95,7 @@ class Thread implements Iterator
       throw new Exception("Thread ID is invalid.");
     $this->threadId = $thrdId;
     $this->posts = array();
+    $this->postIds = array();
     $this->board = $board;
     $this->sticky = $sticky;
     $this->closed = $closed;
@@ -110,6 +114,11 @@ class Thread implements Iterator
   function getThreadId(): int
   {
     return $this->threadId;
+  }
+
+  function getPostIds(): array
+  {
+    return $this->postIds;
   }
 
   /**
@@ -242,7 +251,9 @@ class Thread implements Iterator
   function addPost($post)
   {
     $post->setBoard($this->board);
+    $post->setThread($this);
     $this->posts[] = $post;
+    $this->postIds[] = $post->getNo();
     $this->parseQuotes($post->com, $post->no);
   }
 
@@ -259,10 +270,14 @@ class Thread implements Iterator
   function parseQuotes($com, $no)
   {
     $matches = array();
-    $search = '~([a-z]+)link">&gt;&gt;(\d+)</~';
+    if($this->board->isArchive()) {
+      $search = '~link">&gt;&gt;(\d+)</~';
+    } else {
+      $search = '~>>(\d+)~';
+    }
     preg_match_all($search, $com, $matches);
     for ($i = 0; $i < count($matches[1]); $i++) {
-      $postno = $matches[2][$i];
+      $postno = $matches[1][$i];
       for ($j = 0; $j < count($this->posts); $j++) {
         $p = $this->posts[$j];
         if ($p->no == $postno) {

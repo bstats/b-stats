@@ -2,6 +2,7 @@
 
 namespace Controller;
 use ImageBoard\Yotsuba;
+use Model\FileInfo;
 use Site\Config;
 use Exception;
 use Model\Model;
@@ -12,7 +13,8 @@ class Action
   public static function run(array $breadcrumbs)
   {
     if (method_exists('Controller\Action', $breadcrumbs[2])) {
-      $target = self::{$breadcrumbs[2]}();
+      $method = $breadcrumbs[2];
+      $target = self::$method();
     } else {
       throw new Exception("Unknown action");
     }
@@ -95,17 +97,74 @@ class Action
     $com = post('com');
     if($com == '') {
       $com = null;
-    } else {
-      $com = Yotsuba::toHtml($com, []);
     }
+    if($_FILES['upfile'])
     $post = $model->addPost($board,
         post('resto',0),
-        $name,
+        htmlspecialchars($name),
         $trip,
         htmlspecialchars(post('email')),
         htmlspecialchars(post('sub')),
-        $com);
+        $com, self::checkUploadedFile());
     // auto-noko
     return "/{$board->getName()}/thread/{$post->getThreadId()}";
+  }
+
+  /**
+   * @return FileInfo|null
+   * @throws Exception
+   */
+  private static function checkUploadedFile()
+  {
+    // Undefined | Multiple Files | $_FILES Corruption Attack
+    // If this request falls under any of them, treat it invalid.
+    if (
+        !isset($_FILES['upfile']['error']) ||
+        is_array($_FILES['upfile']['error'])
+    ) {
+      throw new Exception('Invalid parameters.');
+    }
+
+    // Check $_FILES['upfile']['error'] value.
+    switch ($_FILES['upfile']['error']) {
+      case UPLOAD_ERR_OK:
+        break;
+      case UPLOAD_ERR_NO_FILE:
+        return null;
+      case UPLOAD_ERR_INI_SIZE:
+      case UPLOAD_ERR_FORM_SIZE:
+        throw new Exception('Exceeded filesize limit.');
+      default:
+        throw new Exception('Unknown errors.');
+    }
+
+    // DO NOT TRUST $_FILES['upfile']['mime'] VALUE !!
+    // Check MIME Type by yourself.
+    $finfo = new \finfo(FILEINFO_MIME_TYPE);
+    if (false === $ext = array_search(
+            $finfo->file($_FILES['upfile']['tmp_name']),
+            array(
+                'jpg' => 'image/jpeg',
+                'png' => 'image/png',
+                'gif' => 'image/gif',
+            ),
+            true
+        )) {
+      throw new Exception('Invalid file format.');
+    }
+
+    if ($_FILES['upfile']['size'] > 4194304) {
+      throw new Exception('Exceeded file size limit.');
+    }
+
+    $imageData = getimagesize($_FILES['upfile']['tmp_name']);
+    $fileInfo = new FileInfo();
+    $fileInfo->setSize($_FILES['upfile']['size'])
+             ->setHash(md5_file($_FILES['upfile']['tmp_name'], true))
+             ->setW($imageData[0])
+             ->setH($imageData[1])
+             ->setName(pathinfo($_FILES['upfile']['name'], PATHINFO_FILENAME))
+             ->setExt('.'.pathinfo($_FILES['upfile']['name'], PATHINFO_EXTENSION));
+    return $fileInfo;
   }
 }

@@ -20,6 +20,7 @@ class Post implements JsonSerializable
 
   private $doc_id;
   public $no;
+  private $thread;
   public $threadid;
   public $time;
   private $tim;
@@ -96,6 +97,21 @@ class Post implements JsonSerializable
     $this->board = $board;
   }
 
+  function setThread(Thread $thread)
+  {
+    $this->thread = $thread;
+  }
+
+  function hasThread():bool
+  {
+    return $this->thread instanceof Thread;
+  }
+
+  function getThread():Thread
+  {
+    return $this->thread;
+  }
+
   function hasImage()
   {
     return ($this->filename != "" && $this->md5bin != null);
@@ -104,6 +120,11 @@ class Post implements JsonSerializable
   function hasComment()
   {
     return $this->com != null;
+  }
+
+  function getBoard():Board
+  {
+    return $this->board;
   }
 
   function getDocId():int

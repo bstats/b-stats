@@ -10,6 +10,7 @@ class Board implements ArrayAccess, JsonSerializable
 {
   private $name;
   private $name_long;
+  private $group;
   private $worksafe;
   private $pages;
   private $perpage;
@@ -23,7 +24,7 @@ class Board implements ArrayAccess, JsonSerializable
   private $archive_time;
   private $hidden;
 
-  public function __toString()
+  public function __toString():string
   {
     return $this->name;
   }
@@ -157,9 +158,11 @@ class Board implements ArrayAccess, JsonSerializable
     $boards = Model::get()->getBoards();
     $types = [];
     $types['Archives'] = array_filter($boards, function ($b) {
+      /* @var Board $b */
       return $b->isArchive();
     });
     $types['Boards'] = array_filter($boards, function ($b) {
+      /* @var Board $b */
       return !$b->isArchive();
     });
     foreach ($types as $n => $t) {

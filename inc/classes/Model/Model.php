@@ -16,7 +16,7 @@ use Site\Site;
 use ImageBoard\Thread;
 use Site\User;
 
-class Model implements \Model\IModel
+class Model implements IModel
 {
 
   /** @var Model instance */
@@ -47,7 +47,7 @@ class Model implements \Model\IModel
   /**
    * Get all the boards in this DB.
    * @param bool $showHidden Show hidden boards?
-   * @return Board[] array of all boards in this database.
+   * @return array|Board[] array of all boards in this database.
    */
   function getBoards(bool $showHidden = false): array
   {
@@ -57,7 +57,7 @@ class Model implements \Model\IModel
         ->fetchAll();
     $ret = [];
     foreach ($b as $boardinfo) {
-      $ret[$boardinfo['shortname']] = new ImageBoard\Board($boardinfo);
+      $ret[$boardinfo['shortname']] = new Board($boardinfo);
     }
     return $ret;
   }
@@ -203,12 +203,14 @@ class Model implements \Model\IModel
    * @return Post
    * @throws NotFoundException
    */
-  function addPost(Board $board, int $resto, $name, $trip, $email, $sub, $com): Post {
+  function addPost(Board $board, int $resto, $name, $trip, $email, $sub, $com, $fileInfo = null): Post {
     if($board->isArchive()) {
       return null;
     }
 
     $time = time();
+    $tim = (int)(microtime(true) * 1000);
+
     $stmt = $this->conn_rw->prepare("INSERT INTO `{$board->getName()}_post` "
         . "(no, resto, time, name, trip, email, sub, com) VALUES (0, :resto, :time, :name, :trip, :email, :sub, :com)");
     $stmt->execute([
@@ -227,7 +229,20 @@ class Model implements \Model\IModel
       $this->conn_rw->exec("UPDATE `{$board->getName()}_thread` SET `replies`=`replies`+1, `last_crawl`='$time', `lastreply`='$time' WHERE `threadid`='$resto'");
     }
     $this->conn_rw->exec("UPDATE `boards` SET `last_crawl`='$time' WHERE `boards`.`shortname` = '{$board->getName()}'");
+    if($fileInfo != null) {
+      $this->addFileInfo($board, $postId, $tim, $fileInfo);
+    }
     return $this->getPost($board, $postId);
+  }
+
+  function addFileInfo(Board $b, int $no, int $tim, FileInfo $fi)
+  {
+    $prepared = $this->conn_rw->prepare("UPDATE `{$b->getName()}_post` SET ".
+        "`tim`=:tim, `md5`=:md5, `w`=:w, `h`=:h, `filename`=:filename, `ext`=:ext, `fsize`=:fsize WHERE `no`=:no");
+    $prepared->execute([
+      ':tim'=>$tim, ':md5'=>$fi->getHash(), ':w'=>$fi->getW(), ':h'=>$fi->getH(), ':filename'=>$fi->getName(),
+      ':ext'=>$fi->getExt(), ':fsize'=>$fi->getSize(), ':no'=>$no
+    ]);
   }
 
   // Post functions
@@ -246,6 +261,34 @@ class Model implements \Model\IModel
       throw new NotFoundException("No such post $id exists on board {$board->getName()} in this archive");
     }
     return new Post($stmt->fetch(PDO::FETCH_ASSOC), $board);
+  }
+
+  private $threadIdCache = [];
+
+  /**
+   * Gets the threadid (resto) for the given post number.
+   *
+   * @param Board $b
+   * @param int $no
+   * @return int
+   * @throws NotFoundException
+   */
+  function getThreadId(Board $b, int $no): int
+  {
+    if(isset($this->threadIdCache[$b->getName()])) {
+      if (isset($this->threadIdCache[$b->getName()][$no])) {
+        return $this->threadIdCache[$b->getName()][$no];
+      }
+    } else {
+      $this->threadIdCache[$b->getName()] = [];
+    }
+    $query = $this->conn_ro->query("SELECT `resto` FROM `{$b->getName()}_post` WHERE `no`='$no'");
+    if($query === FALSE) {
+      throw new NotFoundException("Linked post not found");
+    }
+    $id = $query->fetchColumn();
+    $this->threadIdCache[$b->getName()][$no] = $id;
+    return $id;
   }
 
   /**
@@ -295,7 +338,7 @@ class Model implements \Model\IModel
    * Search functions
    */
 
-  function getPostsByMD5(ImageBoard\Board $b, string $md5_hex, int $num = 500, int $offset = 0):\Model\PostSearchResult
+  function getPostsByMD5(ImageBoard\Board $b, string $md5_hex, int $num = 500, int $offset = 0): PostSearchResult
   {
     $pTable = $b->getName() . '_post';
     $md5 = alphanum($md5_hex);
@@ -310,7 +353,7 @@ class Model implements \Model\IModel
     return new PostSearchResult($count, $posts);
   }
 
-  function getPostsByID(ImageBoard\Board $b, string $id, int $num = 500, int $offset = 0):\Model\PostSearchResult
+  function getPostsByID(ImageBoard\Board $b, string $id, int $num = 500, int $offset = 0): PostSearchResult
   {
     $pTable = $b->getName() . '_post';
     $idQ = $this->conn_ro->quote($id);
@@ -325,7 +368,7 @@ class Model implements \Model\IModel
     return new PostSearchResult($count, $posts);
   }
 
-  function getPostsByTrip(ImageBoard\Board $b, string $trip, int $num = 500, int $offset = 0):\Model\PostSearchResult
+  function getPostsByTrip(ImageBoard\Board $b, string $trip, int $num = 500, int $offset = 0): PostSearchResult
   {
     $pTable = $b->getName() . '_post';
     $tripQ = $this->conn_ro->quote($trip);

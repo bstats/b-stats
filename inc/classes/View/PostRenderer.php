@@ -4,6 +4,9 @@ namespace View;
 use DateTime;
 use DateTimeZone;
 use ImageBoard\Post;
+use ImageBoard\Board;
+use ImageBoard\Thread;
+use ImageBoard\Yotsuba;
 use Site\Site;
 
 /**
@@ -21,7 +24,7 @@ class PostRenderer
     if ($display == self::DISPLAY_CATALOG) {
       list($tnW, $tnH) = tn_Size($post->w, $post->h);
       return "<div id='thread-{$post->no}' class='thread'>" .
-      "<a href='/{$post->board}/thread/{$post->no}'>" .
+      "<a href='/{$post->getBoard()}/thread/{$post->getNo()}'>" .
       ($post->imgbanned ?
           Site::parseHtmlFragment("banned_image.html")
           : "<img alt='' id='thumb-{$post->no}' class='thumb' width='$tnW' height='$tnH' src='{$post->getThumbUrl()}' data-id='{$post->no}'>") .
@@ -46,7 +49,7 @@ class PostRenderer
       $postDiv->append(self::makePostInfo($post, $sticky, $closed));
     }
     $postDiv->append(el('blockquote',
-        self::fixHTML($post->com, $post->board, $post->threadid),
+        self::fixHTML($post),
         ['class' => 'postMessage', 'id' => "m$post->no"]));
 
     return div($postDiv, "postContainer {$display}Container")->set('id', "pc$post->no");
@@ -69,7 +72,7 @@ class PostRenderer
         ->append(span($time->format(self::TIME_FORMAT), 'dateTime')->set('data-utc', $post->getTime()) . ' ')
         ->append(span('', 'postNum desktop')
             ->append(a('No.', "#p{$post->getNo()}")->set('title', 'Highlight this post'))
-            ->append(a($post->getNo(), "/{$post->board}/thread/{$post->getThreadid()}#p{$post->getNo()}")->set('title', 'Link to this post'))
+            ->append(a($post->getNo(), "/{$post->board}/thread/{$post->getThreadId()}#p{$post->getNo()}")->set('title', 'Link to this post'))
             ->append($icons . ' ')
             ->append(a('Report', 'javascript:')->set('class', 'miniButton')->set('onclick', "reportPost(this,'$post->board','$post->no','$post->threadid');")))
         ->append(' ' . self::makeBackLinks($post));
@@ -174,41 +177,58 @@ class PostRenderer
     /**
      * Tripcode and email formatting.
      */
-    $nameblock = span('', 'nameBlock' . $nameBlockExtra);
-    $nametrip = "";
-    $name = span($post->name, 'name');
-    if ($post->trip != '') {
-      $nametrip = $name . ' ' . span($post->trip, 'postertrip');
+    /* @var HtmlElement $nameBlock */
+    $nameBlock = span('', 'nameBlock' . $nameBlockExtra);
+    $nameTrip = "";
+    $name = span($post->getName(), 'name');
+    if ($post->getTripcode() != '') {
+      $nameTrip = $name . ' ' . span($post->getTripcode(), 'postertrip');
     } else {
-      $nametrip = (string)$name;
+      $nameTrip = (string)$name;
     }
-    if ($post->email != '') {
-      $nameblock->append(a($nametrip, 'mailto:' . $post->email)->set('class', 'useremail'));
+    if ($post->getEmail() != '') {
+      $nameBlock->append(a($nameTrip, 'mailto:' . $post->getEmail())->set('class', 'useremail'));
     } else {
-      $nameblock->append($nametrip);
+      $nameBlock->append($nameTrip);
     }
-    $nameblock->append($cap);
+    $nameBlock->append($cap);
 
-    if ($post->id != "") {
-      $idLink = a($post->id, "/$post->board/search/id/" . str_replace('/', '-', $post->id))->set('title', 'View posts by this ID')->set('class', 'hand posteruid postNum');
-      $idSpan = span("(ID: $idLink)", 'posteruid postNum id_' . $post->id);
-      $nameblock->append(' ' . $idSpan);
+    if ($post->getID() != "") {
+      $idLink = a($post->getID(), "/{$post->getBoard()}/search/id/" . str_replace('/', '-', $post->getID()))
+                ->set('title', 'View posts by this ID')
+                ->set('class', 'hand posteruid postNum');
+      $idSpan = span("(ID: $idLink)", 'posteruid postNum id_' . $post->getID());
+      $nameBlock->append(' ' . $idSpan);
     }
-    return $nameblock;
+    return $nameBlock;
+  }
+
+
+  public static function fixHTML(Post $p):string
+  {
+    if($p->getBoard()->isArchive()) {
+      return self::transform4chanHtml($p->getComment(), $p->getBoard(), $p->getThreadId());
+    } else {
+      return self::transformHtml($p);
+    }
+  }
+
+  private static function transformHtml(Post $p):string
+  {
+    return Yotsuba::parseBBCode($p);
   }
 
   /**
-   * Fix links for use in the archive.
+   * Fix links from 4chan for use in the archive.
    * Yes, I know I'm using regex to deal with HTML, but it works.
    *
    * @todo Use an actual HTML parser rather than regex
    * @param string $com the post comment (full HTML)
-   * @param string $board the board name
+   * @param Board $board the board
    * @param int $thread the threadid
    * @return string the fixed HTML
    */
-  public static function fixHTML($com, $board = 'b', $thread = '')
-  {
+  private static function transform4chanHtml($com, $board, $thread):string {
     $search = array();
     $replace = array();
     //For links to /b/ threads

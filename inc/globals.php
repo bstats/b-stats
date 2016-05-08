@@ -1,5 +1,6 @@
 <?php
 // Global functions - use sparingly
+use \View\HtmlElement;
 
 /**
  * Strips all non-alphanumeric characters from a string.
@@ -148,38 +149,38 @@ function ago($duration){
  * @param string $tag
  * @param string $content
  * @param array $attrs
- * @return \View\HtmlElement
+ * @return HtmlElement
  */
-function el($tag, $content="", $attrs=[]) {
-  return new View\HtmlElement($tag,$content,$attrs);
+function el($tag, $content="", $attrs=[]):HtmlElement {
+  return new HtmlElement($tag,$content,$attrs);
 }
 
 /**
  * Makes a link
  * @param string $name
  * @param string $href
- * @return \View\HtmlElement
+ * @return HtmlElement
  */
-function a($name, $href) {
-  return new View\HtmlElement('a',$name,['href'=>$href]);;
+function a($name, $href):HtmlElement {
+  return new HtmlElement('a',$name,['href'=>$href]);
 }
 
 /**
  * Makes a div
  * @param string $content
  * @param string $classes
- * @return \View\HtmlElement
+ * @return HtmlElement
  */
-function div($content, $classes) {
-  return new View\HtmlElement('div', $content, ['class'=>$classes]);
+function div($content, $classes):HtmlElement {
+  return new HtmlElement('div', $content, ['class'=>$classes]);
 }
 
 /**
  * Makes a span
  * @param string $content
  * @param string $classes
- * @return \View\HtmlElement
+ * @return HtmlElement
  */
-function span($content, $classes) {
-  return new View\HtmlElement('span', $content, ['class'=>$classes]);
+function span($content, $classes):HtmlElement {
+  return new HtmlElement('span', $content, ['class'=>$classes]);
 }
