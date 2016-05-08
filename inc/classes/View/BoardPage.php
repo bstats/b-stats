@@ -21,8 +21,10 @@ class BoardPage extends FancyPage
   {
     parent::__construct("/{$board->getName()}/ - {$board->getLongName()}", "", $board->getPrivilege());
     $boardBanner = div("", "boardBanner centertext")
-        ->append(div("/{$board->getName()}/ - {$board->getLongName()}", "boardTitle"))
-        ->append(a("View this board on 4chan", '//boards.4chan.org/' . $board->getName()));
+        ->append(div("/{$board->getName()}/ - {$board->getLongName()}", "boardTitle"));
+    if ($board->isArchive()) {
+      $boardBanner->append(a("View this board on 4chan", '//boards.4chan.org/' . $board->getName()));
+    }
     $this->appendToBody("<hr>" . $boardBanner . "<hr>");
 
     $this->board = $board;

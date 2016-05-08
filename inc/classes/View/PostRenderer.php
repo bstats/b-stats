@@ -26,8 +26,8 @@ class PostRenderer
           Site::parseHtmlFragment("banned_image.html")
           : "<img alt='' id='thumb-{$post->no}' class='thumb' width='$tnW' height='$tnH' src='{$post->getThumbUrl()}' data-id='{$post->no}'>") .
       "</a>" .
-      ($post->replies > 1 ? "<div title='(R)eplies / (I)mages' id='meta-{$post->no}' class='meta'>" .
-          "R: <b>{$post->replies}</b>" . ($post->images > 1 ? " / I: <b>{$post->images}</b>" : '') .
+      ($post->replies > 0 ? "<div title='(R)eplies / (I)mages' id='meta-{$post->no}' class='meta'>" .
+          "R: <b>{$post->replies}</b>" . ($post->images > 0 ? " / I: <b>{$post->images}</b>" : '') .
           "</div>" : "") .
       '<div class="teaser">' .
       "<b>{$post->sub}</b>" .
@@ -95,7 +95,7 @@ class PostRenderer
           "</a>";
 
       $chanMedia = $post->board == 'f' ? '//i.4cdn.org/f/src/' . $post->filename . $post->ext : '//i.4cdn.org/' . $post->board . '/src/' . $post->tim . $post->ext;
-      $fullImgLink = $post->board == 'f' ? $post->getSwfUrl() : $post->getImgUrl();
+      $fullImgLink = $post->getExtension() == '.swf' ? $post->getSwfUrl() : $post->getImgUrl();
       $fileDiv = div('', 'file')->set('id', 'f' . $post->no);
       $fileInfo = div('', 'fileInfo');
       $fileText = span('', 'fileText')->set('id', 'fT' . $post->no)->set('data-filename', $post->filename . $post->ext);

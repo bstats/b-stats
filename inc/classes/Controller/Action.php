@@ -1,6 +1,7 @@
 <?php
 
 namespace Controller;
+use ImageBoard\Yotsuba;
 use Site\Config;
 use Exception;
 use Model\Model;
@@ -59,5 +60,52 @@ class Action
       echo json_encode($ex->getMessage());
     }
     return '';
+  }
+
+  /**
+   * Naiive attempt at making an imageboard.
+   *
+   * @todo: Make this not as spaghetti
+   *
+   * @return string
+   * @throws Exception
+   * @throws \NotFoundException
+   */
+  static function post():string
+  {
+    $model = Model::get();
+    if(post('mode') != 'regist') {
+      throw new Exception("invalid mode");
+    }
+    $board = $model->getBoard(post('board'));
+    if($board->isArchive()) {
+      throw new Exception("Board is an archive");
+    }
+    $name = post('name', 'Anonymous');
+    if($name == ''){
+      $name = 'Anonymous';
+    }
+    $trip = Yotsuba::parseTripcode($name);
+    if($trip == false){
+      $trip = null;
+    } else {
+      $trip = '!'.$trip;
+    }
+    $name = strtok($name, '#');
+    $com = post('com');
+    if($com == '') {
+      $com = null;
+    } else {
+      $com = Yotsuba::toHtml($com, []);
+    }
+    $post = $model->addPost($board,
+        post('resto',0),
+        $name,
+        $trip,
+        post('email'),
+        post('sub'),
+        $com);
+    // auto-noko
+    return "/{$board->getName()}/thread/{$post->getThreadId()}";
   }
 }

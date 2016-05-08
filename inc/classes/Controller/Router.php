@@ -5,7 +5,7 @@ namespace Controller;
 use Api\AdminApi;
 use Api\PublicApi;
 use View\BoardIndexPage;
-use View\Pages\Catalog;
+use View\Catalog;
 use Site\Config;
 use Controller\Action;
 use Exception;

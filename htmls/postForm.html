@@ -1,0 +1,58 @@
+<form name="post" action="/do/post" method="post" enctype="multipart/form-data" autocomplete="off">
+
+<input type="hidden" name="board" value="_board_"/>
+<input type="hidden" name="MAX_FILE_SIZE" value="4194304"/>
+<input type="hidden" name="mode" value="regist"/>
+<input type="hidden" name="resto" value="_resto_"/>
+
+<div style="display: none;">
+<input type="text" id="PreventChromeAutocomplete"
+       name="PreventChromeAutocomplete" autocomplete="address-level4" />
+</div>
+<table class="postForm" id="postForm" style="display: table;">
+    <tbody>
+        <tr data-type="Name">
+            <td>Name</td>
+            <td><input name="name" type="text" tabindex="1" placeholder="Anonymous" autocomplete="off" /></td>
+        </tr>
+        <tr data-type="Email">
+            <td>Email</td>
+            <td><input name="email" type="text" tabindex="2" autocomplete="off" /></td>
+        </tr>
+        <tr data-type="Subject">
+            <td>Subject</td>
+            <td><input name="sub" type="text" tabindex="3" /><input type="submit" value="Post" tabindex="6" autocomplete="off"/></td>
+        </tr>
+        <tr data-type="Comment">
+            <td>Comment</td>
+            <td><textarea name="com" cols="48" rows="4" wrap="soft" tabindex="4"></textarea></td>
+        </tr>
+        <tr id="captchaFormPart">
+            <td class="desktop">Verification</td>
+            <td colspan="2">
+                <div style="padding: 5px;">
+                    Captcha will go here
+                </div>
+            </td>
+        </tr>
+        <tr data-type="File">
+            <td>File</td>
+            <td><input id="postFile" name="upfile" type="file" tabindex="7" />
+            </td>
+        </tr>
+        <tr data-type="Password">
+            <td>Password</td>
+            <td>
+                <input id="postPassword" name="pwd" type="password" value="_password_" autocomplete="off" />
+            </td>
+        </tr>
+        <tr class="rules">
+            <td colspan="2">
+                <ul class="rules">
+                    <li>Rules</li>
+                </ul>
+            </td>
+        </tr>
+    </tbody>
+</table>
+</form>

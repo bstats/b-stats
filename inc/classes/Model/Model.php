@@ -19,10 +19,10 @@ use Site\User;
 class Model implements \Model\IModel
 {
 
-  /** @var \Model\IModel instance */
+  /** @var Model instance */
   private static $instance;
 
-  public static function get(): \Model\IModel
+  public static function get(): Model
   {
     if (isset(self::$instance))
       return self::$instance;
@@ -190,6 +190,44 @@ class Model implements \Model\IModel
   function getCatalog(Board $board): array
   {
 
+  }
+
+  /**
+   * @param Board $board
+   * @param int $resto
+   * @param $name
+   * @param $trip
+   * @param $email
+   * @param $sub
+   * @param $com
+   * @return Post
+   * @throws NotFoundException
+   */
+  function addPost(Board $board, int $resto, $name, $trip, $email, $sub, $com): Post {
+    if($board->isArchive()) {
+      return null;
+    }
+
+    $time = time();
+    $stmt = $this->conn_rw->prepare("INSERT INTO `{$board->getName()}_post` "
+        . "(no, resto, time, name, trip, email, sub, com) VALUES (0, :resto, :time, :name, :trip, :email, :sub, :com)");
+    $stmt->execute([
+      ':resto'=>$resto, ':time'=>$time, ':name'=>$name, ':trip'=>$trip,
+      ':email'=>$email, ':sub'=>$sub, ':com'=>$com
+    ]);
+    $postId = $this->conn_rw->lastInsertId();
+    $clause = $resto == 0 ? ", `resto`=`doc_id`" : "";
+    $this->conn_rw->exec("UPDATE `{$board->getName()}_post` SET `no`=`doc_id` $clause WHERE `doc_id`=$postId");
+
+    if($resto == 0) {
+      $this->conn_rw->exec("INSERT INTO `{$board->getName()}_thread` (threadid, active, sticky, closed, archived, custom_spoiler, replies, images, last_crawl, lastreply) "
+      ." VALUES ($postId, 1, 0, 0, 0, 0, 0, 0, $time, $time)");
+    }
+    else {
+      $this->conn_rw->exec("UPDATE `{$board->getName()}_thread` SET `replies`=`replies`+1, `last_crawl`='$time', `lastreply`='$time' WHERE `threadid`='$resto'");
+    }
+    $this->conn_rw->exec("UPDATE `boards` SET `last_crawl`='$time' WHERE `boards`.`shortname` = '{$board->getName()}'");
+    return $this->getPost($board, $postId);
   }
 
   // Post functions

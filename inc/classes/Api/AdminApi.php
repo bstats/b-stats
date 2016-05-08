@@ -81,19 +81,19 @@ class AdminApi
       Model::get()->getBoard(post('shortname'));
       return ['error' => 'Board exists'];
     } catch (Exception $ex) {
-      $archive = post('is_archive', true);
+      $archive = post('is_archive', 1);
       Model::get()->addBoard(
           post('shortname'),
           post('longname'),
-          post('worksafe', 0),
-          post('pages', 10),
-          post('per_page', 15),
-          post('privilege', 0),
-          post('swf_board', 0),
-          post('group', 0),
-          post('hidden', 0),
-          post('archive_time', 60),
-          $archive);
+          (int)post('worksafe', 0),
+          (int)post('pages', 10),
+          (int)post('per_page', 15),
+          (int)post('privilege', 0),
+          (int)post('swf_board', 0),
+          (int)post('group', 0),
+          (int)post('hidden', 0),
+          (int)post('archive_time', 60),
+          (int)$archive);
       if ($archive) {
         Archivers::run(post('shortname'));
       }

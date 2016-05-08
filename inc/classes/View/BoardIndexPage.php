@@ -16,6 +16,9 @@ class BoardIndexPage extends BoardPage
   public function __construct(ImageBoard\Board $board, int $page)
   {
     parent::__construct($board);
+    if(!$board->isArchive())
+      $this->appendToBody(Site::parseHtmlFragment('postForm.html',
+          ['_board_','_resto_', '_password_'],[$board->getName(), 0, 'password']));
     if ($board->isSwfBoard()) {
       $this->appendToBody(
           div('', 'topLinks navLinks')

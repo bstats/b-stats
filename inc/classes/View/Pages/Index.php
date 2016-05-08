@@ -45,7 +45,7 @@ class Index extends FancyPage
 
     if (count($plainBoards) > 0) {
       $html .= "<div class='boardlist_big'><h1>Boards</h1><hr style='width:64px;'>";
-      foreach ($archiveBoards as $b) {
+      foreach ($plainBoards as $b) {
         $html .= Site::parseHtmlFragment("indexBoard.html",
             ["%ago%",
                 "%crawltime%",

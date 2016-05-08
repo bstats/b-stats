@@ -134,8 +134,8 @@ class Yotsuba
     {
         $search[0] = '~&gt;&gt;([0-9]{1,9})~'; // >>123 type post links
         $search[1] = "~^&gt;(.*)$~m"; // >greentext
-        $search[2] = "~&gt;&gt;&gt;/([a-z]{1,4}/"; // >>>/board/ links
-        $search[3] = "~&gt;&gt;&gt;/([a-z]{1,4}/([0-9]{1,9})~"; // >>>/board/123 type post links
+        $search[2] = "~&gt;&gt;&gt;/([a-z]{1,4})/~"; // >>>/board/ links
+        $search[3] = "~&gt;&gt;&gt;/([a-z]{1,4})/([0-9]{1,9})~"; // >>>/board/123 type post links
 
         $replace[0] = '<a href="" class="quotelink">&gt;&gt;$1</a>';
         $replace[1] = '<span class="quote">&gt;$1</span>';
@@ -160,7 +160,7 @@ class Yotsuba
                     return '<span class="deadlink">&gt;&gt;' . $matches[1] . '</span>';
             },
             $initialTagComment);
-
+        $formattedComment = str_replace("\r","", $formattedComment);
         $finalComment = str_replace("\n", "<br>", $formattedComment);
         return $finalComment;
     }

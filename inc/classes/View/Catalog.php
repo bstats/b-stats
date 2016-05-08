@@ -1,6 +1,6 @@
 <?php
 
-namespace View\Pages;
+namespace View;
 
 use ImageBoard;
 use ImageBoard\Post;
