@@ -16,17 +16,16 @@ class FuukaApiAdaptor
     if (count($path) > 4 && $path[2] == 'api' && $path[3] == 'chan') {
       if ($path[4] !== 'run' && method_exists(self::class, $path[4])) {
         try {
-          return new JsonPage(self::{
-            $path[4]}($path));
+          $method = $path[4];
+          return new JsonPage(self::$method($path));
         } catch (Exception $ex) {
           return new JsonPage(["error" => $ex->getMessage()]);
         }
       } else {
         return new JsonPage(["error" => "Fuuka adaptor method not implemented."]);
       }
-    } else {
-      return new JsonPage(["error" => "Malformed request."]);
     }
+    return new JsonPage(["error" => "Malformed request."]);
   }
 
   public static function post(array $path):array
@@ -42,6 +41,10 @@ class FuukaApiAdaptor
   {
     $fuukaData = [
         'doc_id' => $post->getDocId(),
+        'num' => $post->getNo(),
+        'subnum' => 0,
+        'thread_num' => $post->getThreadId(),
+        'op' => $post->getNo() == $post->getThreadId() ? 1 : 0,
         'fourchan_date' => $post->getChanTime(),
         'timestamp' => $post->getTime(),
         'name' => $post->name,
