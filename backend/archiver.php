@@ -257,6 +257,16 @@ while (!file_exists("$board.kill")) {
     //Go through each reply.
     
     foreach ($apiThread["posts"] as $reply) {
+      if(!isset($reply['no'])) {
+        o("Error: required variable `no` not set in a post in thread $thread, skipping");
+        continue;
+      } else if(!isset($reply['resto'])) {
+        o("Error: required variable `resto` not set in a post in thread $thread, skipping");
+        continue;
+      } else if(!isset($reply['time'])) {
+        o("Error: required variable `time` not set in a post in thread $thread, skipping");
+        continue;
+      }
       $i += 21;
       if($i > $maxPerQuery) {
         $i = 0;
