@@ -2,10 +2,10 @@
 
 /*
  * 4chan archival script
- * v5
+ * v5.1
  * by terrance
  * 
- * This thing is okay. It works sometimes. I run it using GNU screen.
+ * This thing is okay. It works sometimes.
  * 
  * Usage: php archiver.php -b board [-f]
  * 
@@ -19,7 +19,6 @@ require_once '../inc/config.php';
 
 use Model\Model;
 use Site\Config;
-
 
 if (php_sapi_name() != "cli") {
   die("This script must be run from the command line." . PHP_EOL);
@@ -45,15 +44,29 @@ if (php_sapi_name() != "cli") {
   }
 }
 
+/**
+ * Logs an error message to the error log. A newline character is appended to the message.
+ * The given message is also echoed to the console.
+ *
+ * @param $message string the message to log.
+ */
+function log_error(string $message){
+  global $board;
+  o($message);
+  file_put_contents($board.'.error', $message.PHP_EOL, FILE_APPEND);
+}
+
+
 error_reporting(E_ALL);
 
 define("MAX_TIME", 200);
 
-//Board config is stored in a flat file.
+//Board config is stored in the database.
 try {
   $boardObj = Model::get()->getBoard($board);
   define("EXEC_TIME", $boardObj->getArchiveTime());
 } catch (Exception $ex) {
+  log_error("Board has not been configured. Add it to the boards table.");
   die("Board $board has not been configured yet. Add it to the boards table." . PHP_EOL);
 }
 
@@ -99,6 +112,11 @@ $lastTime = $boardObj->getLastCrawl();
  */
 while (!file_exists("$board.kill")) {
   try {
+  if($logToFile) {
+    // Clear output file
+    fclose(fopen($board.'.log', 'w'));
+  }
+
   $startTime = time();
 
   //Establish variables.
@@ -117,7 +135,7 @@ while (!file_exists("$board.kill")) {
   foreach ($threadsjson as $page) {
     foreach ($page['threads'] as $thread) {
       $everyThread[] = $thread['no'];
-      if ($thread['last_modified'] > $lastTime) {
+      if ($thread['last_modified'] >= $lastTime) {
         $threadsToDownload[] = $thread['no'];
       }
       if($thread['last_modified'] > $highestTime) {
@@ -128,6 +146,7 @@ while (!file_exists("$board.kill")) {
   o("-Done: " . count($threadsToDownload) . " threads have changed.");
 
   if (count($threadsToDownload) == 0) {
+    o("That's not enough: last time was $lastTime, highest thread update time was $highestTime");
     o("That's not enough!");
     goto wait;
   }
@@ -239,8 +258,7 @@ while (!file_exists("$board.kill")) {
   /*
    * Individual thread post loading
    */
-  
-  
+
   o("Downloading threads...");
   $i = 0;
   $queryNum = 0;
@@ -254,17 +272,21 @@ while (!file_exists("$board.kill")) {
   foreach ($threadsToDownload as $thread) {
     $apiThread = json_decode(dlUrl("http://a.4cdn.org/{$board}/thread/$thread.json"), true);
 
+    if(!isset($apiThread['posts'])) {
+      log_error("Error: thread $thread 404'd.");
+      continue;
+    }
+
     //Go through each reply.
-    
     foreach ($apiThread["posts"] as $reply) {
       if(!isset($reply['no'])) {
-        o("Error: required variable `no` not set in a post in thread $thread, skipping");
+        log_error("Error: required variable `no` not set in a post in thread $thread, skipping");
         continue;
       } else if(!isset($reply['resto'])) {
-        o("Error: required variable `resto` not set in a post in thread $thread, skipping");
+        log_error("Error: required variable `resto` not set in a post in thread $thread, skipping");
         continue;
       } else if(!isset($reply['time'])) {
-        o("Error: required variable `time` not set in a post in thread $thread, skipping");
+        log_error("Error: required variable `time` not set in a post in thread $thread, skipping");
         continue;
       }
       $i += 21;
@@ -332,7 +354,8 @@ while (!file_exists("$board.kill")) {
      FROM {$board}_post
      WHERE resto = $thread
      GROUP BY resto")->fetchColumn(0);
-    $pdo->query("UPDATE {$board}_thread SET `lastreply`='$last' WHERE `threadid`='$thread'");
+    if($last != '')
+      $pdo->query("UPDATE {$board}_thread SET `lastreply`='$last' WHERE `threadid`='$thread'");
   }
 
   /*
@@ -349,12 +372,20 @@ while (!file_exists("$board.kill")) {
     o(" There has been an error reported:");
     o($e->getMessage(). " at line ".$e->getLine());
     o($e->getTraceAsString());
-    o("Resetting database connection.");
-    file_put_contents($board.".error", 
-            date("c").PHP_EOL.$e->getMessage(). " at line ".$e->getLine().PHP_EOL.$e->getTraceAsString().PHP_EOL, FILE_APPEND);
+    o("Restarting script...");
+    log_error(date("c").PHP_EOL.$e->getMessage(). " at line ".$e->getLine().PHP_EOL.$e->getTraceAsString().PHP_EOL);
     $pdo = null;
     Config::closePDOConnectionRW();
-    $pdo = Config::getPDOConnectionRW();
+    if(PHP_OS != "WINNT") {
+      // spawn a new process
+      if(!pcntl_fork())
+        pcntl_exec(PHP_BINARY, $argv);
+      die;
+    } else {
+      $args = implode(' ', $argv);
+      exec("psexec -d -accepteula C:\\php\\php.exe $args");
+      die;
+    }
   }
   if ((time() - $startTime) < EXEC_TIME) {
     wait:

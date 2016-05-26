@@ -57,23 +57,15 @@ class Archivers
   /**
    * Gets the output history of the archiver from screen.
    *
-   * @param type $board
+   * @param string $board
    * @return string output history
    */
   static function getOutput(string $board):string
   {
     $status = self::getStatus($board);
-    if ($status == "Running" || $status == "Stopping") {
-      if (PHP_OS == "Linux") {
-        $path = Site::getPath() . "/backend/$board.buff";
-        exec("screen -x $board -p0 -X hardcopy -h $path");
-        sleep(1);
-        $str = file_get_contents($path);
-        unlink($path);
-        return $str;
-      } else {
-        return file_get_contents(Site::getPath() . "/backend/$board.log");
-      }
+    $logFile = Site::getPath() . "/backend/$board.log";
+    if (file_exists($logFile)) {
+      return file_get_contents($logFile);
     }
     return "";
   }
@@ -81,7 +73,7 @@ class Archivers
   /**
    * Gets the error history of the archiver.
    *
-   * @param type $board
+   * @param string $board
    * @return string output history
    */
   static function getError(string $board):string
@@ -106,15 +98,6 @@ class Archivers
     }
   }
 
-  /**
-   *
-   * @param type $board
-   */
-  static function getDetailedStatus(string $board):array
-  {
-
-  }
-
   static function run(string $board):bool
   {
     if (file_exists(Site::getPath() . "/backend/$board-archiver.php")
@@ -122,7 +105,7 @@ class Archivers
     ) {
       if (self::getStatus($board) == self::STOPPED || self::getStatus($board) == self::STOPPED_UNCLEAN) {
         if (PHP_OS == "Linux") {
-          exec("cd " . Site::getPath() . "/backend/ && screen -dmS $board php $board-archiver.php");
+          exec("cd " . Site::getPath() . "/backend/ && php $board-archiver.php -f >> /dev/null &");
         } else {
           $path = Site::getPath() . "/backend/$board-archiver.php";
           $cmd = "c:/php/php.exe \"$path\" -f";
@@ -138,7 +121,7 @@ class Archivers
       if (self::getStatus($board) == self::STOPPED || self::getStatus($board) == self::STOPPED_UNCLEAN) {
         if (PHP_OS == "Linux") {
           exec("cd " . Site::getPath() . "/backend/ && " .
-              "screen -dmS $board php archiver.php -b $board");
+              "php archiver.php -b $board -f >> /dev/null &");
         } else {
           $path = Site::getPath() . "/backend/archiver.php";
           $cmd = "c:/php/php.exe \"$path\" -b $board -f";
