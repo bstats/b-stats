@@ -20,6 +20,9 @@ require_once '../inc/config.php';
 use Model\Model;
 use Site\Config;
 
+define('PROTOCOL','http');
+define('API_DOMAIN',"a.4cdn.org");
+
 if (php_sapi_name() != "cli") {
   die("This script must be run from the command line." . PHP_EOL);
 } else {
@@ -53,7 +56,12 @@ if (php_sapi_name() != "cli") {
 function log_error(string $message){
   global $board;
   o($message);
-  file_put_contents($board.'.error', $message.PHP_EOL, FILE_APPEND);
+  file_put_contents($board.'.error', date("c: ").$message.PHP_EOL, FILE_APPEND);
+}
+
+function log_exception(Throwable $ex) {
+  log_error("\tException: ".$ex->getMessage().PHP_EOL.
+            "At ".$ex->getFile().":".$ex->getLine());
 }
 
 
@@ -67,7 +75,8 @@ try {
   define("EXEC_TIME", $boardObj->getArchiveTime());
 } catch (Exception $ex) {
   log_error("Board has not been configured. Add it to the boards table.");
-  die("Board $board has not been configured yet. Add it to the boards table." . PHP_EOL);
+  log_exception($ex);
+  die();
 }
 
 
@@ -127,8 +136,11 @@ while (!file_exists("$board.kill")) {
 
   //Getting important API stuffs.
   o("Downloading threads.json...");
-  $threadsjson = json_decode(dlUrl("http://a.4cdn.org/{$board}/threads.json"), true);
-
+  $threadsjson = json_decode(dlUrl(PROTOCOL."://".API_DOMAIN."/{$board}/threads.json"), true);
+  if(!is_array($threadsjson)) {
+    log_error("Error downloading threads.json");
+    goto wait;
+  }
   //Parse threads.json
   o("Parsing threads.json...");
   $highestTime = 0;
@@ -152,7 +164,7 @@ while (!file_exists("$board.kill")) {
   }
 
   o("Downloading catalog.json...");
-  $catalog = json_decode(dlUrl("http://a.4cdn.org/{$board}/catalog.json"), true);
+  $catalog = json_decode(dlUrl(PROTOCOL."://".API_DOMAIN."/{$board}/catalog.json"), true);
 
   //Reset active threads.
   o("Marking found threads as active...");
@@ -270,7 +282,7 @@ while (!file_exists("$board.kill")) {
   $postFields[0] = [];
   $placeholders[0] = "";
   foreach ($threadsToDownload as $thread) {
-    $apiThread = json_decode(dlUrl("http://a.4cdn.org/{$board}/thread/$thread.json"), true);
+    $apiThread = json_decode(dlUrl(PROTOCOL."://".API_DOMAIN."/{$board}/thread/$thread.json"), true);
 
     if(!isset($apiThread['posts'])) {
       log_error("Error: thread $thread 404'd.");
@@ -339,12 +351,12 @@ while (!file_exists("$board.kill")) {
   o("Inserting threads (and unmarking non-deleted)...");
   foreach($postFields as $key=>$value) {
     $postInsertQuery = "INSERT INTO `{$board}_post` "
-          . "(`no`,`resto`,`time`,"
-          . "`name`,`trip`,`email`,`sub`,`id`,`capcode`,`country`,`country_name`,`com`,"
-          . "`tim`,`filename`,`ext`,`fsize`,`md5`,`w`,`h`,`filedeleted`,`spoiler`,`tag`) VALUES "
-          . $placeholders[$key]
-          . " ON DUPLICATE KEY UPDATE "
-          . "`com`=VALUES(com),`deleted`=0,`filedeleted`=VALUES(filedeleted)";
+        . "(`no`,`resto`,`time`,"
+        . "`name`,`trip`,`email`,`sub`,`id`,`capcode`,`country`,`country_name`,`com`,"
+        . "`tim`,`filename`,`ext`,`fsize`,`md5`,`w`,`h`,`filedeleted`,`spoiler`,`tag`) VALUES "
+        . $placeholders[$key]
+        . " ON DUPLICATE KEY UPDATE "
+        . "`com`=VALUES(com),`deleted`=0,`filedeleted`=VALUES(filedeleted)";
     $pdo->prepare($postInsertQuery)->execute($postFields[$key]);
     o("Sent query $key");
   }
@@ -366,14 +378,9 @@ while (!file_exists("$board.kill")) {
   
   $lastTime = $highestTime;
   } catch (Throwable $e) {
-    o("***********************************");
-    o("************   ERROR   ************");
-    o("***********************************");
-    o(" There has been an error reported:");
-    o($e->getMessage(). " at line ".$e->getLine());
-    o($e->getTraceAsString());
+    log_exception($e);
     o("Restarting script...");
-    log_error(date("c").PHP_EOL.$e->getMessage(). " at line ".$e->getLine().PHP_EOL.$e->getTraceAsString().PHP_EOL);
+    
     $pdo = null;
     Config::closePDOConnectionRW();
     if(PHP_OS != "WINNT") {
