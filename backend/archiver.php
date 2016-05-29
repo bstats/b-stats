@@ -398,7 +398,7 @@ while (!file_exists("$board.kill")) {
     wait:
     o("Waiting " . (EXEC_TIME - (time() - $startTime)) . " seconds..."
         .PHP_EOL."---------------------".PHP_EOL.PHP_EOL);
-    sleep(EXEC_TIME - (time() - $startTime));
+    @sleep(EXEC_TIME - (time() - $startTime));
   }
 }
 
