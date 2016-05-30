@@ -60,9 +60,19 @@ class Site
     return $_SERVER['REMOTE_ADDR'];
   }
 
+  static function enterBackupMode()
+  {
+    touch(self::getPath() . "/cfg/backup");
+  }
+
+  static function exitBackupMode()
+  {
+    unlink(self::getPath() . "/cfg/backup");
+  }
+
   static function backupInProgress(): bool
   {
-    return file_exists(self::getPath() . "/inc/cfg/backup");
+    return file_exists(self::getPath() . "/cfg/backup");
   }
 
   /**

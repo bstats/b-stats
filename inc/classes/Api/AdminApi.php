@@ -38,6 +38,12 @@
  * POST /admin/archiver/[board]/start
  * POST /admin/archiver/[board]/stop
  * POST /admin/archiver/[board]/clearError
+ *
+ * Note: Once in backup mode, the site can only be put into
+ * normal mode by accessing from localhost or deleting cfg/backup
+ *
+ * GET /admin/sitectl/enterBackupMode
+ * GET /admin/sitectl/exitBackupMode
  */
 namespace Api;
 use Site\Archivers;
@@ -118,6 +124,7 @@ class AdminApi
     $archivers = [];
     $boards = Model::get()->getBoards(true);
     foreach ($boards as $board) {
+      if(!$board->isArchive()) continue;
       $archivers[] = [
           'board' => $board->getName(),
           'status' => Archivers::getStatus($board)];
@@ -184,6 +191,7 @@ class AdminApi
   public static function deleteReport(array $path):array
   {
     self::ensurePOST();
+    Model::get()->archiveReport($path[3], $path[4]);
   }
 
   public static function restorePost(array $path):array
@@ -202,6 +210,21 @@ class AdminApi
     self::ensureGET();
     Site::requirePrivilege(Config::getCfg('permissions')['owner']);
     return Model::get()->getRequests();
+  }
+
+  public static function sitectl(array $path):array
+  {
+    Site::requirePrivilege(Config::getCfg('permissions')['owner']);
+    switch(strtolower($path[3]))
+    {
+      case 'enterbackupmode':
+        Site::enterBackupMode();
+        break;
+      case 'exitbackupmode':
+        Site::exitBackupMode();
+        break;
+    }
+    return ['result'=>'success'];
   }
 
   public static function ensurePOST()

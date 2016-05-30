@@ -15,7 +15,7 @@ require_once('inc/globals.php');
 try {
   // Page router
   try {
-    if (Site::backupInProgress()) {
+    if (Site::backupInProgress() && $_SERVER['REMOTE_ADDR'] != '127.0.0.1') {
       die((new Page("Backup in Progress", "<h2>Backing Up</h2><div class='centertext'>Please come back later.</div>"))->display());
     }
     if (Site::isBanned()) {
