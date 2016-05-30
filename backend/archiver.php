@@ -317,7 +317,7 @@ while (!file_exists("$board.kill")) {
       }
       array_push($postFields[$queryNum],
             $reply['no'],
-            $reply['resto'],
+            $reply['resto'] == 0 ? $reply['no'] : $reply['resto'],
             $reply['time'],
             $reply['name'] ?? null,
             $reply['trip'] ?? null,
