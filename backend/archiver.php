@@ -2,7 +2,7 @@
 
 /*
  * 4chan archival script
- * v5.1
+ * v5.2
  * by terrance
  * 
  * This thing is okay. It works sometimes.
@@ -116,6 +116,7 @@ o("Setting up DB...");
 $pdo->exec(str_replace(['%BOARD%'], [$board], file_get_contents("../sql/newboard.sql")));
 
 $lastTime = $boardObj->getLastCrawl();
+
 /*
  * Begin Main loop
  */
@@ -129,10 +130,10 @@ while (!file_exists("$board.kill")) {
   $startTime = time();
 
   //Establish variables.
-  $threadsToDownload = array();
-  $everyThread = array();
-  $postInsertArr = array();
-  $downloadedThreadsTemp = array();
+  $threadsToDownload = [];
+  $everyThread = [];
+  $postInsertArr = [];
+  $downloadedThreadsTemp = [];
 
   //Getting important API stuffs.
   o("Downloading threads.json...");
@@ -159,114 +160,15 @@ while (!file_exists("$board.kill")) {
 
   if (count($threadsToDownload) == 0) {
     o("That's not enough: last time was $lastTime, highest thread update time was $highestTime");
-    o("That's not enough!");
     goto wait;
   }
-
-  o("Downloading catalog.json...");
-  $catalog = json_decode(dlUrl(PROTOCOL."://".API_DOMAIN."/{$board}/catalog.json"), true);
 
   //Reset active threads.
   o("Marking found threads as active...");
   $pdo->query("UPDATE `{$board}_thread` SET `active`='0' WHERE 1; ");
-  $activethreadindic = "(" . implode(",", $everyThread) . ")";
-  $pdo->query("UPDATE `{$board}_thread` SET `active`='1' WHERE `threadid` IN $activethreadindic");
+  $activeThreads = "(" . implode(",", $everyThread) . ")";
+  $pdo->query("UPDATE `{$board}_thread` SET `active`='1' WHERE `threadid` IN $activeThreads");
 
-
-
-  //Parse 4chan Catalog
-  o("Parsing catalog.json...");
-  foreach ($catalog as $page) {
-    foreach ($page['threads'] as $thread) {
-      if (in_array($thread['no'], $threadsToDownload))
-        $postInsertArr[] = $thread;
-    }
-  }
-  o("-Done: " . count($postInsertArr) . " OPs to be inserted.");
-
-  if (count($postInsertArr) == 0) {
-    o("That's not enough! Waiting " . EXEC_TIME . " seconds...\n\n");
-    sleep(EXEC_TIME);
-    continue;
-  }
-  
-  
-  /*
-   * Board index loading (OPs)
-   */
-  
-  o("Preparing to insert OPs...");
-  $i = 0;
-  $threadInsertQuery = "INSERT INTO `{$board}_thread` "
-          . "(`threadid`,`active`,`sticky`,`closed`,`archived`,`custom_spoiler`,"
-          . "`replies`,`images`,`lastreply`,`last_crawl`) VALUES ";
-          
-  
-  $postInsertQuery = "INSERT INTO `{$board}_post` "
-          . "(`no`,`resto`,`time`,"
-          . "`name`,`trip`,`email`,`sub`,`id`,`capcode`,`country`,`country_name`,`com`,"
-          . "`tim`,`filename`,`ext`,`fsize`,`md5`,`w`,`h`,`filedeleted`,`spoiler`,`tag`) VALUES ";
-
-  $threadFields = [];
-  $postFields = [];
-  $curTime = time();
-  $first = true;
-  foreach ($postInsertArr as $thread) {
-    if(!$first) {
-      $threadInsertQuery .= ",(?,?,?,?,?,?,?,?,?,?)";
-      $postInsertQuery .= ",(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
-    } else {
-      $first = false;
-      $threadInsertQuery .= "(?,?,?,?,?,?,?,?,?,?)";
-      $postInsertQuery .= "(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
-    }
-    array_push($threadFields, 
-            $thread['no'],
-            1,
-            $thread['sticky'] ?? 0,
-            $thread['closed'] ?? 0,
-            $thread['archived'] ?? 0,
-            $thread['custom_spoiler'] ?? null,
-            $thread['replies'],
-            $thread['images'],
-            $thread['time'],
-            $curTime);
-    array_push($postFields,
-            $thread['no'],
-            $thread['no'],
-            $thread['time'],
-            $thread['name'] ?? null,
-            $thread['trip'] ?? null,
-            $thread['email'] ?? null,
-            $thread['sub'] ?? null,
-            $thread['id'] ?? null,
-            $thread['capcode'] ?? null,
-            $thread['country'] ?? null,
-            $thread['country_name'] ?? null,
-            $thread['com'] ?? null,
-            $thread['tim'] ?? null,
-            $thread['filename'] ?? null,
-            $thread['ext'] ?? null,
-            $thread['fsize'] ?? null,
-            isset($thread['md5']) ? base64_decode($thread['md5']) : null,
-            $thread['w'] ?? null,
-            $thread['h'] ?? null,
-            $thread['filedeleted'] ?? null,
-            $thread['spoiler'] ?? null,
-            $thread['tag'] ?? null);
-  }
-  $threadInsertQuery .= " ON DUPLICATE KEY UPDATE "
-          . "`active`=1,`sticky`=VALUES(sticky),`closed`=VALUES(closed),`archived`=VALUES(archived),"
-          . "`custom_spoiler`=VALUES(custom_spoiler),`replies`=VALUES(replies),"
-          . "`images`=VALUES(images),"
-          . "`last_crawl`=UNIX_TIMESTAMP()";
-  $postInsertQuery .= " ON DUPLICATE KEY UPDATE "
-          . "`com`=VALUES(com),`deleted`=0,`filedeleted`=VALUES(filedeleted)";
-  o("Inserting thread infos...");
-  $pdo->prepare($threadInsertQuery)->execute($threadFields);
-  o("Inserting post infos...");
-  $pdo->prepare($postInsertQuery)->execute($postFields);
-  
   /*
    * Individual thread post loading
    */
@@ -277,17 +179,42 @@ while (!file_exists("$board.kill")) {
   $maxPerQuery = 50000;
   $downloadedThreads = array();
   $first = true;
+  $firstThread = true;
   $postFields = [];
+  $threadFields = [];
   $placeholders = [];
   $postFields[0] = [];
   $placeholders[0] = "";
+  $threadInsertQuery = "INSERT INTO `{$board}_thread` "
+      . "(`threadid`,`active`,`sticky`,`closed`,`archived`,`custom_spoiler`,"
+      . "`replies`,`images`,`lastreply`,`last_crawl`) VALUES ";
   foreach ($threadsToDownload as $thread) {
     $apiThread = json_decode(dlUrl(PROTOCOL."://".API_DOMAIN."/{$board}/thread/$thread.json"), true);
 
-    if(!isset($apiThread['posts'])) {
+    if(!isset($apiThread['posts']) || !isset($apiThread['posts'][0])) {
       log_error("Error: thread $thread 404'd.");
       continue;
     }
+
+    // Add thread details
+    if(!$firstThread) {
+      $threadInsertQuery .= ",(?,?,?,?,?,?,?,?,?,?)";
+    } else {
+      $firstThread = false;
+      $threadInsertQuery .= "(?,?,?,?,?,?,?,?,?,?)";
+    }
+
+    array_push($threadFields,
+        $apiThread['posts'][0]['no'],
+        1,
+        $apiThread['posts'][0]['sticky'] ?? 0,
+        $apiThread['posts'][0]['closed'] ?? 0,
+        $apiThread['posts'][0]['archived'] ?? 0,
+        $apiThread['posts'][0]['custom_spoiler'] ?? null,
+        $apiThread['posts'][0]['replies'],
+        $apiThread['posts'][0]['images'],
+        $apiThread['posts'][0]['time'],
+        time());
 
     //Go through each reply.
     foreach ($apiThread["posts"] as $reply) {
@@ -342,13 +269,21 @@ while (!file_exists("$board.kill")) {
     $downloadedThreads[] = $thread;
   }
 
+  $threadInsertQuery .= " ON DUPLICATE KEY UPDATE "
+      . "`active`=1,`sticky`=VALUES(sticky),`closed`=VALUES(closed),`archived`=VALUES(archived),"
+      . "`custom_spoiler`=VALUES(custom_spoiler),`replies`=VALUES(replies),"
+      . "`images`=VALUES(images),"
+      . "`last_crawl`=UNIX_TIMESTAMP()";
+  o("Inserting thread infos...");
+  $pdo->prepare($threadInsertQuery)->execute($threadFields);
+
   o("Marking deleted posts... ");
   foreach ($downloadedThreads as $key => $thread) {
     $downloadedThreadsTemp[$key] = "'$thread'";
   }
   $tempThreads = implode(",", $downloadedThreadsTemp);
   $pdo->query("UPDATE `{$board}_post` SET `deleted` = 1 WHERE `resto` IN ($tempThreads)");
-  o("Inserting threads (and unmarking non-deleted)...");
+  o("Inserting thread posts (and unmarking non-deleted)...");
   foreach($postFields as $key=>$value) {
     $postInsertQuery = "INSERT INTO `{$board}_post` "
         . "(`no`,`resto`,`time`,"
@@ -396,12 +331,16 @@ while (!file_exists("$board.kill")) {
   }
   if ((time() - $startTime) < EXEC_TIME) {
     wait:
-    o("Waiting " . (EXEC_TIME - (time() - $startTime)) . " seconds..."
+    $sleepTime = (EXEC_TIME - (time() - $startTime));
+    o("Waiting " . $sleepTime . " seconds..."
         .PHP_EOL."---------------------".PHP_EOL.PHP_EOL);
-    @sleep(EXEC_TIME - (time() - $startTime));
+    while($sleepTime-- > 0) {
+      if(file_exists("$board.kill")) goto kill;
+      sleep(1);
+    }
   }
 }
-
+kill:
 o("Received kill request. Stopping.");
 $pdo = null;
 unlink($board . ".pid");
