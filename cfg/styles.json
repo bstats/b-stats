@@ -3,5 +3,6 @@
   "yotsuba-blue":["/css/yotsuba-blue.css","/css/bstats-yotsuba-blue.css"],
   "tomorrow":["/css/tomorrow.css","/css/bstats-tomorrow.css"],
   "yotsuba-pink":["/css/yotsuba-pink.css","/css/bstats-yotsuba-pink.css"],
-  "material-design":["/css/yotsuba-blue.css","https://fonts.googleapis.com/css?family=Roboto","/css/material.css","/css/bstats-material.css"]
+  "material-design":["/css/yotsuba-blue.css","https://fonts.googleapis.com/css?family=Roboto","/css/material.css","/css/bstats-material.css"],
+  "none":[""]
 }
