@@ -269,40 +269,44 @@ while (!file_exists("$board.kill")) {
     $downloadedThreads[] = $thread;
   }
 
-  $threadInsertQuery .= " ON DUPLICATE KEY UPDATE "
-      . "`active`=1,`sticky`=VALUES(sticky),`closed`=VALUES(closed),`archived`=VALUES(archived),"
-      . "`custom_spoiler`=VALUES(custom_spoiler),`replies`=VALUES(replies),"
-      . "`images`=VALUES(images),"
-      . "`last_crawl`=UNIX_TIMESTAMP()";
-  o("Inserting thread infos...");
-  $pdo->prepare($threadInsertQuery)->execute($threadFields);
+  if(count($downloadedThreads) > 0) {
+    $threadInsertQuery .= " ON DUPLICATE KEY UPDATE "
+        . "`active`=1,`sticky`=VALUES(sticky),`closed`=VALUES(closed),`archived`=VALUES(archived),"
+        . "`custom_spoiler`=VALUES(custom_spoiler),`replies`=VALUES(replies),"
+        . "`images`=VALUES(images),"
+        . "`last_crawl`=UNIX_TIMESTAMP()";
+    o("Inserting thread infos...");
+    $pdo->prepare($threadInsertQuery)->execute($threadFields);
 
-  o("Marking deleted posts... ");
-  foreach ($downloadedThreads as $key => $thread) {
-    $downloadedThreadsTemp[$key] = "'$thread'";
-  }
-  $tempThreads = implode(",", $downloadedThreadsTemp);
-  $pdo->query("UPDATE `{$board}_post` SET `deleted` = 1 WHERE `resto` IN ($tempThreads)");
-  o("Inserting thread posts (and unmarking non-deleted)...");
-  foreach($postFields as $key=>$value) {
-    $postInsertQuery = "INSERT INTO `{$board}_post` "
-        . "(`no`,`resto`,`time`,"
-        . "`name`,`trip`,`email`,`sub`,`id`,`capcode`,`country`,`country_name`,`com`,"
-        . "`tim`,`filename`,`ext`,`fsize`,`md5`,`w`,`h`,`filedeleted`,`spoiler`,`tag`) VALUES "
-        . $placeholders[$key]
-        . " ON DUPLICATE KEY UPDATE "
-        . "`com`=VALUES(com),`deleted`=0,`filedeleted`=VALUES(filedeleted)";
-    $pdo->prepare($postInsertQuery)->execute($postFields[$key]);
-    o("Sent query $key");
-  }
-  o("Updating thread lastreply...");
-  foreach($downloadedThreads as $key=>$thread){
-    $last = $pdo->query("SELECT MAX(`time`) AS `last`
+    o("Marking deleted posts... ");
+    foreach ($downloadedThreads as $key => $thread) {
+      $downloadedThreadsTemp[$key] = "'$thread'";
+    }
+    $tempThreads = implode(",", $downloadedThreadsTemp);
+    $pdo->query("UPDATE `{$board}_post` SET `deleted` = 1 WHERE `resto` IN ($tempThreads)");
+    o("Inserting thread posts (and unmarking non-deleted)...");
+    foreach ($postFields as $key => $value) {
+      $postInsertQuery = "INSERT INTO `{$board}_post` "
+          . "(`no`,`resto`,`time`,"
+          . "`name`,`trip`,`email`,`sub`,`id`,`capcode`,`country`,`country_name`,`com`,"
+          . "`tim`,`filename`,`ext`,`fsize`,`md5`,`w`,`h`,`filedeleted`,`spoiler`,`tag`) VALUES "
+          . $placeholders[$key]
+          . " ON DUPLICATE KEY UPDATE "
+          . "`com`=VALUES(com),`deleted`=0,`filedeleted`=VALUES(filedeleted)";
+      $pdo->prepare($postInsertQuery)->execute($postFields[$key]);
+      o("Sent query $key");
+    }
+    o("Updating thread lastreply...");
+    foreach ($downloadedThreads as $key => $thread) {
+      $last = $pdo->query("SELECT MAX(`time`) AS `last`
      FROM {$board}_post
      WHERE resto = $thread
      GROUP BY resto")->fetchColumn(0);
-    if($last != '')
-      $pdo->query("UPDATE {$board}_thread SET `lastreply`='$last' WHERE `threadid`='$thread'");
+      if ($last != '')
+        $pdo->query("UPDATE {$board}_thread SET `lastreply`='$last' WHERE `threadid`='$thread'");
+    }
+  } else {
+    log_error("No threads could be downloaded.");
   }
 
   /*
@@ -318,6 +322,9 @@ while (!file_exists("$board.kill")) {
     
     $pdo = null;
     Config::closePDOConnectionRW();
+
+    sleep(5);
+
     if(PHP_OS != "WINNT") {
       // spawn a new process
       if(!pcntl_fork())
