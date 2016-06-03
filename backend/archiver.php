@@ -64,6 +64,19 @@ function log_exception(Throwable $ex) {
             "At ".$ex->getFile().":".$ex->getLine());
 }
 
+/**
+ * Checks that the keys exist in the array and if not throws an exception.
+ * @param array $arr
+ * @param array ...$key Keys to ensure the existence
+ */
+function require_keys(array $arr, ...$key)
+{
+  foreach($key as $k) {
+    if(!array_key_exists($k, $arr)) {
+      throw new RuntimeException("`$k` not set");
+    }
+  }
+}
 
 error_reporting(E_ALL);
 
@@ -191,17 +204,21 @@ while (!file_exists("$board.kill")) {
   foreach ($threadsToDownload as $thread) {
     $apiThread = json_decode(dlUrl(PROTOCOL."://".API_DOMAIN."/{$board}/thread/$thread.json"), true);
 
-    if(!isset($apiThread['posts']) || !isset($apiThread['posts'][0])) {
-      log_error("Error: thread $thread 404'd.");
+    try {
+      if(!is_array($apiThread)) {
+        throw new Exception("Invalid response");
+      }
+      require_keys($apiThread, 'posts');
+    } catch(Exception $ex) {
+      log_error("Error: thread $thread 404'd ({$ex->getMessage()})");
       continue;
     }
 
-    // Add thread details
-    if(!$firstThread) {
-      $threadInsertQuery .= ",(?,?,?,?,?,?,?,?,?,?)";
-    } else {
-      $firstThread = false;
-      $threadInsertQuery .= "(?,?,?,?,?,?,?,?,?,?)";
+    try {
+      require_keys($apiThread['posts'][0], 'no', 'replies', 'images', 'time');
+    } catch(Exception $ex) {
+      log_error("Skipping thread $thread: {$ex->getMessage()}");
+      continue;
     }
 
     array_push($threadFields,
@@ -216,18 +233,23 @@ while (!file_exists("$board.kill")) {
         $apiThread['posts'][0]['time'],
         time());
 
+    // Add thread details
+    if(!$firstThread) {
+      $threadInsertQuery .= ",(?,?,?,?,?,?,?,?,?,?)";
+    } else {
+      $firstThread = false;
+      $threadInsertQuery .= "(?,?,?,?,?,?,?,?,?,?)";
+    }
+
     //Go through each reply.
     foreach ($apiThread["posts"] as $reply) {
-      if(!isset($reply['no'])) {
-        log_error("Error: required variable `no` not set in a post in thread $thread, skipping");
-        continue;
-      } else if(!isset($reply['resto'])) {
-        log_error("Error: required variable `resto` not set in a post in thread $thread, skipping");
-        continue;
-      } else if(!isset($reply['time'])) {
-        log_error("Error: required variable `time` not set in a post in thread $thread, skipping");
+      try {
+        require_keys($reply, 'no', 'resto', 'time');
+      } catch(Exception $ex) {
+        log_error("Skipping thread $thread: {$ex->getMessage()}");
         continue;
       }
+
       $i += 21;
       if($i > $maxPerQuery) {
         $i = 0;
