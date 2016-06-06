@@ -91,6 +91,7 @@ class OldModel
         }
         $dbl = Config::getMysqliConnection();
         $q = $dbl->query("SELECT `hash` FROM `banned_hashes`");
+        $ret = [];
         while ($row = $q->fetch_assoc()) {
             $ret[] = bin2hex($row['hash']);
         }

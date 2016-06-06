@@ -190,7 +190,6 @@ file_put_contents("../cfg/mysql.json", json_encode($mysql, JSON_PRETTY_PRINT));
 echo "Done.".PHP_EOL;
 
 echo "Writing server configuration to ../cfg/servers.json ... ";
-$json = json_encode($cfg,JSON_PRETTY_PRINT);
 file_put_contents("../cfg/mysql.json", json_encode($servers, JSON_PRETTY_PRINT));
 
 echo "Done.".PHP_EOL;
@@ -220,8 +219,8 @@ if($site['ga_id'] == '') {
 }
 
 echo "Writing site configuration to ../cfg/site.json ... ";
-$json = json_encode($cfg,JSON_PRETTY_PRINT);
-file_put_contents("../cfg/site.json", json_encode($servers, JSON_PRETTY_PRINT));
+$json = json_encode($site,JSON_PRETTY_PRINT);
+file_put_contents("../cfg/site.json", json_encode($site, JSON_PRETTY_PRINT));
 echo "Done!".PHP_EOL.PHP_EOL;
 
 echo "One last thing, before your site is ready. You must create".PHP_EOL;

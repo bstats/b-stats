@@ -113,6 +113,6 @@ class Config
       self::$json_cache[$name] = json_decode(file_get_contents(Site::getPath() . "/cfg/$name.json"), true);
       return self::$json_cache[$name];
     }
-    throw new NotFoundException("Couldn't find config: $name");
+    throw new NotFoundException("Couldn't find config: $name (did you run the setup script?)");
   }
 }

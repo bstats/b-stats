@@ -73,7 +73,7 @@ CREATE TABLE `request` (
 CREATE TABLE `users` (
   `uid` int(11) NOT NULL AUTO_INCREMENT,
   `email` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `username` varchar(254) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `username` varchar(250) COLLATE utf8mb4_unicode_ci NOT NULL,
   `password_hash` binary(16) NOT NULL,
   `privilege` tinyint(4) NOT NULL,
   `theme` varchar(20) CHARACTER SET utf8mb4 NOT NULL,
