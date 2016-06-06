@@ -1,12 +1,12 @@
 <?php
 /**
  * Site set-up script.
- * TODO: fix for v2.0
+ * TODO: make this more user-friendly
  */
 
 include_once '../inc/config.php';
 
-use Model\OldModel;
+use Model\Model;
 use Site\Site;
 
 system("clear");
@@ -21,7 +21,7 @@ if(!function_exists("readline")){
 
 echo "------------------------------------------------------------".PHP_EOL;
 echo "                    ARCHIVE SET UP SCRIPT                   ".PHP_EOL;
-echo "                           v 0.2                            ".PHP_EOL;
+echo "                           v 2.0                            ".PHP_EOL;
 echo "------------------------------------------------------------".PHP_EOL;
 echo PHP_EOL.PHP_EOL;
 
@@ -31,7 +31,7 @@ echo "installation setup. ".PHP_EOL;
 echo "ALSO: This website assumes an Apache2 webserver, a working".PHP_EOL;
 echo "installation of GNU screen, mod_rewrite enabled, and many".PHP_EOL;
 echo "other miscellaneous requirements.".PHP_EOL;
-echo "Also, ensure that PHP has write permissions for the ../inc/".PHP_EOL;
+echo "Also, ensure that PHP has write permissions for the ../cfg/".PHP_EOL;
 echo "directory. ".PHP_EOL;
 
 $line = readline("Do you have these? (y/n): ");
@@ -40,7 +40,7 @@ if(strtolower($line) != "y"){
 }
 
 echo PHP_EOL.PHP_EOL.PHP_EOL."[  MYSQL CONFIG  ]".PHP_EOL.PHP_EOL;
-echo "Before anything, we need to create a database called `chan`,".PHP_EOL;
+echo "Before anything, we need to create a database schema,".PHP_EOL;
 echo "Along with two users, one with read-only privileges and one".PHP_EOL;
 echo "with read+write privileges for that database only.".PHP_EOL.PHP_EOL;
 
@@ -75,11 +75,11 @@ echo "Login success!",PHP_EOL;
 if(strtolower(readline("Create a new database? (y/n)")) == "y"){
     database_new_entry:
     $database = $db->real_escape_string(readline("Enter your database name: "));
-    "Attempting to create database `$database`... ";
+    echo "Attempting to create database `$database`... ";
     try {
-       $db->query("CREATE DATABASE `$database` DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;");
+       $db->query("CREATE DATABASE `$database` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;");
     } catch (Exception $ex) {
-        echo "Could not create database `chan`!".PHP_EOL;
+        echo "Could not create database `$database`!".PHP_EOL;
         echo "Specific error: ".$e->getMessage().PHP_EOL;
         if (strtolower(readline("Try re-entering user info? (y/n): ")) == "y") {
             goto user_entry_1;
@@ -161,18 +161,23 @@ foreach(["site","images","thumbs","swf"] as $server)
 }
 
 echo PHP_EOL."For the image, thumbs, and swf servers we need the URL format.".PHP_EOL;
-echo "The format should look like this:".PHP_EOL;
+echo "The format should look something like this:".PHP_EOL;
 echo "/dir/%hex%%ext%".PHP_EOL;
 echo "Available paramaters:".PHP_EOL;
 echo "%hex% : the media's MD5 hash".PHP_EOL;
+echo "  %1% : the first hex digit of the MD5".PHP_EOL;
+echo "  %2% : the second hex digit of the MD5".PHP_EOL;
 echo "%ext% : the media's file extension".PHP_EOL;
 foreach(["images","thumbs","swf"] as $server)
 {
   $servers[$server]["format"] = readline("Enter $server URL format: ");
 }
 
-echo "Writing configuration to ../inc/cfg.json ... ";
-$mysql = array();
+echo "Writing mysql configuration to ../cfg/mysql.json ... ";
+$mysql = [];
+$mysql["read-only"] = [];
+$mysql["read-write"] = [];
+
 $mysql["read-only"]["username"] = $username_ro;
 $mysql["read-only"]["password"] = $password_ro;
 $mysql["read-only"]["db"] = $database;
@@ -181,31 +186,47 @@ $mysql["read-write"]["username"] = $username_rw;
 $mysql["read-write"]["password"] = $password_rw;
 $mysql["read-write"]["db"] = $database;
 $mysql["read-write"]["server"] = 'localhost';
+file_put_contents("../cfg/mysql.json", json_encode($mysql, JSON_PRETTY_PRINT));
+echo "Done.".PHP_EOL;
 
-$cfg = array();
-$cfg["mysql"] = $mysql;
-$cfg["servers"] = $servers;
+echo "Writing server configuration to ../cfg/servers.json ... ";
 $json = json_encode($cfg,JSON_PRETTY_PRINT);
-file_put_contents("../inc/cfg.json", $json);
+file_put_contents("../cfg/mysql.json", json_encode($servers, JSON_PRETTY_PRINT));
 
 echo "Done.".PHP_EOL;
 
 
 echo "Setting up required tables...".PHP_EOL;
 $driver->report_mode = MYSQLI_REPORT_ERROR;
-if(!OldModel::setUpTables()){
+if(!$db->query(file_get_contents("../sql/init.sql"))){
     echo "Could not set up all the tables for some reason! Start over!".PHP_EOL;
+    echo "Error(s): ".PHP_EOL;
+    foreach($db->error_list as $error) {
+        print_r($error);
+        echo PHP_EOL;
+    }
     exit;
 }
 
-echo PHP_EOL.PHP_EOL.PHP_EOL."[  MYSQL CONFIG COMPLETE  ]".PHP_EOL.PHP_EOL;
+echo PHP_EOL.PHP_EOL.PHP_EOL."[  SITE CUSTOMIZATION  ]".PHP_EOL.PHP_EOL;
+$site = [];
+$site['name'] = readline("Enter a site name to show up on all pages (e.g., 'b-stats archive'): ");
+$date = date('j F Y');
+$site['subtitle'] = readline("Enter a subtitle to show up below the name (e.g. 'since $date'): ");
+$site['pagetitle'] = readline("Enter a default HTML page title (e.g., 'archive'): ");
+
+echo "Writing site configuration to ../cfg/site.json ... ";
+$json = json_encode($cfg,JSON_PRETTY_PRINT);
+file_put_contents("../cfg/site.json", json_encode($servers, JSON_PRETTY_PRINT));
+echo "Done!".PHP_EOL.PHP_EOL;
+
 echo "One last thing, before your site is ready. You must create".PHP_EOL;
 echo "an admin user account.".PHP_EOL;
 
 $username = readline("Enter admin username: ");
 $password = readline("Enter admin password: ");
 
-OldModel::addUser($username, $password, Site::LEVEL_TERRANCE, "yotsuba");
+Model::get()->addUser($username, $password, Site::LEVEL_TERRANCE, "yotsuba");
 
 echo "That's it! Your site is ready to go (hopefully)!".PHP_EOL;
 echo "Thank you for choosing my shitty PHP scripts!".PHP_EOL;
