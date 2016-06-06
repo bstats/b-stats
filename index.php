@@ -47,7 +47,7 @@ try {
             . "<br>" . $ex->getMessage() . " at ".$ex->getFile().":".$ex->getLine()."</div>");
     echo $page->display();
   }
-} catch (Error $err) {
+} catch (Throwable $err) {
   echo "There was a serious error encountered. The server admin likely broke a configuration file, or something."
           . "<br><br>"
           . $err->getMessage() . " in " . $err->getFile() . " at line " . $err->getLine();
