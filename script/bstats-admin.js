@@ -14,7 +14,7 @@ var adminApi_get = function(endpoint, callback, error) {
     error: error,
     success: callback
   });
-}
+};
 
 /**
  * Call the admin API using POST
@@ -34,24 +34,22 @@ var adminApi_post = function(endpoint, data, callback, error) {
     success: callback,
     data: data
   });
-}
+};
 
 var deleteReport = function(no,board){
     if(confirm("Really delete the report for "+no+"?")){
-        $.ajax({
-                dataType: "json",
-                headers: {"X-Requested-With":"Ajax"},
-                url: protocol+'//'+host+'/adminAPI.php',
-                type: "POST",
-                data: "a=deleteReport&no="+no+"&b="+board  }).
-        success(function(data){
-            if(data.err === true){
-                alert("Error: "+data.errmsg);
-            }
-            else{
-                removeRow("#report"+no);
-            }
-        });
+        adminApi_post('/deleteReport/'+board+'/'+no, '',
+            function(data){
+                if(data.err === true){
+                    alert("Error: "+data.errmsg);
+                }
+                else{
+                    removeRow("#report"+no);
+                }
+            },
+            function(e){
+                alert('Unsuccessful');
+            });
     }
 };
 

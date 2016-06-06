@@ -13,11 +13,12 @@ var Archivers = {
       for(var i = 0; i < data.length; i++) {
         var action = "<a href='javascript:Archivers.start(&quot;"+data[i].board+"&quot;);'>Start</a>";
         if(data[i].status == "Running" || data[i].status == "Stopping") {
-          action = "<a href='javascript:Archivers.stop(&quot;"+data[i].board+"&quot;);'>Stop</a>"
-          +"&nbsp;<a href='javascript:Archivers.loadBuffer(&quot;"+data[i].board+"&quot;);'>Get Output</a>";
+          action = "<a href='javascript:Archivers.stop(&quot;"+data[i].board+"&quot;);'>Stop</a>";
         }
+        action += "&nbsp;<a href='javascript:Archivers.loadBuffer(&quot;"+data[i].board+"&quot;);'>Get Output</a>";
         action += "&nbsp;<a href='javascript:Archivers.loadError(&quot;"+data[i].board+"&quot;);'>Get Error</a>";
-        str += "<tr><td>"+data[i].board+"</td><td>"+data[i].status+"</td><td>"+action+"</td></tr>";
+        var status = data[i].status == 'Running' ? '<b>Running</b>' : data[i].status;
+        str += "<tr><td>"+data[i].board+"</td><td>"+status+"</td><td>"+action+"</td></tr>";
       }
       tbody.innerHTML = str;
     }
