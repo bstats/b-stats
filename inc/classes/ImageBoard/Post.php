@@ -219,7 +219,7 @@ class Post implements JsonSerializable
 
   function getMD5Bin():string
   {
-    return $this->md5;
+    return $this->md5bin;
   }
 
   function getMD5Hex():string
