@@ -101,6 +101,7 @@ class Yotsuba
      */
     public static function toBBCode(string $html):string
     {
+        if($html == '') return '';
         // Remove EXIF table
         $html = preg_replace("~<br><br><span class=\"abbr\">\[EXIF.+~", "", $html);
         $html = str_replace("<wbr>", "", $html);
