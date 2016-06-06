@@ -207,7 +207,12 @@ class Model implements IModel
     if($board->isArchive()) {
       return null;
     }
-
+    if($resto != 0) {
+      $thread = self::getThread($board, $resto);
+      if($thread->isClosed()) {
+        throw new Exception("Thread $resto is closed; cannot add posts to closed threads.");
+      }
+    }
     $time = time();
     $tim = (int)(microtime(true) * 1000);
 
@@ -302,9 +307,9 @@ class Model implements IModel
     $board = alphanum($t->getBoard()->getName());
     $board = $board . "_";
     $threadid = $t->getThreadId();
-    $stmt = $dbl->prepare("SELECT * FROM `{$board}post` WHERE `resto`=:thread ORDER BY `no` ASC");
+    $stmt = $dbl->prepare("SELECT * FROM `{$board}post` WHERE `no`=:no OR `resto`=:thread ORDER BY `no` ASC");
 
-    if (!$stmt->execute([':thread' => $t->getThreadId()]) || $stmt->rowCount() === 0) {
+    if (!$stmt->execute([':no'=>$t->getThreadId(), ':thread' => $t->getThreadId()]) || $stmt->rowCount() === 0) {
       throw new NotFoundException("Thread #$threadid exists, but contains no posts.");
     }
     return array_map(function ($row) use ($t) {
@@ -478,7 +483,7 @@ class Model implements IModel
 
   public function getReports()
   {
-    $query = $this->conn_ro->query("SELECT *, COUNT(*) AS count FROM `reports` GROUP BY `no` ORDER BY count DESC, time ASC");
+    $query = $this->conn_ro->query("SELECT *, COUNT(*) AS count FROM `reports` WHERE `archived` = 0 GROUP BY `no` ORDER BY count DESC, time ASC");
     $ret = [];
     while ($row = $query->fetch(PDO::FETCH_ASSOC)) {
       $md5 = $this->conn_ro
@@ -500,6 +505,13 @@ class Model implements IModel
             . "VALUES ('$uid','{$board->getName()}',$time,'$ip',$post,$thread)");
   }
 
+  public function archiveReport(ImageBoard\Board $board, int $post)
+  {
+    $this->conn_rw
+        ->prepare("UPDATE `reports` SET `archived`=1 WHERE `board`=:b AND `no`=:no")
+        ->execute([':b'=>$board->getName(), ':no' => $post]);
+  }
+
 
   public function getNumberOfReports()
   {
@@ -519,6 +531,12 @@ class Model implements IModel
     } catch (Exception $ex) {
       return false;
     }
+  }
+
+  public function addUser(string $username, string $password, int $privilege, string $theme):bool
+  {
+    $stmt = $this->conn_rw->prepare("INSERT INTO `users` (`username`,`password_hash`,`privilege`,`theme`) VALUES (?,?,?,?)");
+    return $stmt->execute([$username, md5($password, true), $privilege, $theme]);
   }
 
   public function getUsers():array

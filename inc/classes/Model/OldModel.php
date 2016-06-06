@@ -154,21 +154,6 @@ class OldModel
             throw new Exception("Restore query failed: " . $dbl->error);
     }
 
-    public static function addUser($username, $password, $privilege, $theme)
-    {
-        $db = Config::getMysqliConnectionRW();
-        $themes = array("yotsuba" => "yotsuba", "tomorrow" => "tomorrow");
-        $theme = $themes[$theme];
-        $username = $db->real_escape_string($username);
-        $password = md5($password);
-        $privilege = (int)$privilege;
-        $db->query("INSERT INTO `users` (`username`,`password_hash`,`privilege`,`theme`) VALUES ('$username',UNHEX('$password'),'$privilege','$theme')");
-        if (!$db->errno) {
-            return true;
-        }
-        throw new Exception($db->error);
-    }
-
     public static function getAllNewsArticles()
     {
         $db = Config::getMysqliConnection();
