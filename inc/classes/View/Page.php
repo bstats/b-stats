@@ -175,11 +175,17 @@ class Page implements IPage
     foreach (Config::getCfg('styles')[$this->user->getTheme()] as $css) {
       $styles .= "<link rel='stylesheet' type='text/css' href='$css' data-name='theme'>";
     }
-    $ga = Config::getCfg('site')['ga_id'];
+
+    $ga = Config::getCfg('site')['ga_id'] ?? '';
+    if($ga != '')
+      $analytics = Site::parseHtmlFragment("ga.html", ['__ID__'], [$ga]);
+    else
+      $analytics = "";
+
     $this->header = Site::parseHtmlFragment('pagehead.html', [
         '<!-- styles -->', '<!-- pageTitle -->',
         '<!-- additionalHeaders -->', '<!-- navbar -->', '<!-- ga -->'], [$styles, $this->title,
-        $this->addToHead, $this->renderNavBar(), Site::parseHtmlFragment("ga.html", ['__ID__'], [$ga])]);
+        $this->addToHead, $this->renderNavBar(), $analytics]);
     return $this->header;
   }
 

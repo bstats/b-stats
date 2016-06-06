@@ -214,6 +214,10 @@ $site['name'] = readline("Enter a site name to show up on all pages (e.g., 'b-st
 $date = date('j F Y');
 $site['subtitle'] = readline("Enter a subtitle to show up below the name (e.g. 'since $date'): ");
 $site['pagetitle'] = readline("Enter a default HTML page title (e.g., 'archive'): ");
+$site['ga_id'] = readline("If you have a Google Analytics ID, enter it, otherwise press enter: ");
+if($site['ga_id'] == '') {
+    unset($site['ga_id']);
+}
 
 echo "Writing site configuration to ../cfg/site.json ... ";
 $json = json_encode($cfg,JSON_PRETTY_PRINT);
