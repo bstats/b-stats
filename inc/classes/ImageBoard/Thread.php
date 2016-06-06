@@ -172,6 +172,12 @@ class Thread implements Iterator
     return $this->active;
   }
 
+  function isClosed():bool
+  {
+    return $this->closed;
+  }
+
+
   function asArray(): array
   {
     return [

@@ -83,7 +83,7 @@ class PostRenderer
     /**
      * The following block is only for posts with an image attached.
      */
-    if ($post->md5 != "" && !$post->imgbanned) {
+    if ($post->hasImage() && !$post->imgbanned) {
       $md5Filename = str_replace('/', '-', $post->md5);
       $humanFilesize = $post->fsize > 0 ? human_filesize($post->fsize) . ", " : "";
       list($thumbW, $thumbH) = tn_Size($post->w, $post->h);

@@ -75,7 +75,9 @@ class Action
    */
   static function post():string
   {
+    srand((int)(microtime(true)*1000));
     if(post('captcha') != $_SESSION['captcha']) {
+      $_SESSION['captcha'] = rand(100000, 999999);
       throw new Exception("Invalid Captcha");
     }
     $_SESSION['captcha'] = rand(100000, 999999);

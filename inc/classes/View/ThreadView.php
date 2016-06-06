@@ -21,11 +21,15 @@ class ThreadView extends BoardPage
       $topLinks->append(' [' . a('Catalog', '/' . $this->board->getName() . '/catalog') . ']');
     }
     if(!$thread->getBoard()->isArchive() && $thread->isActive()) {
-      if(!isset($_SESSION['captcha'])) {
-        $_SESSION['captcha'] = rand(100000, 999999);
+      if($thread->isClosed()) {
+        $this->appendToBody(el('h2','Thread is closed.'));
+      } else {
+        if (!isset($_SESSION['captcha'])) {
+          $_SESSION['captcha'] = rand(100000, 999999);
+        }
+        $this->appendToBody(Site::parseHtmlFragment('postForm.html',
+            ['_board_', '_resto_', '_password_'], [$thread->getBoard()->getName(), $thread->getThreadId(), 'password']));
       }
-      $this->appendToBody(Site::parseHtmlFragment('postForm.html',
-          ['_board_','_resto_', '_password_'],[$thread->getBoard()->getName(), $thread->getThreadId(), 'password']));
     }
     $this->appendToBody($topLinks);
     $thread->loadAll();

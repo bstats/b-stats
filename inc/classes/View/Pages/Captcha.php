@@ -20,7 +20,7 @@ class Captcha implements IPage
     $strlen = strlen($image_text);
     $char_array = str_split($image_text);
     for ($i = 0; ($i) < $strlen; $i++) {
-      imagettftext($img, rand(13, 16), rand(-20, 20), 5 + 15 * $i, rand(15, 40), $text_color, Site::getPath()."\\cfg\\DroidSansMono.ttf", $char_array[$i]);
+      imagettftext($img, rand(13, 16), rand(-20, 20), 5 + 15 * $i, rand(15, 40), $text_color, Site::getPath()."/cfg/DroidSansMono.ttf", $char_array[$i]);
     }
     header("Content-type:image/jpeg");
     header("Content-Disposition:inline ; filename=secure.jpg");
