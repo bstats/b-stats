@@ -31,7 +31,7 @@ class Yotsuba
     /**
      * Taken from some 4chan source code leak, modified slightly.
      *
-     * @param string $name string containing raw Name+trip (e.g. terrance#4TfJmbp`)
+     * @param string $name string containing raw Name+trip (e.g. name#tripcode)
      * @return string|boolean the tripcode (sans-!) if there is a # in the string, otherwise false
      */
     public static function parseTripcode($name)
