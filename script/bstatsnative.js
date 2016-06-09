@@ -224,7 +224,7 @@ var ExpandImage = {
         else {
             var newImg = $("<video id='"+md5+"' class='expanded' style='display:block' alt='video' loop autoplay controls />");
             newImg.attr("data-width",width).attr("data-height",height);
-            newImg.attr("src",thumb.attr("data-full-img")+"#t="+document.getElementById("hoverImg").currentTime);
+            newImg.attr("src",$(thumb).attr("data-full-img")+"#t="+document.getElementById("hoverImg").currentTime);
             $(thumb).removeClass("expand-loading").addClass("expand-loaded").after(newImg)
             $("#hoverImg").remove();
             ImageHover.checkScale(newImg);
