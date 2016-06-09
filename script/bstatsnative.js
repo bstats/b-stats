@@ -36,7 +36,7 @@ var API = {
     $.ajax({
       dataType: "json",
       headers: {"X-Requested-With":"Ajax"},
-      url: protocol+'//'+host+endpoint,
+      url: protocol+'//'+host+'/api'+endpoint,
       type: "GET",
       error: error,
       success: callback
@@ -54,7 +54,7 @@ var API = {
     $.ajax({
       dataType: "json",
       headers: {"X-Requested-With":"Ajax"},
-      url: protocol+'//'+host+endpoint,
+      url: protocol+'//'+host+'/api'+endpoint,
       type: "POST",
       error: error,
       success: callback,
