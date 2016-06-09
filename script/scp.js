@@ -1,6 +1,6 @@
 var Archivers = {
   load : function() {
-    adminApi_get("/archivers", Archivers.statusCallback, Archivers.error);
+    API.admin_get("/archivers", Archivers.statusCallback, Archivers.error);
   },
   /**
    * @param {Array} data
@@ -27,16 +27,16 @@ var Archivers = {
     alert("Couldn't load ")
   },
   start : function(board) {
-    adminApi_post("/archiver/"+board+"/start", '', Archivers.load, null);
+    API.admin_post("/archiver/"+board+"/start", '', Archivers.load, null);
   },
   stop : function(board) {
-    adminApi_post("/archiver/"+board+"/stop", '', Archivers.load, null);
+    API.admin_post("/archiver/"+board+"/stop", '', Archivers.load, null);
   },
   loadBuffer : function(board) {
-    adminApi_get("/archiver/"+board+"/output", Archivers.bufferCallback, null);
+    API.admin_get("/archiver/"+board+"/output", Archivers.bufferCallback, null);
   },
   loadError : function(board) {
-    adminApi_get("/archiver/"+board+"/error", Archivers.bufferCallback, null); 
+    API.admin_get("/archiver/"+board+"/error", Archivers.bufferCallback, null); 
   },
   bufferCallback : function(data) {
     if(typeof(data.output) !== 'undefined') {
@@ -49,7 +49,10 @@ var Archivers = {
 
 var Boards = {
   get4chan: function() {
-    adminApi_get("/boards4chan", Boards.chanCallback);
+    API.admin_get("/boards4chan", Boards.chanCallback);
+  },
+  get: function() {
+    API.get("/boards", Boards.chanCallback);
   },
   chanCallback: function(data) {
     console.log(data);

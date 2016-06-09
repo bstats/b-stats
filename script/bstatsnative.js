@@ -19,9 +19,85 @@ else if(/\/thread\//.test(location.pathname)){
         window.location.href = window.location.protocol + "//" + location.host + location.pathname.substr(0,location.pathname.length - 1) + location.hash;
 }
 
+
 apiPosts = new Array();
 host = location.host;
 hoverLoaded = false;
+
+var API = {
+  /**
+   * Call the API using GET
+   * 
+   * @param {String} endpoint the endpoint, like "/boards"
+   * @param {Function} callback for returned data
+   * @returns {undefined}
+   */
+  get : function(endpoint, callback, error) {
+    $.ajax({
+      dataType: "json",
+      headers: {"X-Requested-With":"Ajax"},
+      url: protocol+'//'+host+endpoint,
+      type: "GET",
+      error: error,
+      success: callback
+    });
+  },
+  /**
+   * Call the API using POST
+   * 
+   * @param {String} endpoint the endpoint, like "/boards"
+   * @param {String|Array} data
+   * @param {Function} callback for returned data
+   * @returns {undefined}
+   */
+  post : function(endpoint, data, callback, error) {
+    $.ajax({
+      dataType: "json",
+      headers: {"X-Requested-With":"Ajax"},
+      url: protocol+'//'+host+endpoint,
+      type: "POST",
+      error: error,
+      success: callback,
+      data: data
+    });
+  },
+  /**
+   * Call the admin API using GET
+   * 
+   * @param {String} endpoint the endpoint, like "/archivers" or "/archivers/y/start"
+   * @param {Function} callback for returned data
+   * @returns {undefined}
+   */
+  admin_get : function(endpoint, callback, error) {
+    $.ajax({
+      dataType: "json",
+      headers: {"X-Requested-With":"Ajax"},
+      url: protocol+'//'+host+'/admin'+endpoint,
+      type: "GET",
+      error: error,
+      success: callback
+    });
+  },
+  /**
+   * Call the admin API using POST
+   * 
+   * @param {String} endpoint the endpoint, like "/archivers" or "/archivers/y/start"
+   * @param {String|Array} data
+   * @param {Function} callback for returned data
+   * @returns {undefined}
+   */
+  admin_post : function(endpoint, data, callback, error) {
+    $.ajax({
+      dataType: "json",
+      headers: {"X-Requested-With":"Ajax"},
+      url: protocol+'//'+host+'/admin'+endpoint,
+      type: "POST",
+      error: error,
+      success: callback,
+      data: data
+    });
+  }
+};
 
 offsetX = 50;
 offsetY = 150;
