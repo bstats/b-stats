@@ -454,7 +454,7 @@ class Model implements IModel
     $pics = [];
     while ($reply = $query->fetch(PDO::FETCH_ASSOC)) {
       $pics[] = ["md5" => base64_encode($reply['md5']),
-          "tim" => (int)$reply['tim'],
+          "tim" => $reply['tim'],
           "filename" => $reply['filename'],
           "ext" => $reply['ext'],
           "fsize" => (int)$reply['fsize'],
