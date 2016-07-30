@@ -242,7 +242,7 @@ class Post implements JsonSerializable
     return $this->time;
   }
 
-  function getTim():int
+  function getTim():string
   {
     return $this->tim;
   }
@@ -280,7 +280,7 @@ class Post implements JsonSerializable
       $returnArr['w'] = (int)$this->w;
       $returnArr['h'] = (int)$this->h;
       list($returnArr['tn_w'], $returnArr['tn_h']) = tn_Size($this->w, $this->h);
-      $returnArr['tim'] = (int)$this->tim;
+      $returnArr['tim'] = $this->getTim();
       $returnArr['md5'] = str_replace("-", "/", $this->md5);
       $returnArr['md5_hex'] = bin2hex($this->md5bin);
       $returnArr['fsize'] = (int)$this->fsize;
