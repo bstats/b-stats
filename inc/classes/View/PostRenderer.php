@@ -26,7 +26,7 @@ class PostRenderer
       return "<div id='thread-{$post->no}' class='thread'>" .
       "<a href='/{$post->getBoard()}/thread/{$post->getNo()}'>" .
       ($post->imgbanned ?
-          Site::parseHtmlFragment("banned_image.html")
+          Site::parseHtmlFragment("post/banned_image.html")
           : "<img alt='' id='thumb-{$post->no}' class='thumb' width='$tnW' height='$tnH' src='{$post->getThumbUrl()}' data-id='{$post->no}'>") .
       "</a>" .
       ($post->replies > 0 ? "<div title='(R)eplies / (I)mages' id='meta-{$post->no}' class='meta'>" .
