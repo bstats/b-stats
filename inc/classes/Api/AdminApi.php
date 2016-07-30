@@ -44,6 +44,13 @@
  *
  * GET /admin/sitectl/enterBackupMode
  * GET /admin/sitectl/exitBackupMode
+ *
+ * On success:
+ * { "result" : "Success [or something else" }
+ * On error:
+ * { "error" : "Some error message" }
+ *
+ * Basically, check if "error" is set...
  */
 namespace Api;
 use Site\Archivers;
@@ -191,7 +198,8 @@ class AdminApi
   public static function deleteReport(array $path):array
   {
     self::ensurePOST();
-    Model::get()->archiveReport($path[3], $path[4]);
+    Model::get()->archiveReport(Model::get()->getBoard($path[3]), $path[4]);
+    return ["err"=>false,"errmsg"=>""];
   }
 
   public static function restorePost(array $path):array
