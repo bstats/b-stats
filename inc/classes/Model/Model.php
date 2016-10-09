@@ -515,7 +515,7 @@ class Model implements IModel
 
   public function getNumberOfReports()
   {
-    $data = $this->conn_ro->query("SELECT COUNT(*) AS count FROM `reports`");
+    $data = $this->conn_ro->query("SELECT COUNT(*) AS count FROM `reports` WHERE `archived`=0");
     if ($data !== FALSE) {
       return $data->fetchColumn();
     }
