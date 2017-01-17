@@ -250,7 +250,7 @@ while (!file_exists("$board.kill")) {
         continue;
       }
 
-      $i += 21;
+      $i += 22;
       if($i > $maxPerQuery) {
         $i = 0;
         $queryNum++;
@@ -259,10 +259,10 @@ while (!file_exists("$board.kill")) {
         $first = true;
       }
       if(!$first) {
-        $placeholders[$queryNum] .= ",(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+        $placeholders[$queryNum] .= ",(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
       } else {
         $first = false;
-        $placeholders[$queryNum] .= "(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+        $placeholders[$queryNum] .= "(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
       }
       array_push($postFields[$queryNum],
             $reply['no'],
@@ -286,7 +286,8 @@ while (!file_exists("$board.kill")) {
             $reply['h'] ?? null,
             $reply['filedeleted'] ?? null,
             $reply['spoiler'] ?? null,
-            $reply['tag'] ?? null);
+            $reply['tag'] ?? null,
+            $reply['since4pass'] ?? null);
     }
     $downloadedThreads[] = $thread;
   }
@@ -311,10 +312,10 @@ while (!file_exists("$board.kill")) {
       $postInsertQuery = "INSERT INTO `{$board}_post` "
           . "(`no`,`resto`,`time`,"
           . "`name`,`trip`,`email`,`sub`,`id`,`capcode`,`country`,`country_name`,`com`,"
-          . "`tim`,`filename`,`ext`,`fsize`,`md5`,`w`,`h`,`filedeleted`,`spoiler`,`tag`) VALUES "
+          . "`tim`,`filename`,`ext`,`fsize`,`md5`,`w`,`h`,`filedeleted`,`spoiler`,`tag`,`since4pass`) VALUES "
           . $placeholders[$key]
           . " ON DUPLICATE KEY UPDATE "
-          . "`com`=VALUES(com),`deleted`=0,`filedeleted`=VALUES(filedeleted)";
+          . "`com`=VALUES(com),`deleted`=0,`filedeleted`=VALUES(filedeleted),`since4pass`=VALUES(since4pass)";
       $pdo->prepare($postInsertQuery)->execute($postFields[$key]);
       o("Sent query $key");
     }

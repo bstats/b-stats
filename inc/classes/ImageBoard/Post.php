@@ -49,6 +49,7 @@ class Post implements JsonSerializable
   private $deleted;
   private $filedeleted;
   private $imgbanned;
+  private $since4pass;
 
   function __construct($no, Board $board)
   {
@@ -81,6 +82,7 @@ class Post implements JsonSerializable
       $this->deleted = $arr['deleted'];
       $this->capcode = $arr['capcode'];
       $this->filedeleted = $arr['filedeleted'];
+      $this->since4pass = $arr['since4pass'];
     }
     if ($this->md5 != '' && in_array(bin2hex(base64_decode(str_replace("-", "/", $this->md5))), OldModel::getBannedHashes())) {
       $this->imgbanned = true;
@@ -262,6 +264,11 @@ class Post implements JsonSerializable
     return date("m/d/y(D)H:i:s", $this->time);
   }
 
+  function getSince4Pass()
+  {
+    return $this->since4pass;
+  }
+
   /**
    * Returns the post as a PHP array, good for integrating into API calls.
    * @return array
@@ -298,6 +305,9 @@ class Post implements JsonSerializable
       $returnArr['id'] = $this->id;
     }
     $returnArr['resto'] = (int)$this->threadid;
+    if($this->since4pass){
+      $returnArr['since4pass'] = $this->since4pass;
+    }
     if ($this->no == $this->threadid) {
       $returnArr['bumplimit'] = 0;
       $returnArr['imagelimit'] = 0;

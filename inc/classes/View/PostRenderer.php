@@ -174,6 +174,10 @@ class PostRenderer
         $cap = "";
     }
 
+    if($post->getSince4Pass()) {
+      $cap .= ' <img src="/image/minileaf.gif" alt="Pass user since '.$post->getSince4Pass().'" title="Pass user since '.$post->getSince4Pass().'" class="identityIcon">';
+    }
+
     /**
      * Tripcode and email formatting.
      */
