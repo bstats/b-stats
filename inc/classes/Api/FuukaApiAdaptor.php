@@ -74,6 +74,7 @@ class FuukaApiAdaptor
           'media_orig' => $post->getTim() . $post->getExtension(),
           'media' => $post->getTim() . $post->getExtension(),
           'preview_reply' => $post->getTim() . "s.jpg",
+          'preview_orig' => $post->getTim() . "s.jpg",
           'remote_media_link' => $post->getImgUrl(),
           'media_link' => $post->getImgUrl(),
           'thumb_link' => $post->getThumbUrl()];
