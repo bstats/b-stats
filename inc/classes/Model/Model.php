@@ -388,6 +388,17 @@ class Model implements IModel
     return new PostSearchResult($count, $posts);
   }
 
+  function getPostByTim(ImageBoard\Board $board, string $tim):ImageBoard\Post
+  {
+    $postTbl = alphanum($board->getName()) . "_post";
+    $tim = strtok($tim, '.');
+    $stmt = $this->conn_ro->prepare("SELECT * FROM `$postTbl` WHERE `tim`=:tim");
+    if ($stmt->execute([':tim' => $tim]) == false || $stmt->rowCount() === 0) {
+      throw new NotFoundException("No such image $tim exists on board {$board->getName()} in this archive");
+    }
+    return new Post($stmt->fetch(PDO::FETCH_ASSOC), $board);
+  }
+
   /**
    * Gets a user given a username and password.
    *

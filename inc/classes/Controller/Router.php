@@ -79,6 +79,11 @@ class Router
               case "":
                 $page = new BoardIndexPage($boards[$base], 1);
                 break;
+              case "full_image":
+                $post = Model::get()->getPostByTim($board, $exploded[3] ?? "");
+                header("Location: ".$post->getImgUrl());
+                exit;
+                break;
               default:
                 if (is_numeric($exploded[2])) {
                   $page = new BoardIndexPage($boards[$base], $exploded[2]);
