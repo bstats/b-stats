@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS `%BOARD%_post` (
   `tag` varchar(6) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `deleted` tinyint(1) NOT NULL DEFAULT '0',
   `since4pass` smallint(5) NULL DEFAULT NULL,
-  PRIMARY KEY (`doc_id`), INDEX (`resto`), UNIQUE (`no`), INDEX(`md5`), INDEX(`id`)
+  PRIMARY KEY (`doc_id`), INDEX (`resto`), UNIQUE (`no`), INDEX(`md5`), INDEX(`id`), INDEX(`tim`), INDEX(`trip`)
 ) ENGINE=Aria DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `%BOARD%_deleted` (
